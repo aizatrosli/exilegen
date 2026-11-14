@@ -40,3 +40,22 @@ def test_export_respects_requirements(cat):
         assert "Chaos" in cat.skills[c["main_skill"]]["damage_types"]
         assert set(c["path"]) | set(c["path_tokens"]) <= ids
     assert all(e["s"] in ids and e["t"] in ids for e in m["edges"])
+
+
+def test_chains_are_weighted_by_tempo(cat):
+    doc = graphx.run({"top": 200}, cat=cat)
+    chains = doc["mechanics"]["chains"]
+    assert chains == sorted(chains, key=lambda c: (-c["score"], c["id"]))
+    for c in chains:
+        t = c["tempo"]
+        assert 0 < t["tempo"] <= 1 and abs(c["score"] - c["score_raw"] * t["tempo"]) < 1e-3
+        assert set(t["factors"]) == {"resource", "spirit", "cooldown", "time"}
+    assert any(c["tempo"]["tempo"] < 1 for c in chains)
+
+
+def test_tight_budget_lowers_scores(cat):
+    loose = {c["id"]: c["score"] for c in graphx.run({"top": 2000}, cat=cat)["mechanics"]["chains"]}
+    tight = {c["id"]: c["score"] for c in graphx.run({"top": 2000, "mana_per_second": 40, "spirit": 30}, cat=cat)["mechanics"]["chains"]}
+    both = set(loose) & set(tight)
+    assert both and all(tight[i] <= loose[i] + 1e-9 for i in both) and any(tight[i] < loose[i] for i in both)
+    assert not graphx.run({"mana_per_second": 0}, cat=cat)["passed"]

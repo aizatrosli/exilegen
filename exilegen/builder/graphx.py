@@ -31,6 +31,7 @@ from dataclasses import dataclass, field, asdict
 
 from . import catalog as catmod
 from . import mechgraph
+from . import tempo as tempomod
 
 FORMAT, VERSION = "exilegen-graph", 1
 BUDGET_TIERS = ("low", "mid", "high")
@@ -57,6 +58,8 @@ class Requirements:
     chain_kinds: list = field(default_factory=list)      # empty = all
     min_novelty: float = 0.0
     top: int = 150
+    mana_per_second: float = tempomod.DEFAULT_BUDGET["mana_per_second"]   # sustainable resource spend
+    spirit: float = tempomod.DEFAULT_BUDGET["spirit"]                     # Spirit available for reservations
 
     @classmethod
     def from_dict(cls, d: dict) -> tuple["Requirements", list[str]]:
@@ -161,6 +164,14 @@ def preflight(cat: catmod.Catalog, req: Requirements, unknown_keys: list[str] | 
     out.append(_check("req.keystones", "requirements", "fail" if badk else "ok", "Keystones",
                       ("unknown: " + ", ".join(badk)) if badk else (", ".join(req.keystones) or "any")))
     badc = [k for k in req.chain_kinds if k not in CHAIN_KINDS]
+    has_tempo = bool(tempomod.load())
+    ok_budget = float(req.mana_per_second) > 0 and float(req.spirit) >= 0
+    out.insert(5, _check("data.tempo", "data", "ok" if has_tempo else "warn", "Skill cost, cast time and cooldown",
+                         "from PoB skill data at gem level 20" if has_tempo else
+                         "missing (python3 -m exilegen.builder.tempo): chains are ranked as if skills were free"))
+    out.append(_check("req.budget", "requirements", "ok" if ok_budget else "fail", "Resource and Spirit budget",
+                      f"{req.mana_per_second:g} mana per second, {req.spirit:g} Spirit" if ok_budget else
+                      "mana_per_second must be above 0 and spirit 0 or more"))
     ok_num = 0.0 <= float(req.min_novelty) <= 1.0 and 1 <= int(req.top) <= 2000
     out.append(_check("req.scope", "requirements", "fail" if badc or not ok_num else "ok", "Chain kinds, novelty and size",
                       ("unknown kinds: " + ", ".join(badc)) if badc else
@@ -210,6 +221,16 @@ def _chain_ok(ch: dict, req: Requirements, cat: catmod.Catalog) -> bool:
 def mechanics(cat: catmod.Catalog, req: Requirements) -> dict:
     g = mechgraph.MechGraph(cat)
     pool = g.chains(top=max(4 * req.top, 1200), per_token=10 ** 6, per_main=24, per_entity=24)
+    tempo = tempomod.load()
+    budget = {"mana_per_second": float(req.mana_per_second), "spirit": float(req.spirit)}
+    for c in pool:
+        main = cat.skills[c["main_skill"]]
+        helpers = [cat.skills[g.entities[k].meta["skill"]] for k in c["path"]
+                   if g.entities[k].kind in ("skill", "util") and g.entities[k].meta.get("skill") != c["main_skill"]]
+        c["tempo"] = tempomod.weigh(main, helpers, tempo, budget)
+        c["score_raw"] = c["score"]
+        c["score"] = round(c["score_raw"] * c["tempo"]["tempo"], 4)
+    pool.sort(key=lambda c: (-c["score"], c["id"]))
     chains = [c for c in pool if _chain_ok(c, req, cat)][: req.top]
     ents = {k for c in chains for k in c["path"]}
     toks = {t for c in chains for t in c["tokens"]}
@@ -217,6 +238,8 @@ def mechanics(cat: catmod.Catalog, req: Requirements) -> dict:
     for k in sorted(ents):
         e = g.entities[k]
         meta = {m: e.meta[m] for m in ("ascendancy", "class", "slot") if e.meta.get(m)}
+        if e.kind in ("skill", "util") and e.meta.get("skill") in cat.skills:
+            meta["tempo"] = tempomod.facts(cat.skills[e.meta["skill"]], tempo.get(e.meta["skill"], {}))
         nodes.append({"id": k, "kind": e.kind, "name": e.name, **meta})
         for side, links in (("produces", e.produces), ("consumes", e.consumes)):
             for tok, l in links.items():
