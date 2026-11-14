@@ -4,6 +4,10 @@ Each chain becomes a skeleton (the generator's mechanics_graph source), is built
 and scored by the honest scorer. One JSON line per chain goes to <out>/chain_scores.jsonl; a re-run skips chains
 that already have a line, so a run can be stopped and resumed.
 
+With `--baseline`, every chain also gets a baseline: the same main skill, ascendancy, weapon and defence built
+without the chain's uniques, keystones, ascendancy notables and helper skills (baselines.jsonl, one per distinct
+setup). The chain's gain is its honest DPS over its baseline's, which is the link's own contribution.
+
     python3 -m exilegen.builder.chainscore --out runs/chains --sample 150 --workers 3 --minutes 100
     python3 -m exilegen.builder.chainscore --out runs/chains --report
 
@@ -51,6 +55,29 @@ def _worker(wid: int, jobs, results, budget: int, seed: int):
         ch = jobs.get()
         if ch is None:
             break
+        if "base_key" in ch and "kind" not in ch:      # a baseline job
+            row = {"base_key": ch["base_key"], "main_name": ch["main_name"], "baseline": True}
+            t0 = time.time()
+            try:
+                sk = gen.assemble(random.Random(f"{seed}:{ch['base_key']}"), ch["main_skill"], source="mechanics_graph",
+                                  thesis="baseline without the chain", constraints=[], asc=ch["ascendancy"],
+                                  weapon=ch["weapon"], defence=ch["defence"])
+                if sk is None:
+                    row.update(ok=False, error="no baseline skeleton")
+                else:
+                    res = synthesize(sk, engine, scorer, budget=budget, seed=seed)
+                    row.update(summary_row(res))
+                    row.update(skeleton_id=sk.id, unverified=bool((res.score or {}).get("unverified")),
+                               uniques=[u["name"] for u in sk.uniques])
+            except Exception as e:
+                row.update(ok=False, error=f"{type(e).__name__}: {e}"[:300])
+                try:
+                    engine = Engine()
+                except Exception:
+                    pass
+            row["seconds"] = round(time.time() - t0, 1)
+            results.put(row)
+            continue
         row = {"id": ch["id"], "rank": ch.get("rank"), "kind": ch["kind"], "main_name": ch["main_name"],
                "score": ch["score"], "score_raw": ch.get("score_raw"), "fit": ch["fit"], "novelty": ch["novelty"],
                "tempo": (ch.get("tempo") or {}).get("tempo"), "online_level": (ch.get("leveling") or {}).get("online_level"),
@@ -65,7 +92,9 @@ def _worker(wid: int, jobs, results, budget: int, seed: int):
                 res = synthesize(sk, engine, scorer, budget=budget, seed=seed)
                 s = res.score or {}
                 row.update(summary_row(res))
-                row.update(id=ch["id"], skeleton_id=sk.id, ascendancy=getattr(sk, "ascendancy", None),
+                row.update(id=ch["id"], skeleton_id=sk.id, ascendancy=sk.ascendancy, main_skill=ch["main_skill"],
+                           weapon=sk.weapon, defence=sk.defence,
+                           base_key="|".join(str(x) for x in (ch["main_skill"], sk.ascendancy, sk.weapon, sk.defence)),
                            unverified=bool(s.get("unverified")), code=res.code, notes=(res.notes or [])[-3:])
         except Exception as e:  # a broken chain must not stop the run
             row.update(ok=False, error=f"{type(e).__name__}: {e}"[:300])
@@ -77,22 +106,38 @@ def _worker(wid: int, jobs, results, budget: int, seed: int):
         results.put(row)
 
 
-def run(out: str, sample: int, workers: int, minutes: float, budget: int, seed: int) -> None:
+def _read(path: str) -> list[dict]:
+    return [json.loads(l) for l in open(path) if l.strip()] if os.path.exists(path) else []
+
+
+def _base_job(row: dict) -> dict:
+    return {k: row.get(k) for k in ("base_key", "main_skill", "main_name", "ascendancy", "weapon", "defence")}
+
+
+def run(out: str, sample: int, workers: int, minutes: float, budget: int, seed: int, baseline: bool = False) -> None:
     os.makedirs(out, exist_ok=True)
-    path = os.path.join(out, "chain_scores.jsonl")
-    done = set()
-    if os.path.exists(path):
-        done = {json.loads(l)["id"] for l in open(path) if l.strip()}
+    path, bpath = os.path.join(out, "chain_scores.jsonl"), os.path.join(out, "baselines.jsonl")
+    prior = _read(path)
+    done = {r["id"] for r in prior}
+    based = {r["base_key"] for r in _read(bpath)}
     chains = pool_chains()
     picked = [c for c in spread(chains, sample) if c["id"] not in done]
-    print(f"pool {len(chains)} chains, {len(picked)} to score ({len(done)} already done), {workers} workers", flush=True)
+    todo: list[dict] = []
+    if baseline:                       # baselines owed by chains scored in an earlier session
+        for r in prior:
+            if r.get("base_key") and r["base_key"] not in based:
+                based.add(r["base_key"])
+                todo.append(_base_job(r))
+    print(f"pool {len(chains)} chains, {len(picked)} to score ({len(done)} already done), "
+          f"{len(todo)} baselines owed, {workers} workers", flush=True)
+    todo += picked
     jobs, results = mp.Queue(), mp.Queue()
     procs = [mp.Process(target=_worker, args=(i, jobs, results, budget, seed), daemon=True) for i in range(workers)]
     for p in procs:
         p.start()
-    todo, flying, t0, n = list(picked), 0, time.time(), 0
+    flying, t0, n = 0, time.time(), 0
     deadline = t0 + minutes * 60
-    with open(path, "a") as f:
+    with open(path, "a") as f, open(bpath, "a") as bf:
         while todo or flying:
             while todo and flying < workers and time.time() < deadline:
                 jobs.put(todo.pop(0))
@@ -102,13 +147,21 @@ def run(out: str, sample: int, workers: int, minutes: float, budget: int, seed: 
             row = results.get()
             flying -= 1
             n += 1
-            f.write(json.dumps(row) + "\n")
-            f.flush()
-            print(f"[{n}/{len(picked)}] {row.get('seconds')}s ok={row.get('ok')} feasible={row.get('feasible')} "
-                  f"dps={row.get('dps_honest')} {row['main_name']} ({row['kind']}) {row.get('error') or ''}", flush=True)
+            if row.get("baseline"):
+                bf.write(json.dumps(row) + "\n")
+                bf.flush()
+            else:
+                f.write(json.dumps(row) + "\n")
+                f.flush()
+                if baseline and row.get("base_key") and row["base_key"] not in based:
+                    based.add(row["base_key"])
+                    todo.insert(0, _base_job(row))
+            print(f"[{n}] {row.get('seconds')}s {'base ' if row.get('baseline') else ''}ok={row.get('ok')} "
+                  f"feasible={row.get('feasible')} dps={row.get('dps_honest')} {row['main_name']} "
+                  f"{'(' + row['kind'] + ') ' if row.get('kind') else ''}{row.get('error') or ''}", flush=True)
     for _ in procs:
         jobs.put(None)
-    print(f"scored {n} chains in {(time.time() - t0) / 60:.1f} min, {len(todo)} left", flush=True)
+    print(f"finished {n} jobs in {(time.time() - t0) / 60:.1f} min, {len(todo)} left", flush=True)
 
 
 # ---------------------------------------------------------------------------------------------- report
@@ -171,6 +224,28 @@ def report(out: str) -> dict:
         k["feasible"] += bool(r.get("feasible"))
     rep["by_kind"] = {k: {**{x: v[x] for x in ("n", "with_dps", "feasible")},
                           "median_dps": round(sorted(v["dps"])[len(v["dps"]) // 2]) if v["dps"] else None} for k, v in kinds.items()}
+    base = {r["base_key"]: r for r in _read(os.path.join(out, "baselines.jsonl"))}
+    gains = []
+    for r in dps:
+        b = base.get(r.get("base_key"))
+        if b and b.get("ok") and (b.get("dps_honest") or 0) > 0:
+            r["base_dps"] = b["dps_honest"]
+            r["gain"] = round(r["dps_honest"] / b["dps_honest"], 3)
+            gains.append(r)
+    if gains:
+        g = sorted(r["gain"] for r in gains)
+        rep["gain"] = {"compared": len(gains), "median": g[len(g) // 2], "better_by_10pct": sum(1 for x in g if x >= 1.1),
+                       "worse_by_10pct": sum(1 for x in g if x <= 0.9),
+                       "spearman_vs_gain": {k: spearman([r[k] for r in gains if r.get(k) is not None],
+                                                        [r["gain"] for r in gains if r.get(k) is not None])
+                                            for k in ("score", "score_raw", "fit", "novelty", "tempo")},
+                       "by_kind": {}}
+        for k in sorted({r["kind"] for r in gains}):
+            gk = sorted(r["gain"] for r in gains if r["kind"] == k)
+            rep["gain"]["by_kind"][k] = {"n": len(gk), "median": gk[len(gk) // 2], "better_by_10pct": sum(1 for x in gk if x >= 1.1)}
+        rep["best_gain"] = [{k: r.get(k) for k in ("main_name", "kind", "rank", "score", "gain", "dps_honest", "base_dps", "feasible",
+                                                   "uniques", "keystones", "asc_nodes", "thesis")}
+                            for r in sorted(gains, key=lambda r: -r["gain"])[:20]]
     rep["best"] = [{k: r.get(k) for k in ("main_name", "kind", "rank", "score", "dps_honest", "ehp", "feasible", "unverified", "uniques", "thesis")}
                    for r in sorted(dps, key=lambda r: -r["dps_honest"])[:15]]
     json.dump(rep, open(os.path.join(out, "report.json"), "w"), indent=1)
@@ -185,10 +260,11 @@ def main(argv=None) -> int:
     ap.add_argument("--minutes", type=float, default=100)
     ap.add_argument("--budget", type=int, default=6000, help="engine evaluations per chain")
     ap.add_argument("--seed", type=int, default=7)
+    ap.add_argument("--baseline", action="store_true", help="also build each chain's setup without the chain, to measure its gain")
     ap.add_argument("--report", action="store_true", help="only summarise an existing run")
     a = ap.parse_args(argv)
     if not a.report:
-        run(a.out, a.sample, a.workers, a.minutes, a.budget, a.seed)
+        run(a.out, a.sample, a.workers, a.minutes, a.budget, a.seed, a.baseline)
     print(json.dumps(report(a.out), indent=1))
     return 0
 
