@@ -170,6 +170,7 @@ fn main() {
         pob_root: args.pob_root.clone(),
         user_dir: args.state.join("user"),
         cache_dir: Some(args.state.join("cache")),
+        data_dir: None,
     };
     let h = EngineHandle::spawn(cfg);
     let mut out = std::io::stdout();
