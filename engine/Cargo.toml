@@ -1,0 +1,18 @@
+[package]
+name = "exg-engine"
+version = "0.1.0"
+edition = "2021"
+description = "exilegen engine service: one PoB-PoE2 engine served over stdin/stdout JSON lines"
+
+[[bin]]
+name = "exg-engine"
+path = "src/main.rs"
+
+[dependencies]
+pob-engine = { path = "../../pob-redux/crates/pob-engine", default-features = false }
+serde_json = "1"
+
+[profile.release]
+opt-level = 3
+
+[workspace]

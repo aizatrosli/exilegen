@@ -1,6 +1,6 @@
 target/
 .cache/
-data/
+/data/
 __pycache__/
 *.pyc
 tools/poc/*/work/

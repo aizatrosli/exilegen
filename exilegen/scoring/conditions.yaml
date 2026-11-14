@@ -1,0 +1,437 @@
+# Condition registry: curated layer (hand-maintained).
+#
+# Three parts:
+#   conditions: catalogue of game states a PoB number may silently assume, with the availability
+#               (credit) of each state per locked profile.
+#   drawbacks:  catalogue of costs PoB ignores, with a credit per profile.
+#   entries:    gems / supports / keystones / uniques / rules. Curated entries override the generated
+#               draft (conditions_auto.yaml) that matches the same id, gem id or name.
+#
+# Availability / credit values (per profile):
+#   1.0 / true      state always holds (PoB's assumption is fine)
+#   0.0 / false     state never holds on this profile
+#   0 < x < 1       state holds a fraction x of the time: keep x of the gem's PoB contribution
+#   build           derive from the build itself via the condition's `signal` (bool -> 1/0, number -> that
+#                   fraction). If the signal cannot be read, `unknown` is used and the result is flagged.
+#   build_or:x      signal true -> 1.0, false -> x
+# Profile names that are not listed fall back to `default`.
+#
+# Entry fields: id, kind (gem|support|keystone|unique|rule), name, match {ids, names},
+#   role: skill (the gem IS the damage: credit multiplies its own DPS) | support (credit applies to the
+#         gem's share of the supported skill's DPS) | global (keystone/unique: share of all DPS) | utility
+#   conditions, drawbacks: lists of catalogue ids
+#   typical_share: fallback share of the affected DPS that the gem provides, used only when the engine
+#                  supplies no drop-one marginal for it (then the result is flagged "no_marginal")
+#   on_never: block | discount   what to do when credit is 0 (default: block for role skill, discount otherwise)
+#   treatment: {profile: {action: allow|discount|block|flag|adjust, credit: x, dps_multiplier: x}} explicit override
+#   requires / if_unmet: build signals that must hold; if one is false -> if_unmet {action, credit}
+#   check: name of a custom check in conditions.py (atziri_life_loss, life_cost_sustain, zerphi_glory,
+#          uhtred_one_other_support, spell_cascade_group, ailment_payoff)
+#   utility: {profile: {movement_speed_mult, aoe_mult}} adjustments fed to the objective's utility terms
+#   verified: true when the rule was checked against game behaviour or a POC; source: where it came from
+version: 1
+
+conditions:
+  enemy_cursed:
+    desc: "Target must carry a curse (Hexblast detonates curses)."
+    signal: applies_curse
+    default: build
+    pinnacle_v1: build
+    mapping_v1: build
+    as_exported: 1.0
+    unknown: 0.0
+  corpses_present:
+    desc: "Corpses must exist near the target. A Pinnacle fight has none unless the build makes them."
+    signal: creates_corpses
+    default: build
+    pinnacle_v1: build
+    mapping_v1: 0.8
+    as_exported: 1.0
+    unknown: 0.0
+  kills_recently:
+    desc: "Needs kills. Pinnacle bosses give none (adds aside); mapping gives plenty."
+    default: 0.0
+    pinnacle_v1: 0.0
+    mapping_v1: 0.9
+    as_exported: 1.0
+  moving:
+    desc: "Needs the player to move (Hit and Run) or to keep moving."
+    default: 0.5
+    pinnacle_v1: 0.5
+    mapping_v1: 0.85
+    as_exported: 1.0
+  stationary:
+    desc: "Needs the player to stand still."
+    default: 0.6
+    pinnacle_v1: 0.6
+    mapping_v1: 0.3
+    as_exported: 1.0
+  minion_present:
+    desc: "Needs a live minion (Minion Pact drains one on use)."
+    signal: has_minions
+    default: build
+    pinnacle_v1: build
+    mapping_v1: build
+    as_exported: build
+    unknown: 0.0
+  glory:
+    desc: "Glory requirement (Skyfall: from spending Runic Ward). Zerphi's Infamy uses its own check (Glory from life spent)."
+    default: 0.5
+    as_exported: 1.0
+  low_life:
+    desc: "Player on low life."
+    signal: low_life
+    default: build
+    as_exported: 1.0
+    unknown: 0.0
+  enemy_low_life:
+    desc: "Target on low life (execute effects). A boss spends ~35% of the fight there; PoB uses its config."
+    default: 0.35
+    as_exported: 1.0
+  full_life:
+    desc: "Player on full life. CI builds are always on full life."
+    signal: is_ci
+    default: build_or:0.5
+    pinnacle_v1: build_or:0.4
+    mapping_v1: build_or:0.6
+    as_exported: 1.0
+    unknown: 0.5
+  combo:
+    desc: "Combo built by other strikes before the payoff."
+    default: 0.6
+    as_exported: 1.0
+  charges:
+    desc: "Power/Frenzy/Endurance charges must be generated and are consumed."
+    default: 0.7
+    as_exported: 1.0
+  ramp_up_time:
+    desc: "Effect accumulates over time (Inexorable Critical); long boss fights keep more of it than mapping."
+    default: 0.6
+    pinnacle_v1: 0.8
+    mapping_v1: 0.4
+    as_exported: 1.0
+  block:
+    desc: "Needs blocking; credit = effective block chance."
+    signal: block_chance
+    default: build
+    as_exported: 1.0
+    unknown: 0.2
+  been_hit:
+    desc: "Player was hit recently."
+    default: 0.6
+    pinnacle_v1: 0.7
+    mapping_v1: 0.5
+    as_exported: 1.0
+  enemy_frozen:
+    desc: "Target frozen. Pinnacle bosses need freeze buildup; freeze uptime is low."
+    signal: applies_freeze
+    default: build
+    pinnacle_v1: build
+    as_exported: 1.0
+    unknown: 0.2
+  enemy_shocked:
+    signal: applies_shock
+    default: build
+    as_exported: 1.0
+    unknown: 0.3
+  enemy_ignited:
+    signal: applies_ignite
+    default: build
+    as_exported: 1.0
+    unknown: 0.3
+  enemy_chilled:
+    signal: applies_chill
+    default: build
+    as_exported: 1.0
+    unknown: 0.5
+  enemy_poisoned:
+    signal: applies_poison
+    default: build
+    as_exported: 1.0
+    unknown: 0.3
+  enemy_bleeding:
+    signal: applies_bleed
+    default: build
+    as_exported: 1.0
+    unknown: 0.3
+  enemy_electrocuted:
+    default: 0.2
+    as_exported: 1.0
+  enemy_stunned:
+    desc: "Target stunned/dazed/primed. Bosses resist."
+    default: 0.3
+    pinnacle_v1: 0.2
+    mapping_v1: 0.6
+    as_exported: 1.0
+  armour_broken:
+    desc: "Target armour fully broken."
+    default: 0.5
+    as_exported: 1.0
+  rage:
+    default: 0.8
+    as_exported: 1.0
+  archon_infusion_remnant:
+    desc: "Archon/Infusion/Remnant/Surge mechanics; largely unmodelled in PoB 0.23.1."
+    default: 0.7
+    as_exported: 1.0
+  cooldown_gate:
+    default: 0.7
+    as_exported: 1.0
+  on_death:
+    default: 0.3
+    pinnacle_v1: 0.2
+    mapping_v1: 0.8
+    as_exported: 1.0
+  proximity:
+    default: 0.7
+    as_exported: 1.0
+  parry:
+    signal: has_parry
+    default: build_or:0.0
+    as_exported: 1.0
+    unknown: 0.3
+  marked:
+    signal: applies_mark
+    default: build
+    as_exported: 1.0
+    unknown: 0.3
+  unbound:
+    default: 0.5
+    as_exported: 1.0
+  low_mana:
+    default: 0.3
+    as_exported: 1.0
+
+drawbacks:
+  self_daze:
+    desc: "Dazes the player (Overextend: 5 s on crit). PoB applies the bonus and ignores the daze."
+    default: 0.6
+    pinnacle_v1: 0.5
+    mapping_v1: 0.7
+    as_exported: 1.0
+  life_loss_on_use:
+    desc: "Player loses life/ES/mana on use (Atziri's Impatience 25%)."
+    default: 0.5
+    as_exported: 1.0
+  life_cost:
+    desc: "Cost paid in life. Credit decided by the life_cost_sustain check when the engine reports costs."
+    default: 1.0
+  move_slower:
+    desc: "Slower movement while using the skill. No DPS credit change; feeds the movement utility term."
+    default: 1.0
+  self_damage_taken:
+    default: 0.8
+    as_exported: 1.0
+  less_defences:
+    default: 0.9
+    as_exported: 1.0
+
+entries:
+  # ---------------------------------------------------------------- 1-button POC offenders (spells)
+  - id: gem.hexblast
+    kind: gem
+    name: Hexblast
+    match: {ids: [HexblastPlayer], names: [Hexblast]}
+    role: skill
+    conditions: [enemy_cursed]
+    requires: [applies_curse]
+    if_unmet: {action: block, reason: "Hexblast detonates curses; the build applies none"}
+    treatment:
+      # even with a curse, Hexblast removes it and only detonates curses past half duration:
+      # explosions are capped by the curse re-application cycle (not modelled) -> partial credit
+      pinnacle_v1: {action: discount, credit: 0.5}
+      mapping_v1: {action: discount, credit: 0.7}
+      as_exported: {action: allow}
+    verified: true
+    source: "one-button POC: chosen in 237/197 (x3.5 raw, x1.67 energy-corrected) on builds without a curse; PoB never checks for a curse. Credit 0.5/0.7 for the re-curse cycle is an estimate."
+  - id: gem.detonate_dead
+    kind: gem
+    name: Detonate Dead
+    match: {ids: [DetonateDeadPlayer], names: [Detonate Dead]}
+    role: skill
+    conditions: [corpses_present]
+    treatment:
+      as_exported: {action: allow}
+    verified: true
+    source: "one-button POC 360/321 and support-opt (+380%): PoB assumes a corpse; a Pinnacle arena has none unless the build creates them (Sacrifice + reviving minions)."
+  - id: gem.snap
+    kind: gem
+    name: Snap
+    match: {ids: [SnapPlayer], names: [Snap]}
+    role: skill
+    conditions: []
+    check: ailment_payoff
+    params: {ailments: [shock, ignite, freeze]}
+    verified: false
+    source: "one-button POC 223/1231/350: Snap swaps survived the energy correction. Snap consumes a Frozen/Shocked/Ignited state; credit = best ailment chance of the build's hits (needs per-skill chances from the engine)."
+
+  # ---------------------------------------------------------------- support-opt POC offenders
+  - id: support.overextend
+    kind: support
+    name: Overextend
+    match: {ids: [SupportOverextendPlayer], names: [Overextend]}
+    role: support
+    drawbacks: [self_daze]
+    typical_share: 0.2
+    verified: true
+    source: "support-opt POC: 6/20 strict picks. Gem data daze_self_on_critical_hit_for_X_ms=5000; PoB applies +30% more crit multiplier and ignores the self-daze."
+  - id: support.inexorable_critical
+    kind: support
+    name: Inexorable Critical
+    match: {ids: [SupportInevitableCriticalsPlayer, SupportInevitableCriticalsPlayerTwo], names: [Inexorable Critical I, Inexorable Critical II]}
+    role: support
+    conditions: [ramp_up_time]
+    typical_share: 0.3
+    verified: true
+    source: "support-opt POC: 5/20 strict picks. Crit chance accumulates +10%/s (II: +40%/s, crit damage -10%/s) up to a cap; PoB evaluates the capped state."
+  - id: support.atziris_impatience
+    kind: support
+    name: Atziri's Impatience
+    match: {ids: [SupportAtzirisImpatiencePlayer], names: ["Atziri's Impatience"]}
+    role: support
+    drawbacks: [life_loss_on_use]
+    check: atziri_life_loss
+    params: {loss_fraction: 0.25}
+    typical_share: 0.4
+    verified: true
+    source: "support-opt POC (Flameblast +205%): lose_%_of_life_es_and_mana_when_skill_is_used=25; PoB ignores the loss. Check: 25% of life+ES per use x uses/s vs life recovery."
+  - id: support.atalui_bloodletting
+    kind: support
+    name: Atalui's Bloodletting
+    match: {ids: [SupportAtaluiBloodlettingPlayer], names: ["Atalui's Bloodletting"]}
+    role: support
+    drawbacks: [life_cost]
+    check: life_cost_sustain
+    typical_share: 0.25
+    verified: true
+    source: "support-opt POC (Frostbolt, Spark): the whole mana cost becomes a life cost; the POC never checked life sustain. Check: life cost/s vs life regen + leech."
+  - id: support.minion_pact
+    kind: support
+    name: Minion Pact
+    match: {ids: [SupportMinionPactPlayer, SupportMinionPactPlayerTwo], names: [Minion Pact I, Minion Pact II]}
+    role: support
+    conditions: [minion_present]
+    treatment:
+      as_exported: {action: allow}
+    typical_share: 0.26
+    verified: true
+    source: "support-opt POC best-case pick in 7/20 builds with no minions. 'Only takes effect if you have a Minion with enough life'; PoB applies the 30-35% more damage unconditionally."
+  - id: support.zerphis_infamy
+    kind: support
+    name: Zerphi's Infamy
+    match: {ids: [SupportZerphisLegacyPlayer], names: ["Zerphi's Infamy"]}
+    role: skill
+    conditions: [glory]
+    check: zerphi_glory
+    params: {glory_required: 50, glory_per_life_pct: 5}
+    verified: true
+    source: "support-opt POC best-case pick in 6/20 builds. The skill needs 50 Glory per use and Glory comes from 5% of life spent on skills; PoB applies 50% more damage and ignores the gate. Credit multiplies the whole skill (it cannot be used without Glory)."
+  - id: support.hit_and_run
+    kind: support
+    name: Hit and Run
+    match: {ids: [SupportHitAndRunPlayer], names: [Hit and Run]}
+    role: support
+    conditions: [moving]
+    typical_share: 0.6
+    verified: true
+    source: "support-opt POC (Flicker, Oil Barrage, Falling Thunder). skill_unusable_until_moved_X_distance=100: uses are gated by movement; PoB applies +40% skill speed with no gate. typical_share 0.6 because the gate limits the whole skill, not just the bonus."
+  - id: support.deliberation
+    kind: support
+    name: Deliberation
+    match: {ids: [SupportDeliberationPlayer], names: [Deliberation]}
+    role: support
+    drawbacks: [move_slower]
+    utility:
+      mapping_v1: {movement_speed_mult: 0.9}
+      pinnacle_v1: {movement_speed_mult: 0.95}
+    treatment:
+      default: {action: flag}
+    verified: true
+    source: "support-opt POC flagged it (keyword 'moving'). The 20% more damage is unconditional; the cost is 30% slower movement while using the skill, which PoB ignores -> utility penalty, no DPS change."
+  - id: rule.spell_cascade_group
+    kind: rule
+    name: Spell Cascade
+    match: {ids: [SupportSpellCascadePlayer], names: [Spell Cascade]}
+    role: support
+    check: spell_cascade_group
+    params: {pinnacle_overlap_hits: 0.43, mapping_aoe_mult: 2.28}
+    utility:
+      mapping_v1: {aoe_mult: 2.28}
+    verified: false
+    source: "synergy analysis 5 and one-button POC (removed from 4 Cast-on-X groups): PoB applies -30% damage/-20% area to every Cascadable spell in the group but never counts the two extra cascades. Group rule: the adjustment applies to every spell socketed with it (a whole Meta group). Pinnacle: assume 0.43 extra hit-equivalents on a large boss (net neutral vs no cascade); mapping: area x2.28."
+  - id: support.uhtreds_omen
+    kind: support
+    name: Uhtred's Omen
+    match: {ids: [SupportUhtredOmenPlayer], names: ["Uhtred's Omen"]}
+    role: support
+    check: uhtred_one_other_support
+    typical_share: 0.15
+    verified: true
+    source: "support-opt POC caveat: +2 levels only with exactly one other support; PoB counts only supports applied to the skill, ignoring meta-only supports (Boundless Energy, Atziri's Communion) in a Cast-on-X group."
+  - id: support.concentrated_area
+    kind: support
+    name: Concentrated Area
+    match: {ids: [SupportConcentratedAreaPlayer], names: [Concentrated Area]}
+    role: support
+    utility:
+      mapping_v1: {aoe_mult: 0.5}
+    treatment:
+      default: {action: allow}
+    verified: true
+    source: "support-opt POC most-added support (6/20). Real 30% more area damage for 50% less area: fine on a boss, a clear-speed cost on maps."
+
+  # ---------------------------------------------------------------- other high-risk entries from the scan
+  - id: support.profanity
+    kind: support
+    name: Profanity
+    match: {ids: [SupportProfanityPlayer, SupportProfanityPlayerTwo], names: [Profanity I, Profanity II]}
+    role: support
+    conditions: [corpses_present]
+    typical_share: 0.25
+    verified: false
+    source: "auto-scan (high): 'consume a Corpse on use, dealing more Chaos Damage if they do'."
+  - id: support.biting_frost
+    kind: support
+    name: Biting Frost
+    match: {ids: [SupportBitingFrostPlayer, SupportBitingFrostPlayerTwo], names: [Biting Frost I, Biting Frost II]}
+    role: support
+    conditions: [enemy_frozen]
+    typical_share: 0.3
+    verified: false
+    source: "auto-scan (high): more damage against Frozen enemies but consumes Freeze; Pinnacle freeze uptime is low."
+  - id: support.exploit_weakness
+    kind: support
+    name: Exploit Weakness
+    match: {ids: [SupportExploitWeaknessPlayer], names: [Exploit Weakness]}
+    role: support
+    conditions: [armour_broken]
+    typical_share: 0.29
+    verified: false
+    source: "auto-scan (high): consumes fully broken armour to gain 40% more damage."
+  - id: support.culmination
+    kind: support
+    name: Culmination
+    match: {ids: [SupportCulminationPlayer, SupportCulminationPlayerTwo], names: [Culmination I, Culmination II]}
+    role: support
+    conditions: [combo]
+    typical_share: 0.25
+    verified: false
+    source: "PoB data: more damage per Combo stack (up to 10) built by other strikes."
+  - id: support.rageforged
+    kind: support
+    name: Rageforged
+    match: {ids: [SupportRageforgedPlayer, SupportRageforgedPlayerTwo], names: [Rageforged I, Rageforged II]}
+    role: support
+    conditions: [rage]
+    typical_share: 0.26
+    verified: false
+    source: "PoB data: spends 10 Rage per use for 35% more damage; needs a Rage source."
+  - id: support.ixchels_torment
+    kind: support
+    name: Ixchel's Torment
+    match: {ids: [SupportFlukePlayerTwo], names: ["Ixchel's Torment"]}
+    role: support
+    treatment:
+      default: {action: flag}
+    verified: false
+    source: "one-button POC pick (1231): random damage/area roll on triggered skills; PoB value is an average. Flag only."

@@ -1,0 +1,10104 @@
+[
+{
+"line": 3,
+"tags": {
+"activationCounts": {
+"manual": 2,
+"persistent": 5,
+"proxy": 0,
+"triggered": 1
+},
+"allocatedNodeCount": 134,
+"anyManualSpell": true,
+"ascendancy": "Oracle",
+"ascendancyNodes": [
+{
+"id": 378,
+"name": "Critical Hit Chance",
+"type": "Normal"
+},
+{
+"id": 5571,
+"name": "The Unseen Path",
+"type": "Notable"
+},
+{
+"id": 11335,
+"name": "Passive Point",
+"type": "Normal"
+},
+{
+"id": 25092,
+"name": "Critical Damage Bonus on You",
+"type": "Normal"
+},
+{
+"id": 32905,
+"name": "Entwined Realities",
+"type": "Notable"
+},
+{
+"id": 34313,
+"name": "The Lesser Harm",
+"type": "Notable"
+},
+{
+"id": 47190,
+"name": "Passive Point",
+"type": "Normal"
+},
+{
+"id": 55135,
+"name": "Forced Outcome",
+"type": "Notable"
+}
+],
+"className": "Druid",
+"grantedSkills": [
+{
+"activation": "persistent",
+"name": "Spellslinger",
+"source": "Sol Spire"
+},
+{
+"activation": "persistent",
+"name": "Impurity",
+"source": "Palm of the Dreamer"
+}
+],
+"itemGrantedManualDamagingSkills": [],
+"items": [
+{
+"base": "Solar Amulet",
+"name": "Spirit Locket",
+"rarity": "RARE",
+"slot": "Amulet"
+},
+{
+"base": "Heavy Belt",
+"name": "Headhunter",
+"rarity": "UNIQUE",
+"slot": "Belt"
+},
+{
+"base": "Silk Robe",
+"name": "Temporalis",
+"rarity": "UNIQUE",
+"slot": "Body Armour"
+},
+{
+"base": "Sekhema Sandals",
+"name": "Blood League",
+"rarity": "RARE",
+"slot": "Boots"
+},
+{
+"base": "Opulent Gloves",
+"name": "Empyrean Nails",
+"rarity": "RARE",
+"slot": "Gloves"
+},
+{
+"base": "Ancestral Tiara",
+"name": "Viper Crest",
+"rarity": "RARE",
+"slot": "Helmet"
+},
+{
+"base": "Sapphire",
+"name": "Apocalypse Lens",
+"rarity": "RARE",
+"slot": "Jewel 21984"
+},
+{
+"base": "Sapphire",
+"name": "Luminous Scar",
+"rarity": "RARE",
+"slot": "Jewel 26196"
+},
+{
+"base": "Diamond",
+"name": "Prism of Belief",
+"rarity": "UNIQUE",
+"slot": "Jewel 55190"
+},
+{
+"base": "Diamond",
+"name": "Heart of the Well",
+"rarity": "UNIQUE",
+"slot": "Jewel 61419"
+},
+{
+"base": "Sapphire",
+"name": "Armageddon Stone",
+"rarity": "RARE",
+"slot": "Jewel 61834"
+},
+{
+"base": "Sapphire",
+"name": "Dusk Eye",
+"rarity": "RARE",
+"slot": "Jewel 7960"
+},
+{
+"base": "Mnemonic Ring",
+"name": "Soul Circle",
+"rarity": "RARE",
+"slot": "Ring 1"
+},
+{
+"base": "Ring",
+"name": "Kalandra's Touch",
+"rarity": "UNIQUE",
+"slot": "Ring 2"
+},
+{
+"base": "Dueling Wand",
+"name": "Sol Spire",
+"rarity": "RARE",
+"slot": "Weapon 1"
+},
+{
+"base": "Shrine Sceptre",
+"name": "Palm of the Dreamer",
+"rarity": "UNIQUE",
+"slot": "Weapon 2"
+}
+],
+"keystones": [
+{
+"id": 42680,
+"name": "Blackflame Covenant"
+},
+{
+"id": 45918,
+"name": "Mind Over Matter"
+},
+{
+"id": 46742,
+"name": "Elemental Equilibrium"
+},
+{
+"id": 49547,
+"name": "Scarred Faith"
+},
+{
+"id": 56349,
+"name": "Chaos Inoculation"
+},
+{
+"id": 57513,
+"name": "Eldritch Battery"
+}
+],
+"level": 100,
+"manualDamagingSkillNames": [
+"Orb of Storms",
+"Spark"
+],
+"manualDamagingSkills": 2,
+"noCast": false,
+"notables": [
+{
+"id": 2335,
+"name": "Turn the Clock Forward"
+},
+{
+"id": 3567,
+"name": "Raw Mana"
+},
+{
+"id": 5284,
+"name": "Shredding Force"
+},
+{
+"id": 6898,
+"name": "Guardian of the Wilds"
+},
+{
+"id": 7777,
+"name": "Breaking Point"
+},
+{
+"id": 8957,
+"name": "Right Hand of Darkness"
+},
+{
+"id": 13515,
+"name": "Stormwalker"
+},
+{
+"id": 13724,
+"name": "Deadly Force"
+},
+{
+"id": 13738,
+"name": "Lightning Quick"
+},
+{
+"id": 13823,
+"name": "Controlling Magic"
+},
+{
+"id": 16940,
+"name": "Arcane Nature"
+},
+{
+"id": 19044,
+"name": "Arcane Intensity"
+},
+{
+"id": 20032,
+"name": "Erraticism"
+},
+{
+"id": 20677,
+"name": "For the Jugular"
+},
+{
+"id": 20963,
+"name": "Calculated Hunter"
+},
+{
+"id": 27388,
+"name": "Aspiring Genius"
+},
+{
+"id": 27626,
+"name": "Touch the Arcane"
+},
+{
+"id": 28267,
+"name": "Desensitisation"
+},
+{
+"id": 34300,
+"name": "Conservative Casting"
+},
+{
+"id": 37543,
+"name": "Full Recovery"
+},
+{
+"id": 43139,
+"name": "Stormbreaker"
+},
+{
+"id": 45632,
+"name": "Mind Eraser"
+},
+{
+"id": 50562,
+"name": "Barbaric Strength"
+},
+{
+"id": 52115,
+"name": "Nurturing Nature"
+},
+{
+"id": 55149,
+"name": "Pure Chaos"
+},
+{
+"id": 58016,
+"name": "All Natural"
+},
+{
+"id": 58096,
+"name": "Lasting Incantations"
+},
+{
+"id": 61444,
+"name": "Wasting Casts"
+},
+{
+"id": 61601,
+"name": "True Strike"
+}
+],
+"oneButton": false,
+"oneButtonInclItemSkills": false,
+"socketGroups": [
+{
+"active": "Spellslinger",
+"enabled": true,
+"gems": [
+{
+"activation": "persistent",
+"damaging": false,
+"enabled": true,
+"id": "MetaSpellslingerPlayer",
+"itemGranted": true,
+"known": true,
+"level": 20,
+"name": "Spellslinger",
+"proxyKind": [],
+"quality": 0,
+"spell": false,
+"support": false,
+"types": [
+"AttackInPlace",
+"Buff",
+"CanHaveMultipleOngoingSkillInstances",
+"Cooldown",
+"GeneratesEnergy",
+"HasReservation",
+"Invocation",
+"Meta",
+"OngoingSkill",
+"Persistent",
+"Triggers"
+],
+"weaponDefault": false
+}
+],
+"grantedBy": "Sol Spire",
+"includeInFullDPS": false,
+"index": 1,
+"main": false,
+"metaGroup": true,
+"slot": "Weapon 1",
+"supports": []
+},
+{
+"active": "Impurity",
+"enabled": true,
+"gems": [
+{
+"activation": "persistent",
+"damaging": false,
+"enabled": true,
+"id": "ImpurityPlayer",
+"itemGranted": true,
+"known": true,
+"level": 14,
+"name": "Impurity",
+"proxyKind": [],
+"quality": 0,
+"spell": false,
+"support": false,
+"types": [
+"AffectsPresence",
+"AttackInPlace",
+"Aura",
+"Buff",
+"Chaos",
+"HasReservation",
+"OngoingSkill",
+"Persistent"
+],
+"weaponDefault": false
+},
+{
+"enabled": true,
+"id": "SupportClarityPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Clarity II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportArmourDemolisherPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Armour Demolisher II",
+"quality": 0,
+"support": true
+}
+],
+"grantedBy": "Palm of the Dreamer",
+"includeInFullDPS": false,
+"index": 2,
+"main": false,
+"metaGroup": false,
+"slot": "Weapon 2",
+"supports": [
+"Clarity II",
+"Armour Demolisher II"
+]
+},
+{
+"active": "Mana Remnants",
+"enabled": true,
+"gems": [
+{
+"activation": "persistent",
+"damaging": false,
+"enabled": true,
+"id": "ManaRemnantsPlayer",
+"itemGranted": false,
+"known": true,
+"level": 19,
+"name": "Mana Remnants",
+"proxyKind": [],
+"quality": 20,
+"spell": false,
+"support": false,
+"types": [
+"AttackInPlace",
+"Buff",
+"GeneratesRemnants",
+"HasReservation",
+"OngoingSkill",
+"Persistent",
+"TotemCastsAlone"
+],
+"weaponDefault": false
+},
+{
+"enabled": true,
+"id": "SupportInterludePlayer",
+"known": true,
+"level": 1,
+"name": "Remnant Potency I",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportFleetingRemnantsPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Harmonic Remnants II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportKhatalsRejuvenationPlayer",
+"known": true,
+"level": 1,
+"name": "Khatal's Rejuvenation",
+"quality": 0,
+"support": true
+}
+],
+"includeInFullDPS": false,
+"index": 3,
+"main": false,
+"metaGroup": false,
+"supports": [
+"Remnant Potency I",
+"Harmonic Remnants II",
+"Khatal's Rejuvenation"
+]
+},
+{
+"active": "Orb of Storms",
+"enabled": true,
+"gems": [
+{
+"activation": "manual",
+"damaging": true,
+"enabled": true,
+"id": "OrbOfStormsPlayer",
+"itemGranted": false,
+"known": true,
+"level": 20,
+"name": "Orb of Storms",
+"proxyKind": [],
+"quality": 20,
+"spell": true,
+"support": false,
+"types": [
+"Area",
+"AreaSpell",
+"Chains",
+"Damage",
+"Duration",
+"GeneratesInfusion",
+"GeneratesRemnants",
+"Lightning",
+"Limit",
+"Mineable",
+"Orb",
+"Spell",
+"Sustained",
+"Totemable",
+"Trappable",
+"Triggerable",
+"Unleashable",
+"UsableWhileMoving"
+],
+"weaponDefault": false
+},
+{
+"enabled": true,
+"id": "SupportEfficiencyPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Efficiency II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportMagnifiedAreaPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Magnified Area II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "ProlongedDurationSupportPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Prolonged Duration II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportZenithPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Zenith II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportLightningMasteryPlayer",
+"known": true,
+"level": 1,
+"name": "Lightning Mastery",
+"quality": 0,
+"support": true
+}
+],
+"includeInFullDPS": false,
+"index": 4,
+"main": false,
+"metaGroup": false,
+"supports": [
+"Efficiency II",
+"Magnified Area II",
+"Prolonged Duration II",
+"Zenith II",
+"Lightning Mastery"
+]
+},
+{
+"active": "Arctic Armour",
+"enabled": true,
+"gems": [
+{
+"activation": "persistent",
+"damaging": true,
+"enabled": true,
+"id": "ArcticArmourPlayer",
+"itemGranted": false,
+"known": true,
+"level": 20,
+"name": "Arctic Armour",
+"proxyKind": [],
+"quality": 20,
+"spell": true,
+"support": false,
+"types": [
+"AttackInPlace",
+"Buff",
+"Cold",
+"Cooldown",
+"Damage",
+"GainsStages",
+"HasReservation",
+"OngoingSkill",
+"Persistent",
+"Spell",
+"Sustained"
+],
+"weaponDefault": false
+},
+{
+"enabled": true,
+"id": "SupportClarityPlayer",
+"known": true,
+"level": 1,
+"name": "Clarity I",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportBountyPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Bounty II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportColdMasteryPlayer",
+"known": true,
+"level": 1,
+"name": "Cold Mastery",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportElementalFocusPlayer",
+"known": true,
+"level": 1,
+"name": "Elemental Focus",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportAmbushPlayer",
+"known": true,
+"level": 1,
+"name": "Ambush",
+"quality": 0,
+"support": true
+}
+],
+"includeInFullDPS": false,
+"index": 5,
+"main": false,
+"metaGroup": false,
+"supports": [
+"Clarity I",
+"Bounty II",
+"Cold Mastery",
+"Elemental Focus",
+"Ambush"
+]
+},
+{
+"active": "Cast on Critical",
+"enabled": true,
+"gems": [
+{
+"activation": "persistent",
+"damaging": false,
+"enabled": true,
+"id": "MetaCastOnCritPlayer",
+"itemGranted": false,
+"known": true,
+"level": 20,
+"name": "Cast on Critical",
+"proxyKind": [],
+"quality": 20,
+"spell": false,
+"support": false,
+"types": [
+"Buff",
+"CanHaveMultipleOngoingSkillInstances",
+"GeneratesEnergy",
+"HasReservation",
+"Meta",
+"OngoingSkill",
+"Persistent",
+"Triggers"
+],
+"weaponDefault": false
+},
+{
+"activation": "triggered",
+"damaging": true,
+"enabled": true,
+"id": "CometPlayer",
+"itemGranted": false,
+"known": true,
+"level": 20,
+"name": "Comet",
+"proxyKind": [],
+"quality": 0,
+"spell": true,
+"support": false,
+"types": [
+"Area",
+"AreaSpell",
+"Cascadable",
+"Cold",
+"Damage",
+"Invokable",
+"Mineable",
+"Multicastable",
+"Spell",
+"Totemable",
+"Trappable",
+"Triggerable",
+"Triggered",
+"Unleashable"
+],
+"weaponDefault": false
+},
+{
+"enabled": true,
+"id": "SupportEfficiencyPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Efficiency II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportZenithPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Zenith II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportElementalFocusPlayer",
+"known": true,
+"level": 1,
+"name": "Elemental Focus",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportBoundlessEnergyPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Boundless Energy II",
+"quality": 0,
+"support": true
+}
+],
+"includeInFullDPS": false,
+"index": 6,
+"main": false,
+"metaGroup": true,
+"supports": [
+"Efficiency II",
+"Zenith II",
+"Elemental Focus",
+"Boundless Energy II"
+]
+},
+{
+"active": "Siphon Elements",
+"enabled": true,
+"gems": [
+{
+"activation": "persistent",
+"damaging": false,
+"enabled": true,
+"id": "SiphonElementsPlayer",
+"itemGranted": false,
+"known": true,
+"level": 20,
+"name": "Siphon Elements",
+"proxyKind": [],
+"quality": 20,
+"spell": false,
+"support": false,
+"types": [
+"AttackInPlace",
+"Buff",
+"Cold",
+"Fire",
+"GeneratesInfusion",
+"GeneratesRemnants",
+"HasReservation",
+"Lightning",
+"OngoingSkill",
+"Persistent",
+"TotemCastsAlone"
+],
+"weaponDefault": false
+},
+{
+"enabled": true,
+"id": "SupportFleetingRemnantsPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Harmonic Remnants II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportInterludePlayer",
+"known": true,
+"level": 1,
+"name": "Remnant Potency I",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportColdMasteryPlayer",
+"known": true,
+"level": 1,
+"name": "Cold Mastery",
+"quality": 0,
+"support": true
+}
+],
+"includeInFullDPS": false,
+"index": 7,
+"main": false,
+"metaGroup": false,
+"supports": [
+"Harmonic Remnants II",
+"Remnant Potency I",
+"Cold Mastery"
+]
+},
+{
+"active": "Blink",
+"enabled": true,
+"gems": [
+{
+"activation": "persistent",
+"damaging": false,
+"enabled": true,
+"id": "BlinkReservationPlayer",
+"itemGranted": false,
+"known": true,
+"level": 20,
+"name": "Blink",
+"proxyKind": [],
+"quality": 20,
+"spell": false,
+"support": false,
+"types": [
+"AttackInPlace",
+"Buff",
+"DodgeReplacement",
+"HasReservation",
+"OngoingSkill",
+"Persistent",
+"ReserveInAllSets"
+],
+"weaponDefault": false
+},
+{
+"enabled": true,
+"id": "SupportCooldownRecoveryPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Cooldown Recovery II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportRapidCastingPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Rapid Casting II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportUhtredAuguryPlayer",
+"known": true,
+"level": 1,
+"name": "Uhtred's Augury",
+"quality": 0,
+"support": true
+}
+],
+"includeInFullDPS": false,
+"index": 8,
+"main": false,
+"metaGroup": false,
+"supports": [
+"Cooldown Recovery II",
+"Rapid Casting II",
+"Uhtred's Augury"
+]
+},
+{
+"active": "Spark",
+"enabled": true,
+"gems": [
+{
+"activation": "manual",
+"damaging": true,
+"enabled": true,
+"id": "SparkPlayer",
+"itemGranted": false,
+"known": true,
+"level": 20,
+"name": "Spark",
+"proxyKind": [],
+"quality": 19,
+"spell": true,
+"support": false,
+"types": [
+"Damage",
+"Duration",
+"Invokable",
+"Lightning",
+"Mineable",
+"Multicastable",
+"Projectile",
+"ProjectilesFromUser",
+"Spell",
+"Totemable",
+"Trappable",
+"Triggerable",
+"Unleashable",
+"UsableWhileMoving"
+],
+"weaponDefault": false
+},
+{
+"enabled": true,
+"id": "SupportEfficiencyPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Efficiency II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportVilentasPropulsionPlayer",
+"known": true,
+"level": 1,
+"name": "Vilenta's Propulsion",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportZenithPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Zenith II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportRakiatasFlowPlayer",
+"known": true,
+"level": 1,
+"name": "Rakiata's Flow",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportDiallasDesirePlayer",
+"known": true,
+"level": 1,
+"name": "Dialla's Desire",
+"quality": 0,
+"support": true
+}
+],
+"includeInFullDPS": false,
+"index": 9,
+"main": true,
+"metaGroup": false,
+"supports": [
+"Efficiency II",
+"Vilenta's Propulsion",
+"Zenith II",
+"Rakiata's Flow",
+"Dialla's Desire"
+]
+}
+],
+"uniques": [
+"Headhunter",
+"Temporalis",
+"Prism of Belief",
+"Heart of the Well",
+"Kalandra's Touch",
+"Palm of the Dreamer"
+],
+"unsupportedModLines": 11
+},
+"pinnacle_locked": {
+"mainSkill": {
+"flags": [],
+"id": "SparkPlayer",
+"name": "Spark",
+"types": [
+"Damage",
+"Duration",
+"Invokable",
+"Lightning",
+"Mineable",
+"Multicastable",
+"Projectile",
+"ProjectilesFromUser",
+"Spell",
+"Totemable",
+"Trappable",
+"Triggerable",
+"Unleashable",
+"UsableWhileMoving"
+]
+},
+"minionStats": null,
+"stats": {
+"Armour": 0,
+"AverageBurstDamage": 61406.72,
+"AverageDamage": 61406.72,
+"AverageHit": 61406.72,
+"BlockChance": 0,
+"ChaosResist": 23,
+"ChaosResistOverCap": 0,
+"CharmLimit": 3,
+"ColdMaximumHitTaken": 11402,
+"ColdResist": 57,
+"ColdResistOverCap": 0,
+"CombinedDPS": 196662.66083361,
+"CritChance": 100,
+"CritMultiplier": 5.44,
+"CullingDPS": 0,
+"DeflectChance": 0,
+"Dex": 54,
+"EffectiveBlockChance": 0,
+"EffectiveSpellBlockChance": 0,
+"EnduranceChargesMax": 3,
+"EnergyShield": 0,
+"EnergyShieldRecharge": 0,
+"EvadeChance": 0,
+"Evasion": 9,
+"FireMaximumHitTaken": 18732,
+"FireResist": 75,
+"FireResistOverCap": 11,
+"FrenzyChargesMax": 3,
+"FullDPS": 0,
+"HitChance": 100,
+"HitDamageByType": {
+"Chaos": 1848.5,
+"Cold": 701.25,
+"Fire": 1642.5,
+"Lightning": 7095.75
+},
+"IgniteDPS": 161.15683361376,
+"Int": 341,
+"Life": 1,
+"LifeRegenRecovery": 0,
+"LifeUnreserved": 1,
+"LightningMaximumHitTaken": 11402,
+"LightningResist": 57,
+"LightningResistOverCap": 0,
+"Mana": 5244,
+"ManaCost": 220,
+"ManaPerSecondCost": 704,
+"ManaRegenRecovery": 383.9,
+"ManaUnreserved": 5244,
+"MeleeEvadeChance": 0,
+"MovementSpeedMod": 1.261,
+"NonHitDPS": 161.15683361376,
+"PhysicalDamageReduction": 0,
+"PhysicalMaximumHitTaken": 5245,
+"PowerChargesMax": 3,
+"PreEffectiveCritChance": 42.3,
+"ProjectileEvadeChance": 0,
+"ReservationDPS": 0,
+"Speed": 3.2,
+"SpellBlockChance": 0,
+"SpellSuppressionChance": 0,
+"Spirit": 279,
+"SpiritReserved": 257,
+"SpiritUnreserved": 22,
+"Str": 65,
+"TotalDPS": 196501.504,
+"TotalDot": 0,
+"TotalDotDPS": 161.15683361376,
+"TotalEHP": 10487.212695501,
+"Ward": 0,
+"WithBleedDPS": 196501.504,
+"WithIgniteDPS": 196662.66083361,
+"WithPoisonDPS": 196501.504
+}
+},
+"as_exported": {
+"mainSkill": {
+"flags": [],
+"id": "SparkPlayer",
+"name": "Spark",
+"types": [
+"Damage",
+"Duration",
+"Invokable",
+"Lightning",
+"Mineable",
+"Multicastable",
+"Projectile",
+"ProjectilesFromUser",
+"Spell",
+"Totemable",
+"Trappable",
+"Triggerable",
+"Unleashable",
+"UsableWhileMoving"
+]
+},
+"minionStats": null,
+"stats": {
+"Armour": 0,
+"AverageBurstDamage": 80682,
+"AverageDamage": 80682,
+"AverageHit": 80682,
+"BlockChance": 0,
+"ChaosResist": 23,
+"ChaosResistOverCap": 0,
+"CharmLimit": 3,
+"ColdMaximumHitTaken": 11402,
+"ColdResist": 57,
+"ColdResistOverCap": 0,
+"CombinedDPS": 314953.4948088,
+"CritChance": 100,
+"CritMultiplier": 5.44,
+"CullingDPS": 0,
+"DeflectChance": 0,
+"Dex": 54,
+"EffectiveBlockChance": 0,
+"EffectiveSpellBlockChance": 0,
+"EnduranceChargesMax": 3,
+"EnergyShield": 0,
+"EnergyShieldRecharge": 0,
+"EvadeChance": 0,
+"Evasion": 9,
+"FireMaximumHitTaken": 18732,
+"FireResist": 75,
+"FireResistOverCap": 11,
+"FrenzyChargesMax": 3,
+"FullDPS": 0,
+"HitChance": 100,
+"HitDamageByType": {
+"Chaos": 3453,
+"Cold": 857.25,
+"Fire": 2008.5,
+"Lightning": 8512.5
+},
+"IgniteDPS": 293.6948088005,
+"Int": 341,
+"Life": 1,
+"LifeRegenRecovery": 0,
+"LifeUnreserved": 1,
+"LightningMaximumHitTaken": 11402,
+"LightningResist": 57,
+"LightningResistOverCap": 0,
+"Mana": 5244,
+"ManaCost": 220,
+"ManaPerSecondCost": 858,
+"ManaRegenRecovery": 552.8,
+"ManaUnreserved": 5244,
+"MeleeEvadeChance": 0,
+"MovementSpeedMod": 1.261,
+"NonHitDPS": 293.69480880053,
+"PhysicalDamageReduction": 0,
+"PhysicalMaximumHitTaken": 5245,
+"PowerChargesMax": 3,
+"PreEffectiveCritChance": 42.3,
+"ProjectileEvadeChance": 0,
+"ReservationDPS": 0,
+"Speed": 3.9,
+"SpellBlockChance": 0,
+"SpellSuppressionChance": 0,
+"Spirit": 279,
+"SpiritReserved": 257,
+"SpiritUnreserved": 22,
+"Str": 65,
+"TotalDPS": 314659.8,
+"TotalDot": 0,
+"TotalDotDPS": 293.6948088005,
+"TotalEHP": 10487.212695501,
+"Ward": 0,
+"WithBleedDPS": 314659.8,
+"WithIgniteDPS": 314953.4948088,
+"WithPoisonDPS": 314659.8
+}
+}
+},
+{
+"line": 4,
+"tags": {
+"activationCounts": {
+"manual": 4,
+"persistent": 10,
+"proxy": 0,
+"triggered": 1
+},
+"allocatedNodeCount": 140,
+"anyManualSpell": true,
+"ascendancy": "Gemling Legionnaire",
+"ascendancyNodes": [
+{
+"id": 3084,
+"name": "Reduced Attribute Requirements",
+"type": "Normal"
+},
+{
+"id": 11641,
+"name": "Essence of Virtue",
+"type": "Notable"
+},
+{
+"id": 14429,
+"name": "Advanced Thaumaturgy",
+"type": "Notable"
+},
+{
+"id": 30996,
+"name": "Gem Studded",
+"type": "Notable"
+},
+{
+"id": 34882,
+"name": "Skill Gem Quality",
+"type": "Normal"
+},
+{
+"id": 37397,
+"name": "Neurological Implants",
+"type": "Normal"
+},
+{
+"id": 45248,
+"name": "Skill Gem Quality",
+"type": "Normal"
+},
+{
+"id": 55582,
+"name": "Skill Gem Quality",
+"type": "Normal"
+},
+{
+"id": 60287,
+"name": "Implanted Gems",
+"type": "Notable"
+}
+],
+"className": "Mercenary",
+"grantedSkills": [
+{
+"activation": "persistent",
+"name": "Virtuous Barrier",
+"source": "Tree:11641"
+},
+{
+"activation": "manual",
+"name": "The Stars Answer",
+"source": "Runeseeker's Call"
+},
+{
+"activation": "manual",
+"name": "Sigil of Power",
+"source": "Glyph Gnarl"
+},
+{
+"activation": "persistent",
+"name": "Cast on Critical",
+"source": "Brood Gorget"
+}
+],
+"itemGrantedManualDamagingSkills": [],
+"items": [
+{
+"base": "Absent Amulet",
+"name": "Brood Gorget",
+"rarity": "RARE",
+"slot": "Amulet"
+},
+{
+"base": "Commanding Arm",
+"name": "Commanding Arm",
+"rarity": "NORMAL",
+"slot": "Arm 1"
+},
+{
+"base": "Caster Arm",
+"name": "Caster Arm",
+"rarity": "NORMAL",
+"slot": "Arm 2"
+},
+{
+"base": "Utility Belt",
+"name": "Mageblood",
+"rarity": "UNIQUE",
+"slot": "Belt"
+},
+{
+"base": "Silk Robe",
+"name": "Temporalis",
+"rarity": "UNIQUE",
+"slot": "Body Armour"
+},
+{
+"base": "Sekhema Sandals",
+"name": "Gale Span",
+"rarity": "RARE",
+"slot": "Boots"
+},
+{
+"base": "Sirenscale Gloves",
+"name": "Gloom Vise",
+"rarity": "RARE",
+"slot": "Gloves"
+},
+{
+"base": "Sapphire",
+"name": "Behemoth Glimmer",
+"rarity": "RARE",
+"slot": "Gloves Jewel Socket 1"
+},
+{
+"base": "Ancestral Tiara",
+"name": "Tempest Crown",
+"rarity": "RARE",
+"slot": "Helmet"
+},
+{
+"base": "Sapphire",
+"name": "Plague Ruin",
+"rarity": "RARE",
+"slot": "Jewel 11184"
+},
+{
+"base": "Time-Lost Sapphire",
+"name": "Sol Eye",
+"rarity": "RARE",
+"slot": "Jewel 21984"
+},
+{
+"base": "Sapphire",
+"name": "Soul Star",
+"rarity": "RARE",
+"slot": "Jewel 23960"
+},
+{
+"base": "Sapphire",
+"name": "Viper Lens",
+"rarity": "RARE",
+"slot": "Jewel 2491"
+},
+{
+"base": "Sapphire",
+"name": "Chimeric Spark",
+"rarity": "RARE",
+"slot": "Jewel 26178"
+},
+{
+"base": "Diamond",
+"name": "From Nothing",
+"rarity": "UNIQUE",
+"slot": "Jewel 26196"
+},
+{
+"base": "Sapphire",
+"name": "Armageddon Creed",
+"rarity": "RARE",
+"slot": "Jewel 26725"
+},
+{
+"base": "Sapphire",
+"name": "Phoenix Vessel",
+"rarity": "RARE",
+"slot": "Jewel 32763"
+},
+{
+"base": "Sapphire",
+"name": "Cataclysm Glisten",
+"rarity": "RARE",
+"slot": "Jewel 46882"
+},
+{
+"base": "Sapphire",
+"name": "Carrion Prism",
+"rarity": "RARE",
+"slot": "Jewel 54127"
+},
+{
+"base": "Sapphire",
+"name": "Eagle Drop",
+"rarity": "RARE",
+"slot": "Jewel 55190"
+},
+{
+"base": "Diamond",
+"name": "Megalomaniac",
+"rarity": "UNIQUE",
+"slot": "Jewel 60735"
+},
+{
+"base": "Diamond",
+"name": "The Adorned",
+"rarity": "UNIQUE",
+"slot": "Jewel 61419"
+},
+{
+"base": "Sapphire",
+"name": "Dusk Essence",
+"rarity": "RARE",
+"slot": "Jewel 61834"
+},
+{
+"base": "Sapphire",
+"name": "Plague Vessel",
+"rarity": "RARE",
+"slot": "Jewel 62152"
+},
+{
+"base": "Sapphire",
+"name": "Voices",
+"rarity": "UNIQUE",
+"slot": "Jewel 7960"
+},
+{
+"base": "Surefooted Leg",
+"name": "Surefooted Leg",
+"rarity": "NORMAL",
+"slot": "Leg 1"
+},
+{
+"base": "Calm Leg",
+"name": "Calm Leg",
+"rarity": "NORMAL",
+"slot": "Leg 2"
+},
+{
+"base": "Mnemonic Ring",
+"name": "Entropy Twirl",
+"rarity": "RARE",
+"slot": "Ring 1"
+},
+{
+"base": "Ring",
+"name": "Kalandra's Touch",
+"rarity": "UNIQUE",
+"slot": "Ring 2"
+},
+{
+"base": "Runemastered Runic Fork",
+"name": "Runeseeker's Call",
+"rarity": "UNIQUE",
+"slot": "Weapon 1"
+},
+{
+"base": "Sacred Focus",
+"name": "Rathpith Globe",
+"rarity": "UNIQUE",
+"slot": "Weapon 2"
+}
+],
+"keystones": [
+{
+"id": 45918,
+"name": "Mind Over Matter"
+},
+{
+"id": 55048,
+"name": "Pain Attunement"
+},
+{
+"id": 57513,
+"name": "Eldritch Battery"
+}
+],
+"level": 100,
+"manualDamagingSkillNames": [
+"Ice Nova",
+"Frost Wall",
+"Spark"
+],
+"manualDamagingSkills": 3,
+"noCast": false,
+"notables": [
+{
+"id": 1506,
+"name": "Remnant Attraction"
+},
+{
+"id": 2335,
+"name": "Turn the Clock Forward"
+},
+{
+"id": 2999,
+"name": "Final Barrage"
+},
+{
+"id": 3567,
+"name": "Raw Mana"
+},
+{
+"id": 4810,
+"name": "Sanguine Tolerance"
+},
+{
+"id": 7782,
+"name": "Rupturing Pins"
+},
+{
+"id": 8831,
+"name": "Tempered Mind"
+},
+{
+"id": 11838,
+"name": "Dreamcatcher"
+},
+{
+"id": 16466,
+"name": "Mental Alacrity"
+},
+{
+"id": 19044,
+"name": "Arcane Intensity"
+},
+{
+"id": 24721,
+"name": "Brain Freeze"
+},
+{
+"id": 26563,
+"name": "Bone Chains"
+},
+{
+"id": 32976,
+"name": "Gem Enthusiast"
+},
+{
+"id": 35564,
+"name": "Turn the Clock Back"
+},
+{
+"id": 39567,
+"name": "Ingenuity"
+},
+{
+"id": 41394,
+"name": "Invigorating Archon"
+},
+{
+"id": 43633,
+"name": "Energising Archon"
+},
+{
+"id": 50498,
+"name": "Brain Storm"
+},
+{
+"id": 63400,
+"name": "Chakra of Elements"
+}
+],
+"oneButton": false,
+"oneButtonInclItemSkills": false,
+"socketGroups": [
+{
+"active": "Virtuous Barrier",
+"enabled": true,
+"gems": [
+{
+"activation": "persistent",
+"damaging": false,
+"enabled": true,
+"id": "VirtuousBarrierPlayer",
+"itemGranted": true,
+"known": true,
+"level": 20,
+"name": "Virtuous Barrier",
+"proxyKind": [],
+"quality": 0,
+"spell": false,
+"support": false,
+"types": [
+"Buff",
+"HasReservation",
+"OngoingSkill",
+"Persistent",
+"ReserveInAllSets"
+],
+"weaponDefault": false
+}
+],
+"grantedBy": "Tree:11641",
+"includeInFullDPS": false,
+"index": 1,
+"main": false,
+"metaGroup": false,
+"supports": []
+},
+{
+"active": "The Stars Answer",
+"enabled": true,
+"gems": [
+{
+"activation": "manual",
+"damaging": false,
+"enabled": true,
+"id": "TheStarsAnswerPlayer",
+"itemGranted": true,
+"known": true,
+"level": 19,
+"name": "The Stars Answer",
+"proxyKind": [],
+"quality": 0,
+"spell": true,
+"support": false,
+"types": [
+"Area",
+"Buff",
+"Cold",
+"Duration",
+"Physical",
+"Spell",
+"UsableWhileMoving",
+"UsableWhileShapeshifted"
+],
+"weaponDefault": false
+},
+{
+"enabled": true,
+"id": "SupportEfficiencyPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Efficiency II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportExecutePlayerTwo",
+"known": true,
+"level": 1,
+"name": "Execute II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "ProlongedDurationSupportPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Prolonged Duration II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportBleedPlayer",
+"known": true,
+"level": 1,
+"name": "Bleed I",
+"quality": 0,
+"support": true
+}
+],
+"grantedBy": "Runeseeker's Call",
+"includeInFullDPS": false,
+"index": 2,
+"main": false,
+"metaGroup": false,
+"slot": "Weapon 1",
+"supports": [
+"Efficiency II",
+"Execute II",
+"Prolonged Duration II",
+"Bleed I"
+]
+},
+{
+"active": "Cast on Critical",
+"enabled": true,
+"gems": [
+{
+"activation": "persistent",
+"damaging": false,
+"enabled": true,
+"id": "MetaCastOnCritPlayer",
+"itemGranted": false,
+"known": true,
+"level": 20,
+"name": "Cast on Critical",
+"proxyKind": [],
+"quality": 0,
+"spell": false,
+"support": false,
+"types": [
+"Buff",
+"CanHaveMultipleOngoingSkillInstances",
+"GeneratesEnergy",
+"HasReservation",
+"Meta",
+"OngoingSkill",
+"Persistent",
+"Triggers"
+],
+"weaponDefault": false
+},
+{
+"activation": "triggered",
+"damaging": true,
+"enabled": true,
+"id": "ArcPlayer",
+"itemGranted": false,
+"known": true,
+"level": 20,
+"name": "Arc",
+"proxyKind": [],
+"quality": 23,
+"spell": true,
+"support": false,
+"types": [
+"Chains",
+"Damage",
+"Invokable",
+"Lightning",
+"Mineable",
+"Multicastable",
+"Projectile",
+"Spell",
+"Totemable",
+"Trappable",
+"Triggerable",
+"Triggered",
+"Unleashable",
+"UsableWhileMoving"
+],
+"weaponDefault": false
+},
+{
+"enabled": true,
+"id": "SupportZenithPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Zenith II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportEfficiencyPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Efficiency II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportEmbitterPlayer",
+"known": true,
+"level": 1,
+"name": "Embitter",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportPietysMercyPlayer",
+"known": true,
+"level": 1,
+"name": "Dominus' Grasp",
+"quality": 0,
+"support": true
+}
+],
+"includeInFullDPS": false,
+"index": 3,
+"main": true,
+"metaGroup": true,
+"supports": [
+"Zenith II",
+"Efficiency II",
+"Embitter",
+"Dominus' Grasp"
+]
+},
+{
+"active": "Sigil of Power",
+"enabled": true,
+"gems": [
+{
+"activation": "manual",
+"damaging": false,
+"enabled": true,
+"id": "SigilOfPowerPlayer",
+"itemGranted": true,
+"known": true,
+"level": 20,
+"name": "Sigil of Power",
+"proxyKind": [],
+"quality": 0,
+"spell": true,
+"support": false,
+"types": [
+"Area",
+"AreaSpell",
+"Cooldown",
+"Duration",
+"GainsStages",
+"Limit",
+"Mineable",
+"Spell",
+"Totemable",
+"Trappable",
+"Triggerable",
+"UsableWhileMoving"
+],
+"weaponDefault": false
+}
+],
+"grantedBy": "Glyph Gnarl",
+"includeInFullDPS": false,
+"index": 4,
+"main": false,
+"metaGroup": false,
+"slot": "Weapon 1 Swap",
+"supports": []
+},
+{
+"active": "Charge Regulation",
+"enabled": true,
+"gems": [
+{
+"activation": "persistent",
+"damaging": false,
+"enabled": true,
+"id": "ChargeRegulationPlayer",
+"itemGranted": false,
+"known": true,
+"level": 20,
+"name": "Charge Regulation",
+"proxyKind": [],
+"quality": 20,
+"spell": false,
+"support": false,
+"types": [
+"AttackInPlace",
+"Buff",
+"HasReservation",
+"OngoingSkill",
+"Persistent"
+],
+"weaponDefault": false
+}
+],
+"includeInFullDPS": false,
+"index": 5,
+"main": false,
+"metaGroup": false,
+"supports": []
+},
+{
+"active": "Blink",
+"enabled": true,
+"gems": [
+{
+"activation": "persistent",
+"damaging": false,
+"enabled": true,
+"id": "BlinkReservationPlayer",
+"itemGranted": false,
+"known": true,
+"level": 20,
+"name": "Blink",
+"proxyKind": [],
+"quality": 23,
+"spell": false,
+"support": false,
+"types": [
+"AttackInPlace",
+"Buff",
+"DodgeReplacement",
+"HasReservation",
+"OngoingSkill",
+"Persistent",
+"ReserveInAllSets"
+],
+"weaponDefault": false
+},
+{
+"enabled": true,
+"id": "SupportCooldownRecoveryPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Cooldown Recovery II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportRapidCastingPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Rapid Casting II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportEfficiencyPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Efficiency II",
+"quality": 0,
+"support": true
+}
+],
+"includeInFullDPS": false,
+"index": 6,
+"main": false,
+"metaGroup": false,
+"supports": [
+"Cooldown Recovery II",
+"Rapid Casting II",
+"Efficiency II"
+]
+},
+{
+"active": "Siphon Elements",
+"enabled": true,
+"gems": [
+{
+"activation": "persistent",
+"damaging": false,
+"enabled": true,
+"id": "SiphonElementsPlayer",
+"itemGranted": false,
+"known": true,
+"level": 20,
+"name": "Siphon Elements",
+"proxyKind": [],
+"quality": 23,
+"spell": false,
+"support": false,
+"types": [
+"AttackInPlace",
+"Buff",
+"Cold",
+"Fire",
+"GeneratesInfusion",
+"GeneratesRemnants",
+"HasReservation",
+"Lightning",
+"OngoingSkill",
+"Persistent",
+"TotemCastsAlone"
+],
+"weaponDefault": false
+},
+{
+"enabled": true,
+"id": "SupportInterludePlayer",
+"known": true,
+"level": 1,
+"name": "Remnant Potency I",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportFleetingRemnantsPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Harmonic Remnants II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportColdMasteryPlayer",
+"known": true,
+"level": 1,
+"name": "Cold Mastery",
+"quality": 0,
+"support": true
+}
+],
+"includeInFullDPS": false,
+"index": 7,
+"main": false,
+"metaGroup": false,
+"supports": [
+"Remnant Potency I",
+"Harmonic Remnants II",
+"Cold Mastery"
+]
+},
+{
+"active": "Mana Remnants",
+"enabled": true,
+"gems": [
+{
+"activation": "persistent",
+"damaging": false,
+"enabled": true,
+"id": "ManaRemnantsPlayer",
+"itemGranted": false,
+"known": true,
+"level": 20,
+"name": "Mana Remnants",
+"proxyKind": [],
+"quality": 23,
+"spell": false,
+"support": false,
+"types": [
+"AttackInPlace",
+"Buff",
+"GeneratesRemnants",
+"HasReservation",
+"OngoingSkill",
+"Persistent",
+"TotemCastsAlone"
+],
+"weaponDefault": false
+},
+{
+"enabled": true,
+"id": "SupportFleetingRemnantsPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Harmonic Remnants II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportInterludePlayerThree",
+"known": true,
+"level": 1,
+"name": "Remnant Potency III",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportKhatalsRejuvenationPlayer",
+"known": true,
+"level": 1,
+"name": "Khatal's Rejuvenation",
+"quality": 0,
+"support": true
+}
+],
+"includeInFullDPS": false,
+"index": 8,
+"main": false,
+"metaGroup": false,
+"supports": [
+"Harmonic Remnants II",
+"Remnant Potency III",
+"Khatal's Rejuvenation"
+]
+},
+{
+"active": "Alchemist's Boon",
+"enabled": true,
+"gems": [
+{
+"activation": "persistent",
+"damaging": false,
+"enabled": true,
+"id": "AlchemistsBoonPlayer",
+"itemGranted": false,
+"known": true,
+"level": 14,
+"name": "Alchemist's Boon",
+"proxyKind": [],
+"quality": 23,
+"spell": false,
+"support": false,
+"types": [
+"AttackInPlace",
+"Aura",
+"Buff",
+"HasReservation",
+"OngoingSkill",
+"Persistent"
+],
+"weaponDefault": false
+}
+],
+"includeInFullDPS": false,
+"index": 9,
+"main": false,
+"metaGroup": false,
+"supports": []
+},
+{
+"active": "Combat Frenzy",
+"enabled": true,
+"gems": [
+{
+"activation": "persistent",
+"damaging": false,
+"enabled": true,
+"id": "CombatFrenzyPlayer",
+"itemGranted": false,
+"known": true,
+"level": 13,
+"name": "Combat Frenzy",
+"proxyKind": [],
+"quality": 20,
+"spell": false,
+"support": false,
+"types": [
+"AttackInPlace",
+"Buff",
+"GeneratesCharges",
+"HasReservation",
+"OngoingSkill",
+"Persistent"
+],
+"weaponDefault": false
+},
+{
+"enabled": true,
+"id": "SupportChargeProfusionPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Charge Profusion II",
+"quality": 0,
+"support": true
+}
+],
+"includeInFullDPS": false,
+"index": 10,
+"main": false,
+"metaGroup": false,
+"supports": [
+"Charge Profusion II"
+]
+},
+{
+"active": "Ice Nova",
+"enabled": true,
+"gems": [
+{
+"activation": "manual",
+"damaging": true,
+"enabled": true,
+"id": "IceNovaPlayer",
+"itemGranted": false,
+"known": true,
+"level": 20,
+"name": "Ice Nova",
+"proxyKind": [],
+"quality": 0,
+"spell": true,
+"support": false,
+"types": [
+"Area",
+"AreaSpell",
+"Cascadable",
+"Cold",
+"CreatesGroundEffect",
+"Damage",
+"Duration",
+"Invokable",
+"Mineable",
+"Multicastable",
+"Nova",
+"Spell",
+"Totemable",
+"Trappable",
+"Triggerable",
+"Unleashable",
+"UsableWhileMoving"
+],
+"weaponDefault": false
+},
+{
+"enabled": true,
+"id": "SupportPersistentGroundPlayerThree",
+"known": true,
+"level": 1,
+"name": "Persistent Ground III",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportShockPlayer",
+"known": true,
+"level": 1,
+"name": "Shock",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportSwiftAfflictionPlayer",
+"known": true,
+"level": 1,
+"name": "Swift Affliction I",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportCorrosionPlayer",
+"known": true,
+"level": 1,
+"name": "Corrosion",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportSlowPotencyPlayer",
+"known": true,
+"level": 1,
+"name": "Slow Potency",
+"quality": 0,
+"support": true
+}
+],
+"includeInFullDPS": false,
+"index": 11,
+"main": false,
+"metaGroup": false,
+"supports": [
+"Persistent Ground III",
+"Shock",
+"Swift Affliction I",
+"Corrosion",
+"Slow Potency"
+]
+},
+{
+"active": "Remnants of Kalguur",
+"enabled": true,
+"gems": [
+{
+"activation": "persistent",
+"damaging": false,
+"enabled": true,
+"id": "MetaRemnantsOfKalguurPlayer",
+"itemGranted": false,
+"known": true,
+"level": 20,
+"name": "Remnants of Kalguur",
+"proxyKind": [],
+"quality": 23,
+"spell": false,
+"support": false,
+"types": [
+"AttackInPlace",
+"Buff",
+"GeneratesRemnants",
+"HasReservation",
+"OngoingSkill",
+"Persistent"
+],
+"weaponDefault": false
+},
+{
+"enabled": true,
+"id": "SupportInterludePlayerThree",
+"known": true,
+"level": 1,
+"name": "Remnant Potency III",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportFleetingRemnantsPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Harmonic Remnants II",
+"quality": 0,
+"support": true
+}
+],
+"includeInFullDPS": false,
+"index": 12,
+"main": false,
+"metaGroup": false,
+"supports": [
+"Remnant Potency III",
+"Harmonic Remnants II"
+]
+},
+{
+"active": "Frost Wall",
+"enabled": true,
+"gems": [
+{
+"activation": "manual",
+"damaging": true,
+"enabled": true,
+"id": "FrostWallPlayer",
+"itemGranted": false,
+"known": true,
+"level": 20,
+"name": "Frost Wall",
+"proxyKind": [],
+"quality": 23,
+"spell": true,
+"support": false,
+"types": [
+"Area",
+"Cascadable",
+"Cold",
+"Cooldown",
+"Damage",
+"Duration",
+"IceCrystal",
+"Invokable",
+"Mineable",
+"Multicastable",
+"Spell",
+"ToggleSpawnedObjectTargetable_DefaultOff",
+"Totemable",
+"Trappable",
+"Triggerable",
+"UsableWhileMoving",
+"Wall"
+],
+"weaponDefault": false
+},
+{
+"enabled": true,
+"id": "SupportCooldownRecoveryPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Cooldown Recovery II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportBlindsidePlayer",
+"known": true,
+"level": 1,
+"name": "Blindside",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportCorrosionPlayer",
+"known": true,
+"level": 1,
+"name": "Corrosion",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportExecutePlayerThree",
+"known": true,
+"level": 1,
+"name": "Execute III",
+"quality": 0,
+"support": true
+}
+],
+"includeInFullDPS": false,
+"index": 13,
+"main": false,
+"metaGroup": false,
+"supports": [
+"Cooldown Recovery II",
+"Blindside",
+"Corrosion",
+"Execute III"
+]
+},
+{
+"active": "Explosive Transmutation",
+"enabled": true,
+"gems": [
+{
+"activation": "persistent",
+"damaging": false,
+"enabled": true,
+"id": "ExplosiveTransmutationPlayer",
+"itemGranted": false,
+"known": true,
+"level": 20,
+"name": "Explosive Transmutation",
+"proxyKind": [],
+"quality": 23,
+"spell": false,
+"support": false,
+"types": [
+"Buff",
+"HasReservation",
+"OngoingSkill",
+"Persistent"
+],
+"weaponDefault": false
+},
+{
+"enabled": true,
+"id": "SupportZenithPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Zenith II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportEfficiencyPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Efficiency II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportVoranasSiege",
+"known": true,
+"level": 1,
+"name": "Vorana's Siege",
+"quality": 0,
+"support": true
+}
+],
+"includeInFullDPS": false,
+"index": 14,
+"main": false,
+"metaGroup": false,
+"supports": [
+"Zenith II",
+"Efficiency II",
+"Vorana's Siege"
+]
+},
+{
+"active": "Archmage",
+"enabled": true,
+"gems": [
+{
+"activation": "persistent",
+"damaging": false,
+"enabled": true,
+"id": "ArchmagePlayer",
+"itemGranted": false,
+"known": true,
+"level": 20,
+"name": "Archmage",
+"proxyKind": [],
+"quality": 23,
+"spell": false,
+"support": false,
+"types": [
+"AttackInPlace",
+"Buff",
+"HasReservation",
+"Lightning",
+"OngoingSkill",
+"Persistent"
+],
+"weaponDefault": false
+},
+{
+"enabled": true,
+"id": "SupportAtzirisCommunionPlayer",
+"known": true,
+"level": 1,
+"name": "Atziri's Communion",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportClarityPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Clarity II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportDiallasDesirePlayer",
+"known": true,
+"level": 1,
+"name": "Dialla's Desire",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportWarmbloodedPlayer",
+"known": true,
+"level": 1,
+"name": "Warm Blooded",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportHerDeclarationPlayer",
+"known": true,
+"level": 1,
+"name": "Her Declaration",
+"quality": 0,
+"support": true
+}
+],
+"includeInFullDPS": false,
+"index": 15,
+"main": false,
+"metaGroup": false,
+"supports": [
+"Atziri's Communion",
+"Clarity II",
+"Dialla's Desire",
+"Warm Blooded",
+"Her Declaration"
+]
+},
+{
+"active": "Spark",
+"enabled": true,
+"gems": [
+{
+"activation": "manual",
+"damaging": true,
+"enabled": true,
+"id": "SparkPlayer",
+"itemGranted": false,
+"known": true,
+"level": 20,
+"name": "Spark",
+"proxyKind": [],
+"quality": 23,
+"spell": true,
+"support": false,
+"types": [
+"Damage",
+"Duration",
+"Invokable",
+"Lightning",
+"Mineable",
+"Multicastable",
+"Projectile",
+"ProjectilesFromUser",
+"Spell",
+"Totemable",
+"Trappable",
+"Triggerable",
+"Unleashable",
+"UsableWhileMoving"
+],
+"weaponDefault": false
+},
+{
+"enabled": true,
+"id": "SupportRakiatasFlowPlayer",
+"known": true,
+"level": 1,
+"name": "Rakiata's Flow",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportVilentasPropulsionPlayer",
+"known": true,
+"level": 1,
+"name": "Vilenta's Propulsion",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportZenithPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Zenith II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportEfficiencyPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Efficiency II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportPiercePlayerThree",
+"known": true,
+"level": 1,
+"name": "Pierce III",
+"quality": 0,
+"support": true
+}
+],
+"includeInFullDPS": false,
+"index": 16,
+"main": false,
+"metaGroup": false,
+"supports": [
+"Rakiata's Flow",
+"Vilenta's Propulsion",
+"Zenith II",
+"Efficiency II",
+"Pierce III"
+]
+},
+{
+"active": "Powered by Verisium",
+"enabled": true,
+"gems": [
+{
+"activation": "manual",
+"damaging": false,
+"enabled": true,
+"id": "PoweredByVerisiumPlayer",
+"itemGranted": false,
+"known": true,
+"level": 13,
+"name": "Powered by Verisium",
+"proxyKind": [],
+"quality": 23,
+"spell": true,
+"support": false,
+"types": [
+"Cooldown",
+"GeneratesInfusion",
+"Multicastable",
+"Spell",
+"Triggerable",
+"Unleashable"
+],
+"weaponDefault": false
+},
+{
+"enabled": true,
+"id": "SupportCooldownRecoveryPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Cooldown Recovery II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportEfficiencyPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Efficiency II",
+"quality": 0,
+"support": true
+}
+],
+"includeInFullDPS": false,
+"index": 17,
+"main": false,
+"metaGroup": false,
+"supports": [
+"Cooldown Recovery II",
+"Efficiency II"
+]
+},
+{
+"active": "Cast on Critical",
+"enabled": true,
+"gems": [
+{
+"activation": "persistent",
+"damaging": false,
+"enabled": true,
+"id": "MetaCastOnCritPlayer",
+"itemGranted": true,
+"known": true,
+"level": 20,
+"name": "Cast on Critical",
+"proxyKind": [],
+"quality": 0,
+"spell": false,
+"support": false,
+"types": [
+"Buff",
+"CanHaveMultipleOngoingSkillInstances",
+"GeneratesEnergy",
+"HasReservation",
+"Meta",
+"OngoingSkill",
+"Persistent",
+"Triggers"
+],
+"weaponDefault": false
+}
+],
+"grantedBy": "Brood Gorget",
+"includeInFullDPS": false,
+"index": 18,
+"main": false,
+"metaGroup": true,
+"slot": "Amulet",
+"supports": []
+}
+],
+"uniques": [
+"Mageblood",
+"Temporalis",
+"From Nothing",
+"Megalomaniac",
+"The Adorned",
+"Voices",
+"Kalandra's Touch",
+"Runeseeker's Call",
+"Rathpith Globe"
+],
+"unsupportedModLines": 13
+},
+"pinnacle_locked": {
+"mainSkill": {
+"flags": [],
+"id": "ArcPlayer",
+"name": "Arc",
+"types": [
+"Chains",
+"Damage",
+"Invokable",
+"Lightning",
+"Mineable",
+"Multicastable",
+"Projectile",
+"Spell",
+"Totemable",
+"Trappable",
+"Triggerable",
+"Triggered",
+"Unleashable",
+"UsableWhileMoving"
+]
+},
+"minionStats": null,
+"stats": {
+"Armour": 0,
+"AverageBurstDamage": 5404707.48854,
+"AverageDamage": 5404707.48854,
+"AverageHit": 5404707.48854,
+"BlockChance": 0,
+"ChaosMaximumHitTaken": 18645,
+"ChaosResist": 51,
+"ChaosResistOverCap": 0,
+"CharmLimit": 3,
+"ColdMaximumHitTaken": 32629,
+"ColdResist": 75,
+"ColdResistOverCap": 24,
+"CombinedDPS": 21225760.31863,
+"CritChance": 75.15,
+"CritMultiplier": 23.53,
+"CullingDPS": 0,
+"DeflectChance": 0,
+"Dex": 99,
+"EffectiveBlockChance": 0,
+"EffectiveSpellBlockChance": 0,
+"EnduranceChargesMax": 3,
+"EnergyShield": 0,
+"EnergyShieldRecharge": 0,
+"EvadeChance": 0,
+"Evasion": 12,
+"FireMaximumHitTaken": 32629,
+"FireResist": 75,
+"FireResistOverCap": 14,
+"FrenzyChargesMax": 3,
+"FullDPS": 0,
+"HitChance": 100,
+"HitDamageByType": {
+"Cold": 247614.5,
+"Lightning": 53797.5
+},
+"Int": 345,
+"Life": 1724,
+"LifeRegenRecovery": 0,
+"LifeUnreserved": 338,
+"LightningMaximumHitTaken": 32629,
+"LightningResist": 75,
+"LightningResistOverCap": 16,
+"Mana": 8498,
+"ManaCost": 1236,
+"ManaPerSecondCost": 4854.1090909091,
+"ManaRegenRecovery": 1109.8,
+"ManaUnreserved": 8498,
+"MeleeEvadeChance": 0,
+"MovementSpeedMod": 1.358,
+"NonHitDPS": 0,
+"PhysicalDamageReduction": 0,
+"PhysicalMaximumHitTaken": 9136,
+"PowerChargesMax": 3,
+"PreEffectiveCritChance": 75.15,
+"ProjectileEvadeChance": 0,
+"ReservationDPS": 0,
+"Speed": 3.9272727272727,
+"SpellBlockChance": 0,
+"SpellSuppressionChance": 0,
+"Spirit": 190,
+"SpiritReserved": 190,
+"SpiritUnreserved": -153,
+"Str": 74,
+"TotalDPS": 21225760.31863,
+"TotalDot": 0,
+"TotalDotDPS": 0,
+"TotalEHP": 19743.811394892,
+"Ward": 300,
+"WithBleedDPS": 21225760.31863,
+"WithIgniteDPS": 21225760.31863,
+"WithPoisonDPS": 21225760.31863
+}
+},
+"as_exported": {
+"mainSkill": {
+"flags": [],
+"id": "ArcPlayer",
+"name": "Arc",
+"types": [
+"Chains",
+"Damage",
+"Invokable",
+"Lightning",
+"Mineable",
+"Multicastable",
+"Projectile",
+"Spell",
+"Totemable",
+"Trappable",
+"Triggerable",
+"Triggered",
+"Unleashable",
+"UsableWhileMoving"
+]
+},
+"minionStats": null,
+"stats": {
+"Armour": 0,
+"AverageBurstDamage": 6932307.081028,
+"AverageDamage": 6932307.081028,
+"AverageHit": 6932307.081028,
+"BlockChance": 0,
+"ChaosMaximumHitTaken": 18645,
+"ChaosResist": 51,
+"ChaosResistOverCap": 0,
+"CharmLimit": 3,
+"ColdMaximumHitTaken": 32629,
+"ColdResist": 75,
+"ColdResistOverCap": 24,
+"CombinedDPS": 29808920.44842,
+"CritChance": 95.44,
+"CritMultiplier": 23.53,
+"CullingDPS": 0,
+"DeflectChance": 0,
+"Dex": 99,
+"EffectiveBlockChance": 0,
+"EffectiveSpellBlockChance": 0,
+"EnduranceChargesMax": 3,
+"EnergyShield": 0,
+"EnergyShieldRecharge": 0,
+"EvadeChance": 0,
+"Evasion": 14,
+"FireMaximumHitTaken": 32629,
+"FireResist": 75,
+"FireResistOverCap": 14,
+"FrenzyChargesMax": 3,
+"FullDPS": 0,
+"HitChance": 100,
+"HitDamageByType": {
+"Cold": 253081.25,
+"Lightning": 54985.25
+},
+"Int": 345,
+"Life": 1724,
+"LifeRegenRecovery": 0,
+"LifeUnreserved": 338,
+"LightningMaximumHitTaken": 32629,
+"LightningResist": 75,
+"LightningResistOverCap": 16,
+"Mana": 8498,
+"ManaCost": 1236,
+"ManaPerSecondCost": 5314.8,
+"ManaRegenRecovery": 1391,
+"ManaUnreserved": 8498,
+"MeleeEvadeChance": 0,
+"MovementSpeedMod": 1.358,
+"NonHitDPS": 0,
+"PhysicalDamageReduction": 0,
+"PhysicalMaximumHitTaken": 9136,
+"PowerChargesMax": 3,
+"PreEffectiveCritChance": 95.44,
+"ProjectileEvadeChance": 0,
+"ReservationDPS": 0,
+"Speed": 4.3,
+"SpellBlockChance": 0,
+"SpellSuppressionChance": 0,
+"Spirit": 190,
+"SpiritReserved": 190,
+"SpiritUnreserved": -153,
+"Str": 74,
+"TotalDPS": 29808920.44842,
+"TotalDot": 0,
+"TotalDotDPS": 0,
+"TotalEHP": 19743.811394892,
+"Ward": 300,
+"WithBleedDPS": 29808920.44842,
+"WithIgniteDPS": 29808920.44842,
+"WithPoisonDPS": 29808920.44842
+}
+}
+},
+{
+"line": 11,
+"tags": {
+"activationCounts": {
+"manual": 4,
+"persistent": 6,
+"proxy": 0,
+"triggered": 0
+},
+"allocatedNodeCount": 156,
+"anyManualSpell": true,
+"ascendancy": "Martial Artist",
+"ascendancyNodes": [
+{
+"id": 20437,
+"name": "Attributes",
+"type": "Normal"
+},
+{
+"id": 39552,
+"name": "Runic Meridians",
+"type": "Notable"
+},
+{
+"id": 39595,
+"name": "Way of the Stonefist",
+"type": "Notable"
+},
+{
+"id": 41751,
+"name": "Martial Adept",
+"type": "Notable"
+},
+{
+"id": 52295,
+"name": "Evasion and Energy Shield",
+"type": "Normal"
+},
+{
+"id": 53280,
+"name": "Attack Speed",
+"type": "Normal"
+},
+{
+"id": 61586,
+"name": "Martial Master",
+"type": "Notable"
+},
+{
+"id": 65228,
+"name": "Attack Speed",
+"type": "Normal"
+}
+],
+"className": "Monk",
+"grantedSkills": [
+{
+"activation": "persistent",
+"name": "Trinity",
+"source": "Viper Charm"
+},
+{
+"activation": "manual",
+"name": "Quarterstaff Strike",
+"source": "Default Attack"
+}
+],
+"itemGrantedManualDamagingSkills": [],
+"items": [
+{
+"base": "Absent Amulet",
+"name": "Viper Charm",
+"rarity": "RARE",
+"slot": "Amulet"
+},
+{
+"base": "Utility Belt",
+"name": "Mageblood",
+"rarity": "UNIQUE",
+"slot": "Belt"
+},
+{
+"base": "Sleek Jacket",
+"name": "Blood Cloak",
+"rarity": "RARE",
+"slot": "Body Armour"
+},
+{
+"base": "Daggerfoot Shoes",
+"name": "Foe League",
+"rarity": "RARE",
+"slot": "Boots"
+},
+{
+"base": "Fists of Stone",
+"name": "Torment Claw",
+"rarity": "RARE",
+"slot": "Gloves"
+},
+{
+"base": "Sapphire",
+"name": "Dragon Scar",
+"rarity": "RARE",
+"slot": "Gloves Jewel Socket 1"
+},
+{
+"base": "Ancestral Tiara",
+"name": "Gloom Salvation",
+"rarity": "RARE",
+"slot": "Helmet"
+},
+{
+"base": "Sapphire",
+"name": "Maelstrom Lens",
+"rarity": "RARE",
+"slot": "Jewel 21984"
+},
+{
+"base": "Time-Lost Sapphire",
+"name": "Phoenix Eye",
+"rarity": "RARE",
+"slot": "Jewel 32763"
+},
+{
+"base": "Sapphire",
+"name": "Empyrean Cut",
+"rarity": "RARE",
+"slot": "Jewel 61419"
+},
+{
+"base": "Diamond",
+"name": "Heart of the Well",
+"rarity": "UNIQUE",
+"slot": "Jewel 61834"
+},
+{
+"base": "Ring",
+"name": "Kalandra's Touch",
+"rarity": "UNIQUE",
+"slot": "Ring 1"
+},
+{
+"base": "Prismatic Ring",
+"name": "Ghoul Spiral",
+"rarity": "RARE",
+"slot": "Ring 2"
+},
+{
+"base": "Sinister Quarterstaff",
+"name": "Pain Bane",
+"rarity": "RARE",
+"slot": "Weapon 1"
+}
+],
+"keystones": [
+{
+"id": 56349,
+"name": "Chaos Inoculation"
+}
+],
+"level": 100,
+"manualDamagingSkillNames": [
+"Shattering Palm",
+"Flicker Strike",
+"Falling Thunder"
+],
+"manualDamagingSkills": 3,
+"noCast": false,
+"notables": [
+{
+"id": 2113,
+"name": "Martial Artistry"
+},
+{
+"id": 2254,
+"name": "Pure Energy"
+},
+{
+"id": 3215,
+"name": "Melding"
+},
+{
+"id": 4959,
+"name": "Heavy Frost",
+"weaponSet": 2
+},
+{
+"id": 7847,
+"name": "The Fabled Stag"
+},
+{
+"id": 9444,
+"name": "One with the Storm",
+"weaponSet": 1
+},
+{
+"id": 9642,
+"name": "Dampening Shield"
+},
+{
+"id": 13407,
+"name": "Heartbreaking"
+},
+{
+"id": 13724,
+"name": "Deadly Force",
+"weaponSet": 1
+},
+{
+"id": 19156,
+"name": "Immaterial"
+},
+{
+"id": 20677,
+"name": "For the Jugular",
+"weaponSet": 1
+},
+{
+"id": 25362,
+"name": "Chakra of Impact",
+"weaponSet": 1
+},
+{
+"id": 26331,
+"name": "Harsh Winter",
+"weaponSet": 2
+},
+{
+"id": 27176,
+"name": "The Power Within"
+},
+{
+"id": 32951,
+"name": "Preservation",
+"weaponSet": 2
+},
+{
+"id": 34168,
+"name": "Crashing Wave"
+},
+{
+"id": 34324,
+"name": "Spectral Ward"
+},
+{
+"id": 36931,
+"name": "Concussive Attack",
+"weaponSet": 1
+},
+{
+"id": 38342,
+"name": "Stupefy"
+},
+{
+"id": 38537,
+"name": "Heartstopping"
+},
+{
+"id": 39369,
+"name": "Struck Through"
+},
+{
+"id": 39990,
+"name": "Chronomancy",
+"weaponSet": 2
+},
+{
+"id": 42078,
+"name": "The Hollowkeeper"
+},
+{
+"id": 47514,
+"name": "Dizzying Hits"
+},
+{
+"id": 48198,
+"name": "Step Like Mist"
+},
+{
+"id": 49220,
+"name": "Flow Like Water"
+},
+{
+"id": 49356,
+"name": "First Principle of the Hollow"
+},
+{
+"id": 53941,
+"name": "Shimmering"
+},
+{
+"id": 56063,
+"name": "Lingering Horror",
+"weaponSet": 2
+},
+{
+"id": 56265,
+"name": "Throatseeker"
+},
+{
+"id": 56453,
+"name": "Killer Instinct",
+"weaponSet": 1
+},
+{
+"id": 59657,
+"name": "First Teachings of the Keeper"
+},
+{
+"id": 61601,
+"name": "True Strike",
+"weaponSet": 1
+},
+{
+"id": 62984,
+"name": "Mindful Awareness"
+},
+{
+"id": 65204,
+"name": "Overflowing Power"
+}
+],
+"oneButton": false,
+"oneButtonInclItemSkills": false,
+"socketGroups": [
+{
+"active": "Rend",
+"enabled": true,
+"gems": [
+{
+"activation": "manual",
+"damaging": true,
+"enabled": true,
+"id": "WyvernRendPlayer",
+"itemGranted": false,
+"known": true,
+"level": 20,
+"name": "Rend",
+"proxyKind": [],
+"quality": 0,
+"spell": false,
+"support": false,
+"types": [
+"Area",
+"Attack",
+"ConsumesCharges",
+"Duration",
+"HasUsageCondition",
+"Melee",
+"MeleeSingleTarget",
+"Shapeshift",
+"SupportedByMobileAssault",
+"Wyvern"
+],
+"weaponDefault": true
+},
+{
+"enabled": true,
+"id": "SupportRagePlayerThree",
+"known": true,
+"level": 1,
+"name": "Rage III",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportPerpetualChargePlayer",
+"known": true,
+"level": 1,
+"name": "Perpetual Charge",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportRapidAttacksPlayerThree",
+"known": true,
+"level": 1,
+"name": "Rapid Attacks III",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "ProlongedDurationSupportPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Prolonged Duration II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportHitAndRunPlayer",
+"known": true,
+"level": 1,
+"name": "Hit and Run",
+"quality": 0,
+"support": true
+}
+],
+"includeInFullDPS": false,
+"index": 1,
+"main": false,
+"metaGroup": false,
+"supports": [
+"Rage III",
+"Perpetual Charge",
+"Rapid Attacks III",
+"Prolonged Duration II",
+"Hit and Run"
+]
+},
+{
+"active": "Hollow Focus",
+"enabled": true,
+"gems": [
+{
+"activation": "persistent",
+"damaging": true,
+"enabled": true,
+"id": "HollowFocusPlayer",
+"itemGranted": false,
+"known": true,
+"level": 20,
+"name": "Hollow Focus",
+"proxyKind": [],
+"quality": 0,
+"spell": false,
+"support": false,
+"types": [
+"AffectedByCooldownRate",
+"Area",
+"Attack",
+"Buff",
+"Duration",
+"HasReservation",
+"Limit",
+"OngoingSkill",
+"Persistent",
+"ToggleSpawnedObjectTargetable_DefaultOff"
+],
+"weaponDefault": true
+},
+{
+"enabled": true,
+"id": "SupportMagnifiedAreaPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Magnified Area II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportCooldownRecoveryPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Cooldown Recovery II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportCullingStrikePlayerTwo",
+"known": true,
+"level": 1,
+"name": "Culling Strike II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportBlindPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Blind II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportLivingLightningPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Living Lightning II",
+"quality": 0,
+"support": true
+}
+],
+"includeInFullDPS": false,
+"index": 2,
+"main": false,
+"metaGroup": false,
+"supports": [
+"Magnified Area II",
+"Cooldown Recovery II",
+"Culling Strike II",
+"Blind II",
+"Living Lightning II"
+]
+},
+{
+"active": "Hollow Form",
+"enabled": true,
+"gems": [
+{
+"activation": "manual",
+"damaging": true,
+"enabled": true,
+"id": "MetaHollowFormPlayer",
+"itemGranted": false,
+"known": true,
+"level": 20,
+"name": "Hollow Form",
+"proxyKind": [],
+"quality": 0,
+"spell": false,
+"support": false,
+"types": [
+"Attack",
+"AttackInPlace",
+"Channel",
+"ConsumesCharges",
+"GamepadDoNotChannelSkillAtLocation",
+"Melee",
+"Meta",
+"SkillConsumesPowerChargesOnUse",
+"Sustained",
+"UsableWhileMoving",
+"UsableWhileShapeshifted"
+],
+"weaponDefault": true
+},
+{
+"enabled": true,
+"id": "SupportMobilityPlayer",
+"known": true,
+"level": 1,
+"name": "Mobility",
+"quality": 0,
+"support": true
+}
+],
+"includeInFullDPS": false,
+"index": 3,
+"main": false,
+"metaGroup": false,
+"supports": [
+"Mobility"
+]
+},
+{
+"active": "Trinity",
+"enabled": true,
+"gems": [
+{
+"activation": "persistent",
+"damaging": false,
+"enabled": true,
+"id": "TrinityPlayer",
+"itemGranted": false,
+"known": true,
+"level": 18,
+"name": "Trinity",
+"proxyKind": [],
+"quality": 0,
+"spell": false,
+"support": false,
+"types": [
+"AttackInPlace",
+"Buff",
+"Cold",
+"Fire",
+"HasReservation",
+"Lightning",
+"OngoingSkill",
+"Persistent"
+],
+"weaponDefault": false
+},
+{
+"enabled": true,
+"id": "SupportFireMasteryPlayer",
+"known": true,
+"level": 1,
+"name": "Fire Mastery",
+"quality": 0,
+"support": true
+}
+],
+"includeInFullDPS": false,
+"index": 4,
+"main": false,
+"metaGroup": false,
+"supports": [
+"Fire Mastery"
+]
+},
+{
+"active": "Shattering Palm",
+"enabled": true,
+"gems": [
+{
+"activation": "manual",
+"damaging": true,
+"enabled": true,
+"id": "ShatteringPalmPlayer",
+"itemGranted": false,
+"known": true,
+"level": 19,
+"name": "Shattering Palm",
+"proxyKind": [],
+"quality": 20,
+"spell": false,
+"support": false,
+"types": [
+"Area",
+"Attack",
+"Cold",
+"ComboStacking",
+"GeneratesCharges",
+"HasUsageCondition",
+"Melee",
+"MeleeSingleTarget",
+"SupportedByComboMastery"
+],
+"weaponDefault": false
+},
+{
+"enabled": true,
+"id": "SupportLivingLightningPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Living Lightning II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportCulminationPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Culmination II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportAilithLineagePlayer",
+"known": true,
+"level": 1,
+"name": "Ailith's Chimes",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportChargeProfusionPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Charge Profusion II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportRagePlayerThree",
+"known": true,
+"level": 1,
+"name": "Rage III",
+"quality": 0,
+"support": true
+}
+],
+"includeInFullDPS": false,
+"index": 5,
+"main": false,
+"metaGroup": false,
+"supports": [
+"Living Lightning II",
+"Culmination II",
+"Ailith's Chimes",
+"Charge Profusion II",
+"Rage III"
+]
+},
+{
+"active": "Ghost Dance",
+"enabled": true,
+"gems": [
+{
+"activation": "persistent",
+"damaging": false,
+"enabled": true,
+"id": "GhostDancePlayer",
+"itemGranted": false,
+"known": true,
+"level": 20,
+"name": "Ghost Dance",
+"proxyKind": [],
+"quality": 20,
+"spell": false,
+"support": false,
+"types": [
+"AffectedByCooldownRate",
+"Buff",
+"HasReservation",
+"OngoingSkill",
+"Persistent"
+],
+"weaponDefault": false
+},
+{
+"enabled": true,
+"id": "SupportCooldownRecoveryPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Cooldown Recovery II",
+"quality": 0,
+"support": true
+}
+],
+"includeInFullDPS": false,
+"index": 6,
+"main": false,
+"metaGroup": false,
+"supports": [
+"Cooldown Recovery II"
+]
+},
+{
+"active": "Wind Dancer",
+"enabled": true,
+"gems": [
+{
+"activation": "persistent",
+"damaging": false,
+"enabled": true,
+"id": "WindDancerPlayer",
+"itemGranted": false,
+"known": true,
+"level": 19,
+"name": "Wind Dancer",
+"proxyKind": [],
+"quality": 20,
+"spell": false,
+"support": false,
+"types": [
+"AttackInPlace",
+"Buff",
+"GainsStages",
+"HasReservation",
+"OngoingSkill",
+"Persistent"
+],
+"weaponDefault": false
+},
+{
+"enabled": true,
+"id": "SupportMagnifiedAreaPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Magnified Area II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportBlindPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Blind II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportMaimPlayer",
+"known": true,
+"level": 1,
+"name": "Maim",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportElementalArmamentPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Elemental Armament II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportFreezePlayer",
+"known": true,
+"level": 1,
+"name": "Freeze",
+"quality": 0,
+"support": true
+}
+],
+"includeInFullDPS": false,
+"index": 7,
+"main": false,
+"metaGroup": false,
+"supports": [
+"Magnified Area II",
+"Blind II",
+"Maim",
+"Elemental Armament II",
+"Freeze"
+]
+},
+{
+"active": "Herald of Ice",
+"enabled": true,
+"gems": [
+{
+"activation": "persistent",
+"damaging": true,
+"enabled": true,
+"id": "HeraldOfIcePlayer",
+"itemGranted": false,
+"known": true,
+"level": 19,
+"name": "Herald of Ice",
+"proxyKind": [],
+"quality": 20,
+"spell": false,
+"support": false,
+"types": [
+"Area",
+"Attack",
+"AttackInPlace",
+"Buff",
+"Cold",
+"HasReservation",
+"Herald",
+"NoAttackOrCastTime",
+"OngoingSkill",
+"Persistent"
+],
+"weaponDefault": false
+},
+{
+"enabled": true,
+"id": "SupportFarCombatPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Longshot II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportElementalArmamentPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Elemental Armament II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportMagnifiedAreaPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Magnified Area II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportElementalFocusPlayer",
+"known": true,
+"level": 1,
+"name": "Elemental Focus",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportBlindPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Blind II",
+"quality": 0,
+"support": true
+}
+],
+"includeInFullDPS": false,
+"index": 8,
+"main": false,
+"metaGroup": false,
+"supports": [
+"Longshot II",
+"Elemental Armament II",
+"Magnified Area II",
+"Elemental Focus",
+"Blind II"
+]
+},
+{
+"active": "Charge Regulation",
+"enabled": true,
+"gems": [
+{
+"activation": "persistent",
+"damaging": false,
+"enabled": true,
+"id": "ChargeRegulationPlayer",
+"itemGranted": false,
+"known": true,
+"level": 20,
+"name": "Charge Regulation",
+"proxyKind": [],
+"quality": 20,
+"spell": false,
+"support": false,
+"types": [
+"AttackInPlace",
+"Buff",
+"HasReservation",
+"OngoingSkill",
+"Persistent"
+],
+"weaponDefault": false
+}
+],
+"includeInFullDPS": false,
+"index": 9,
+"main": false,
+"metaGroup": false,
+"supports": []
+},
+{
+"active": "Charged Staff",
+"enabled": true,
+"gems": [
+{
+"activation": "manual",
+"damaging": false,
+"enabled": true,
+"id": "ChargedStaffPlayer",
+"itemGranted": false,
+"known": true,
+"level": 20,
+"name": "Charged Staff",
+"proxyKind": [],
+"quality": 20,
+"spell": true,
+"support": false,
+"types": [
+"Buff",
+"ConsumesCharges",
+"Duration",
+"HasUsageCondition",
+"Lightning",
+"RequiresCharges",
+"SkillConsumesPowerChargesOnUse",
+"Spell"
+],
+"weaponDefault": false
+},
+{
+"enabled": true,
+"id": "SupportBlazingCriticalPlayer",
+"known": true,
+"level": 1,
+"name": "Blazing Critical",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportOisinsOathPlayer",
+"known": true,
+"level": 1,
+"name": "Oisin's Oath",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportBlindPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Blind II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "ProlongedDurationSupportPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Prolonged Duration II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportCullingStrikePlayerTwo",
+"known": true,
+"level": 1,
+"name": "Culling Strike II",
+"quality": 0,
+"support": true
+}
+],
+"includeInFullDPS": false,
+"index": 10,
+"main": false,
+"metaGroup": false,
+"supports": [
+"Blazing Critical",
+"Oisin's Oath",
+"Blind II",
+"Prolonged Duration II",
+"Culling Strike II"
+]
+},
+{
+"active": "Flicker Strike",
+"enabled": true,
+"gems": [
+{
+"activation": "manual",
+"damaging": true,
+"enabled": true,
+"id": "FlickerStrikePlayer",
+"itemGranted": false,
+"known": true,
+"level": 20,
+"name": "Flicker Strike",
+"proxyKind": [],
+"quality": 20,
+"spell": false,
+"support": false,
+"types": [
+"Area",
+"Attack",
+"ConsumesCharges",
+"HasUsageCondition",
+"Melee",
+"MeleeSingleTarget",
+"SkillConsumesPowerChargesOnUse",
+"SupportedByMobileAssault"
+],
+"weaponDefault": false
+},
+{
+"enabled": true,
+"id": "SupportElementalArmamentPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Elemental Armament II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportVoranasSiege",
+"known": true,
+"level": 1,
+"name": "Vorana's Siege",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportPerpetualChargePlayer",
+"known": true,
+"level": 1,
+"name": "Perpetual Charge",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportCloseCombatPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Close Combat II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportHitAndRunPlayer",
+"known": true,
+"level": 1,
+"name": "Hit and Run",
+"quality": 0,
+"support": true
+}
+],
+"includeInFullDPS": false,
+"index": 11,
+"main": true,
+"metaGroup": false,
+"supports": [
+"Elemental Armament II",
+"Vorana's Siege",
+"Perpetual Charge",
+"Close Combat II",
+"Hit and Run"
+]
+},
+{
+"active": "Convalescence",
+"enabled": true,
+"gems": [
+{
+"activation": "persistent",
+"damaging": false,
+"enabled": true,
+"id": "ConvalescencePlayer",
+"itemGranted": false,
+"known": true,
+"level": 19,
+"name": "Convalescence",
+"proxyKind": [],
+"quality": 20,
+"spell": false,
+"support": false,
+"types": [
+"AttackInPlace",
+"Buff",
+"HasReservation",
+"OngoingSkill",
+"Persistent",
+"ReserveInAllSets"
+],
+"weaponDefault": false
+},
+{
+"enabled": true,
+"id": "SupportSecondWindPlayerThree",
+"known": true,
+"level": 1,
+"name": "Second Wind III",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportCooldownRecoveryPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Cooldown Recovery II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "ProlongedDurationSupportPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Prolonged Duration II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportRapidCastingPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Rapid Casting II",
+"quality": 0,
+"support": true
+}
+],
+"includeInFullDPS": false,
+"index": 12,
+"main": false,
+"metaGroup": false,
+"supports": [
+"Second Wind III",
+"Cooldown Recovery II",
+"Prolonged Duration II",
+"Rapid Casting II"
+]
+},
+{
+"active": "Falling Thunder",
+"enabled": true,
+"gems": [
+{
+"activation": "manual",
+"damaging": true,
+"enabled": true,
+"id": "FallingThunderPlayer",
+"itemGranted": false,
+"known": true,
+"level": 20,
+"name": "Falling Thunder",
+"proxyKind": [],
+"quality": 20,
+"spell": false,
+"support": false,
+"types": [
+"Area",
+"Attack",
+"AttackInPlace",
+"ConsumesCharges",
+"Cooldown",
+"Lightning",
+"Melee",
+"Projectile",
+"ProjectilesNotFromUser",
+"RangedAttack",
+"SkillConsumesPowerChargesOnUse",
+"Slam",
+"SupportedByBreachlordsAmalgam",
+"SupportedByNovaProjectiles"
+],
+"weaponDefault": false
+},
+{
+"enabled": true,
+"id": "SupportRakiatasFlowPlayer",
+"known": true,
+"level": 1,
+"name": "Rakiata's Flow",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "FistOfWarSupportPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Fist of War II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportNovaProjectilesPlayer",
+"known": true,
+"level": 1,
+"name": "Nova Projectiles I",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportBreachlordsAmalgam",
+"known": true,
+"level": 1,
+"name": "Breachlord's Amalgam",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportCooldownRecoveryPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Cooldown Recovery II",
+"quality": 0,
+"support": true
+}
+],
+"includeInFullDPS": false,
+"index": 13,
+"main": false,
+"metaGroup": false,
+"supports": [
+"Rakiata's Flow",
+"Fist of War II",
+"Nova Projectiles I",
+"Breachlord's Amalgam",
+"Cooldown Recovery II"
+]
+},
+{
+"active": "Trinity",
+"enabled": true,
+"gems": [
+{
+"activation": "persistent",
+"damaging": false,
+"enabled": true,
+"id": "TrinityPlayer",
+"itemGranted": true,
+"known": true,
+"level": 18,
+"name": "Trinity",
+"proxyKind": [],
+"quality": 0,
+"spell": false,
+"support": false,
+"types": [
+"AttackInPlace",
+"Buff",
+"Cold",
+"Fire",
+"HasReservation",
+"Lightning",
+"OngoingSkill",
+"Persistent"
+],
+"weaponDefault": false
+}
+],
+"grantedBy": "Viper Charm",
+"includeInFullDPS": false,
+"index": 14,
+"main": false,
+"metaGroup": false,
+"slot": "Amulet",
+"supports": []
+},
+{
+"active": "Quarterstaff Strike",
+"enabled": true,
+"gems": [
+{
+"activation": "manual",
+"damaging": true,
+"enabled": true,
+"id": "MeleeQuarterstaffPlayer",
+"itemGranted": true,
+"known": true,
+"level": 20,
+"name": "Quarterstaff Strike",
+"proxyKind": [],
+"quality": 0,
+"spell": false,
+"support": false,
+"types": [
+"Area",
+"Attack",
+"AttackInPlace",
+"Melee",
+"MeleeSingleTarget"
+],
+"weaponDefault": true
+}
+],
+"grantedBy": "Default Attack",
+"includeInFullDPS": false,
+"index": 15,
+"main": false,
+"metaGroup": false,
+"slot": "Weapon 1",
+"supports": []
+}
+],
+"uniques": [
+"Mageblood",
+"Heart of the Well",
+"Kalandra's Touch"
+],
+"unsupportedModLines": 15
+},
+"pinnacle_locked": {
+"mainSkill": {
+"flags": [],
+"id": "FlickerStrikePlayer",
+"name": "Flicker Strike",
+"types": [
+"Area",
+"Attack",
+"ConsumesCharges",
+"HasUsageCondition",
+"Melee",
+"MeleeSingleTarget",
+"SkillConsumesPowerChargesOnUse",
+"SupportedByMobileAssault"
+]
+},
+"minionStats": null,
+"stats": {
+"Armour": 0,
+"AverageBurstDamage": 108906.66515267,
+"AverageDamage": 108906.66515267,
+"BlockChance": 0,
+"ChaosResist": 5,
+"ChaosResistOverCap": 0,
+"CharmLimit": 3,
+"ColdMaximumHitTaken": 42229,
+"ColdResist": 82,
+"ColdResistOverCap": 53,
+"CombinedDPS": 542032.88549609,
+"CritChance": 98.49,
+"CritMultiplier": 5.01,
+"CullingDPS": 0,
+"DeflectChance": 14,
+"Dex": 183,
+"EffectiveBlockChance": 0,
+"EffectiveSpellBlockChance": 0,
+"EnduranceChargesMax": 3,
+"EnergyShield": 8867,
+"EnergyShieldRecharge": 1108.4,
+"EvadeChance": 52,
+"Evasion": 10351,
+"FireMaximumHitTaken": 34108,
+"FireResist": 77,
+"FireResistOverCap": 18,
+"FrenzyChargesMax": 3,
+"FullDPS": 0,
+"HitChance": 100,
+"HitDamageByType": {
+"Cold": 4712.75,
+"Fire": 5801.25,
+"Lightning": 6505.5,
+"Physical": 4444.9950405998
+},
+"IgniteDPS": 7627.8795919228,
+"Int": 169,
+"Life": 1,
+"LifeRegenRecovery": 0,
+"LifeUnreserved": 1,
+"LightningMaximumHitTaken": 31671,
+"LightningResist": 75,
+"LightningResistOverCap": 9,
+"Mana": 730,
+"ManaCost": 247,
+"ManaPerSecondCost": 1212.029,
+"ManaRegenRecovery": 35.3,
+"ManaUnreserved": 730,
+"MeleeEvadeChance": 52,
+"MovementSpeedMod": 1.95,
+"NonHitDPS": 7627.8795919229,
+"PhysicalDamageReduction": 0,
+"PhysicalMaximumHitTaken": 8868,
+"PowerChargesMax": 6,
+"PreEffectiveCritChance": 98.49,
+"ProjectileEvadeChance": 52,
+"ReservationDPS": 0,
+"Speed": 4.907,
+"SpellBlockChance": 0,
+"SpellSuppressionChance": 0,
+"Spirit": 150,
+"SpiritReserved": 150,
+"SpiritUnreserved": -93,
+"Str": 53,
+"TotalDPS": 534405.00590417,
+"TotalDot": 0,
+"TotalDotDPS": 7627.8795919228,
+"TotalEHP": 49030.511948752,
+"Ward": 0,
+"WithBleedDPS": 534405.00590417,
+"WithIgniteDPS": 542032.88549609,
+"WithPoisonDPS": 534405.00590417
+}
+},
+"as_exported": {
+"mainSkill": {
+"flags": [],
+"id": "FlickerStrikePlayer",
+"name": "Flicker Strike",
+"types": [
+"Area",
+"Attack",
+"ConsumesCharges",
+"HasUsageCondition",
+"Melee",
+"MeleeSingleTarget",
+"SkillConsumesPowerChargesOnUse",
+"SupportedByMobileAssault"
+]
+},
+"minionStats": null,
+"stats": {
+"Armour": 0,
+"AverageBurstDamage": 2607436.5523211,
+"AverageDamage": 173829.10348807,
+"BlockChance": 0,
+"ChaosResist": 5,
+"ChaosResistOverCap": 0,
+"CharmLimit": 3,
+"ColdMaximumHitTaken": 50671,
+"ColdResist": 82,
+"ColdResistOverCap": 53,
+"CombinedDPS": 1031479.8688652,
+"CritChance": 100,
+"CritMultiplier": 5.81,
+"CullingDPS": 0,
+"DeflectChance": 34,
+"Dex": 183,
+"EffectiveBlockChance": 0,
+"EffectiveSpellBlockChance": 0,
+"EnduranceChargesMax": 3,
+"EnergyShield": 10640,
+"EnergyShieldRecharge": 1330,
+"EvadeChance": 73,
+"Evasion": 16148,
+"FireMaximumHitTaken": 40927,
+"FireResist": 77,
+"FireResistOverCap": 18,
+"FrenzyChargesMax": 3,
+"FullDPS": 0,
+"HitChance": 100,
+"HitDamageByType": {
+"Cold": 5507,
+"Fire": 9064.5,
+"Lightning": 9156.25,
+"Physical": 5611.8387001808
+},
+"IgniteDPS": 15448.758977378,
+"Int": 169,
+"Life": 1,
+"LifeRegenRecovery": 0,
+"LifeUnreserved": 1,
+"LightningMaximumHitTaken": 38004,
+"LightningResist": 75,
+"LightningResistOverCap": 9,
+"Mana": 730,
+"ManaCost": 247,
+"ManaPerSecondCost": 1443.715,
+"ManaRegenRecovery": 35.3,
+"ManaUnreserved": 730,
+"MeleeEvadeChance": 73,
+"MovementSpeedMod": 1.95,
+"NonHitDPS": 15448.758977378,
+"PhysicalDamageReduction": 0,
+"PhysicalMaximumHitTaken": 10641,
+"PowerChargesMax": 6,
+"PreEffectiveCritChance": 100,
+"ProjectileEvadeChance": 73,
+"ReservationDPS": 0,
+"Speed": 5.845,
+"SpellBlockChance": 0,
+"SpellSuppressionChance": 0,
+"Spirit": 150,
+"SpiritReserved": 150,
+"SpiritUnreserved": -93,
+"Str": 53,
+"TotalDPS": 1016031.1098878,
+"TotalDot": 0,
+"TotalDotDPS": 15448.758977378,
+"TotalEHP": 114456.64387346,
+"Ward": 0,
+"WithBleedDPS": 1016031.1098878,
+"WithIgniteDPS": 1031479.8688652,
+"WithPoisonDPS": 1016031.1098878
+}
+}
+},
+{
+"line": 33,
+"tags": {
+"activationCounts": {
+"manual": 4,
+"persistent": 6,
+"proxy": 0,
+"triggered": 0
+},
+"allocatedNodeCount": 134,
+"anyManualSpell": true,
+"ascendancy": "Ritualist",
+"ascendancyNodes": [
+{
+"id": 3223,
+"name": "Attributes",
+"type": "Normal"
+},
+{
+"id": 4891,
+"name": "Intricate Sigils",
+"type": "Notable"
+},
+{
+"id": 7068,
+"name": "Mystic Attunement",
+"type": "Notable"
+},
+{
+"id": 18280,
+"name": "Mind Phylacteries",
+"type": "Notable"
+},
+{
+"id": 34785,
+"name": "Unfurled Finger",
+"type": "Notable"
+},
+{
+"id": 37972,
+"name": "Charm Charges",
+"type": "Normal"
+},
+{
+"id": 58574,
+"name": "Reduced Mana",
+"type": "Normal"
+},
+{
+"id": 60859,
+"name": "Charm Charges",
+"type": "Normal"
+}
+],
+"className": "Huntress",
+"grantedSkills": [
+{
+"activation": "manual",
+"name": "Bow Shot",
+"source": "Default Attack"
+}
+],
+"itemGrantedManualDamagingSkills": [],
+"items": [
+{
+"base": "Solar Amulet",
+"name": "Sol Braid",
+"rarity": "RARE",
+"slot": "Amulet"
+},
+{
+"base": "Fine Belt",
+"name": "Shavronne's Satchel",
+"rarity": "UNIQUE",
+"slot": "Belt"
+},
+{
+"base": "Sleek Jacket",
+"name": "Apocalypse Shroud",
+"rarity": "RARE",
+"slot": "Body Armour"
+},
+{
+"base": "Daggerfoot Shoes",
+"name": "Victory Spark",
+"rarity": "RARE",
+"slot": "Boots"
+},
+{
+"base": "Runeforged Barbed Bracers",
+"name": "Doom Clutches",
+"rarity": "RARE",
+"slot": "Gloves"
+},
+{
+"base": "Grinning Mask",
+"name": "Onslaught Dome",
+"rarity": "RARE",
+"slot": "Helmet"
+},
+{
+"base": "Diamond",
+"name": "Prism of Belief",
+"rarity": "UNIQUE",
+"slot": "Jewel 21984"
+},
+{
+"base": "Time-Lost Diamond",
+"name": "Against the Darkness",
+"rarity": "UNIQUE",
+"slot": "Jewel 32763"
+},
+{
+"base": "Sapphire",
+"name": "Grand Spectrum",
+"rarity": "UNIQUE",
+"slot": "Jewel 46882"
+},
+{
+"base": "Sapphire",
+"name": "Grand Spectrum",
+"rarity": "UNIQUE",
+"slot": "Jewel 60735"
+},
+{
+"base": "Sapphire",
+"name": "Grand Spectrum",
+"rarity": "UNIQUE",
+"slot": "Jewel 61834"
+},
+{
+"base": "Gold Ring",
+"name": "Andvarius",
+"rarity": "UNIQUE",
+"slot": "Ring 1"
+},
+{
+"base": "Gold Ring",
+"name": "Andvarius",
+"rarity": "UNIQUE",
+"slot": "Ring 2"
+},
+{
+"base": "Gold Ring",
+"name": "Andvarius",
+"rarity": "UNIQUE",
+"slot": "Ring 3"
+},
+{
+"base": "Gemini Bow",
+"name": "Kraken Reach",
+"rarity": "RARE",
+"slot": "Weapon 1"
+},
+{
+"base": "Primed Quiver",
+"name": "Cadiro's Gambit",
+"rarity": "UNIQUE",
+"slot": "Weapon 2"
+}
+],
+"keystones": [
+{
+"id": 56349,
+"name": "Chaos Inoculation"
+}
+],
+"level": 100,
+"manualDamagingSkillNames": [
+"Ice Shot",
+"Ice Shot",
+"Tornado Shot"
+],
+"manualDamagingSkills": 3,
+"noCast": false,
+"notables": [
+{
+"id": 2254,
+"name": "Pure Energy"
+},
+{
+"id": 3215,
+"name": "Melding"
+},
+{
+"id": 9642,
+"name": "Dampening Shield"
+},
+{
+"id": 13407,
+"name": "Heartbreaking"
+},
+{
+"id": 17548,
+"name": "Moment of Truth"
+},
+{
+"id": 20677,
+"name": "For the Jugular"
+},
+{
+"id": 32301,
+"name": "Frazzled"
+},
+{
+"id": 33542,
+"name": "Quick Fingers"
+},
+{
+"id": 34324,
+"name": "Spectral Ward"
+},
+{
+"id": 35987,
+"name": "Blur"
+},
+{
+"id": 38537,
+"name": "Heartstopping"
+},
+{
+"id": 39369,
+"name": "Struck Through"
+},
+{
+"id": 43082,
+"name": "Acceleration"
+},
+{
+"id": 49356,
+"name": "First Principle of the Hollow"
+},
+{
+"id": 56265,
+"name": "Throatseeker"
+},
+{
+"id": 56776,
+"name": "Cooked"
+},
+{
+"id": 57204,
+"name": "Critical Exploit"
+},
+{
+"id": 59720,
+"name": "Beastial Skin"
+},
+{
+"id": 60034,
+"name": "Falcon Dive"
+},
+{
+"id": 61601,
+"name": "True Strike"
+},
+{
+"id": 62230,
+"name": "Patient Barrier"
+}
+],
+"oneButton": false,
+"oneButtonInclItemSkills": false,
+"socketGroups": [
+{
+"active": "Bow Shot",
+"enabled": true,
+"gems": [
+{
+"activation": "manual",
+"damaging": true,
+"enabled": true,
+"id": "MeleeBowPlayer",
+"itemGranted": true,
+"known": true,
+"level": 20,
+"name": "Bow Shot",
+"proxyKind": [],
+"quality": 0,
+"spell": false,
+"support": false,
+"types": [
+"Attack",
+"Barrageable",
+"Bow",
+"MirageArcherCanUse",
+"Projectile",
+"ProjectilesFromUser",
+"RangedAttack",
+"UsableWhileMoving"
+],
+"weaponDefault": true
+},
+{
+"enabled": true,
+"id": "SupportElementalArmamentPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Elemental Armament II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportDeliberationPlayer",
+"known": true,
+"level": 1,
+"name": "Deliberation",
+"quality": 0,
+"support": true
+}
+],
+"grantedBy": "Default Attack",
+"includeInFullDPS": false,
+"index": 1,
+"main": false,
+"metaGroup": false,
+"slot": "Weapon 1",
+"supports": [
+"Elemental Armament II",
+"Deliberation"
+]
+},
+{
+"active": "Ice Shot",
+"enabled": true,
+"gems": [
+{
+"activation": "manual",
+"damaging": true,
+"enabled": true,
+"id": "IceShotPlayer",
+"itemGranted": false,
+"known": true,
+"level": 20,
+"name": "Ice Shot",
+"proxyKind": [],
+"quality": 20,
+"spell": false,
+"support": false,
+"types": [
+"Attack",
+"Barrageable",
+"Bow",
+"Cold",
+"HasUsageCondition",
+"Mineable",
+"MirageArcherCanUse",
+"Projectile",
+"ProjectilesFromUser",
+"RangedAttack",
+"SupportedByGarukhan",
+"SupportedByNovaProjectiles",
+"Totemable",
+"Trappable",
+"Triggerable",
+"UsableWhileMoving"
+],
+"weaponDefault": false
+},
+{
+"enabled": true,
+"id": "SupportGarukhansResolvePlayer",
+"known": true,
+"level": 1,
+"name": "Garukhan's Resolve",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportNovaProjectilesPlayer",
+"known": true,
+"level": 1,
+"name": "Nova Projectiles I",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportEmbitterPlayer",
+"known": true,
+"level": 1,
+"name": "Embitter",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportRapidAttacksPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Rapid Attacks II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportMinionPactPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Minion Pact II",
+"quality": 0,
+"support": true
+}
+],
+"includeInFullDPS": false,
+"index": 2,
+"main": true,
+"metaGroup": false,
+"supports": [
+"Garukhan's Resolve",
+"Nova Projectiles I",
+"Embitter",
+"Rapid Attacks II",
+"Minion Pact II"
+]
+},
+{
+"active": "Barrage",
+"enabled": true,
+"gems": [
+{
+"activation": "manual",
+"damaging": false,
+"enabled": true,
+"id": "BarragePlayer",
+"itemGranted": false,
+"known": true,
+"level": 11,
+"name": "Barrage",
+"proxyKind": [],
+"quality": 20,
+"spell": true,
+"support": false,
+"types": [
+"Buff",
+"ConsumesCharges",
+"Cooldown",
+"Duration",
+"EmpowersOtherSkill",
+"ModifiesNextSkill",
+"SkillConsumesFrenzyChargesOnUse",
+"Spell",
+"UsableWhileMounted",
+"UsableWhileMoving"
+],
+"weaponDefault": false
+},
+{
+"enabled": true,
+"id": "SupportOlrothsConvictionPlayer",
+"known": true,
+"level": 1,
+"name": "Olroth's Conviction",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportUhtredsConstellation",
+"known": true,
+"level": 1,
+"name": "Uhtred's Constellation",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportHeightenedChargesPlayer",
+"known": true,
+"level": 1,
+"name": "Heightened Charges",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportPerpetualChargePlayer",
+"known": true,
+"level": 1,
+"name": "Perpetual Charge",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportEfficiencyPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Efficiency II",
+"quality": 0,
+"support": true
+}
+],
+"includeInFullDPS": false,
+"index": 3,
+"main": false,
+"metaGroup": false,
+"supports": [
+"Olroth's Conviction",
+"Uhtred's Constellation",
+"Heightened Charges",
+"Perpetual Charge",
+"Efficiency II"
+]
+},
+{
+"active": "Mirage Archer",
+"enabled": true,
+"gems": [
+{
+"activation": "persistent",
+"damaging": false,
+"enabled": true,
+"id": "MetaMirageArcherPlayer",
+"itemGranted": false,
+"known": true,
+"level": 20,
+"name": "Mirage Archer",
+"proxyKind": [],
+"quality": 20,
+"spell": false,
+"support": false,
+"types": [
+"AttackInPlace",
+"Buff",
+"Cooldown",
+"Duration",
+"OngoingSkill",
+"Persistent",
+"UsedByProxy"
+],
+"weaponDefault": false
+},
+{
+"activation": "manual",
+"damaging": true,
+"enabled": true,
+"id": "IceShotPlayer",
+"itemGranted": false,
+"known": true,
+"level": 20,
+"name": "Ice Shot",
+"proxyKind": [],
+"quality": 20,
+"spell": false,
+"support": false,
+"types": [
+"Attack",
+"Barrageable",
+"Bow",
+"Cold",
+"Mineable",
+"MirageArcherCanUse",
+"Projectile",
+"ProjectilesFromUser",
+"RangedAttack",
+"SupportedByMirageArcher",
+"Totemable",
+"Trappable",
+"Triggerable",
+"UsableWhileMoving",
+"UsedByClone",
+"UsedByProxy"
+],
+"weaponDefault": false
+},
+{
+"enabled": true,
+"id": "SupportElementalArmamentPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Elemental Armament II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportDeliberationPlayer",
+"known": true,
+"level": 1,
+"name": "Deliberation",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportCooldownRecoveryPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Cooldown Recovery II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportRapidAttacksPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Rapid Attacks II",
+"quality": 0,
+"support": true
+}
+],
+"includeInFullDPS": false,
+"index": 4,
+"main": false,
+"metaGroup": false,
+"supports": [
+"Elemental Armament II",
+"Deliberation",
+"Cooldown Recovery II",
+"Rapid Attacks II"
+]
+},
+{
+"active": "Mana Remnants",
+"enabled": true,
+"gems": [
+{
+"activation": "persistent",
+"damaging": false,
+"enabled": true,
+"id": "ManaRemnantsPlayer",
+"itemGranted": false,
+"known": true,
+"level": 14,
+"name": "Mana Remnants",
+"proxyKind": [],
+"quality": 20,
+"spell": false,
+"support": false,
+"types": [
+"AttackInPlace",
+"Buff",
+"GeneratesRemnants",
+"HasReservation",
+"OngoingSkill",
+"Persistent",
+"TotemCastsAlone"
+],
+"weaponDefault": false
+},
+{
+"enabled": true,
+"id": "SupportKhatalsRejuvenationPlayer",
+"known": true,
+"level": 1,
+"name": "Khatal's Rejuvenation",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportInterludePlayer",
+"known": true,
+"level": 1,
+"name": "Remnant Potency I",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportFleetingRemnantsPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Harmonic Remnants II",
+"quality": 0,
+"support": true
+}
+],
+"includeInFullDPS": false,
+"index": 5,
+"main": false,
+"metaGroup": false,
+"supports": [
+"Khatal's Rejuvenation",
+"Remnant Potency I",
+"Harmonic Remnants II"
+]
+},
+{
+"active": "Tornado Shot",
+"enabled": true,
+"gems": [
+{
+"activation": "manual",
+"damaging": true,
+"enabled": true,
+"id": "TornadoShotPlayer",
+"itemGranted": false,
+"known": true,
+"level": 19,
+"name": "Tornado Shot",
+"proxyKind": [],
+"quality": 20,
+"spell": false,
+"support": false,
+"types": [
+"Area",
+"Attack",
+"Barrageable",
+"Bow",
+"CannotChain",
+"DamageOverTime",
+"Duration",
+"Limit",
+"Mineable",
+"MirageArcherCanUse",
+"ObjectDurability",
+"Physical",
+"ProjectileNoCollision",
+"ProjectileNumber",
+"ProjectileSpeed",
+"Rain",
+"RangedAttack",
+"Totemable",
+"Trappable",
+"Triggerable",
+"UsableWhileMoving",
+"Wind"
+],
+"weaponDefault": false
+},
+{
+"enabled": true,
+"id": "SupportEmbitterPlayer",
+"known": true,
+"level": 1,
+"name": "Embitter",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportDurabilityPlayer",
+"known": true,
+"level": 1,
+"name": "Durability",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "ProlongedDurationSupportPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Prolonged Duration II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportIncreaseLimitPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Overabundance II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportOisinsOathPlayer",
+"known": true,
+"level": 1,
+"name": "Oisin's Oath",
+"quality": 0,
+"support": true
+}
+],
+"includeInFullDPS": false,
+"index": 6,
+"main": false,
+"metaGroup": false,
+"supports": [
+"Embitter",
+"Durability",
+"Prolonged Duration II",
+"Overabundance II",
+"Oisin's Oath"
+]
+},
+{
+"active": "Skeletal Cleric",
+"enabled": true,
+"gems": [
+{
+"activation": "persistent",
+"damaging": false,
+"enabled": true,
+"id": "SummonSkeletalClericsPlayer",
+"itemGranted": false,
+"known": true,
+"level": 13,
+"name": "Skeletal Cleric",
+"proxyKind": [
+"minion"
+],
+"quality": 20,
+"spell": false,
+"support": false,
+"types": [
+"CreatesMinion",
+"CreatesSkeletonMinion",
+"CreatesUndeadMinion",
+"HasReservation",
+"Minion",
+"MinionsAreUndamagable",
+"MinionsCanExplode",
+"MultipleReservation",
+"Persistent"
+],
+"weaponDefault": false
+},
+{
+"enabled": true,
+"id": "SupportBrutusBrainPlayer",
+"known": true,
+"level": 1,
+"name": "Brutus' Brain",
+"quality": 0,
+"support": true
+}
+],
+"includeInFullDPS": false,
+"index": 7,
+"main": false,
+"metaGroup": false,
+"supports": [
+"Brutus' Brain"
+]
+},
+{
+"active": "Charge Regulation",
+"enabled": true,
+"gems": [
+{
+"activation": "persistent",
+"damaging": false,
+"enabled": true,
+"id": "ChargeRegulationPlayer",
+"itemGranted": false,
+"known": true,
+"level": 14,
+"name": "Charge Regulation",
+"proxyKind": [],
+"quality": 20,
+"spell": false,
+"support": false,
+"types": [
+"AttackInPlace",
+"Buff",
+"HasReservation",
+"OngoingSkill",
+"Persistent"
+],
+"weaponDefault": false
+}
+],
+"includeInFullDPS": false,
+"index": 8,
+"main": false,
+"metaGroup": false,
+"supports": []
+},
+{
+"active": "Berserk",
+"enabled": true,
+"gems": [
+{
+"activation": "persistent",
+"damaging": false,
+"enabled": true,
+"id": "BerserkPlayer",
+"itemGranted": false,
+"known": true,
+"level": 14,
+"name": "Berserk",
+"proxyKind": [],
+"quality": 20,
+"spell": false,
+"support": false,
+"types": [
+"AttackInPlace",
+"Buff",
+"HasReservation",
+"OngoingSkill",
+"Persistent"
+],
+"weaponDefault": false
+}
+],
+"includeInFullDPS": false,
+"index": 9,
+"main": false,
+"metaGroup": false,
+"supports": []
+},
+{
+"active": "Wind Dancer",
+"enabled": true,
+"gems": [
+{
+"activation": "persistent",
+"damaging": false,
+"enabled": true,
+"id": "WindDancerPlayer",
+"itemGranted": false,
+"known": true,
+"level": 18,
+"name": "Wind Dancer",
+"proxyKind": [],
+"quality": 20,
+"spell": false,
+"support": false,
+"types": [
+"AttackInPlace",
+"Buff",
+"GainsStages",
+"HasReservation",
+"OngoingSkill",
+"Persistent"
+],
+"weaponDefault": false
+},
+{
+"enabled": true,
+"id": "SupportKnockbackPlayer",
+"known": true,
+"level": 1,
+"name": "Knockback",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportEmbitterPlayer",
+"known": true,
+"level": 1,
+"name": "Embitter",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportMagnifiedAreaPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Magnified Area II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportBlindPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Blind II",
+"quality": 0,
+"support": true
+}
+],
+"includeInFullDPS": false,
+"index": 10,
+"main": false,
+"metaGroup": false,
+"supports": [
+"Knockback",
+"Embitter",
+"Magnified Area II",
+"Blind II"
+]
+}
+],
+"uniques": [
+"Shavronne's Satchel",
+"Prism of Belief",
+"Against the Darkness",
+"Grand Spectrum",
+"Grand Spectrum",
+"Grand Spectrum",
+"Andvarius",
+"Andvarius",
+"Andvarius",
+"Cadiro's Gambit"
+],
+"unsupportedModLines": 4
+},
+"pinnacle_locked": {
+"mainSkill": {
+"flags": [],
+"id": "IceShotPlayer",
+"name": "Ice Shot",
+"types": [
+"Attack",
+"Barrageable",
+"Bow",
+"Cold",
+"HasUsageCondition",
+"Mineable",
+"MirageArcherCanUse",
+"Projectile",
+"ProjectilesFromUser",
+"RangedAttack",
+"SupportedByGarukhan",
+"SupportedByNovaProjectiles",
+"Totemable",
+"Trappable",
+"Triggerable",
+"UsableWhileMoving"
+]
+},
+"minionStats": null,
+"stats": {
+"Armour": 0,
+"AverageBurstDamage": 4479.9706182464,
+"AverageDamage": 4479.9706182464,
+"BlockChance": 0,
+"ChaosResist": 0,
+"ChaosResistOverCap": 0,
+"CharmLimit": 3,
+"ColdMaximumHitTaken": 5988,
+"ColdResist": 1,
+"ColdResistOverCap": 0,
+"CombinedDPS": 10067.676691443,
+"CritChance": 43.644951,
+"CritMultiplier": 7.57,
+"CullingDPS": 0,
+"DeflectChance": 51,
+"Dex": 192,
+"EffectiveBlockChance": 0,
+"EffectiveSpellBlockChance": 0,
+"EnduranceChargesMax": 3,
+"EnergyShield": 5945,
+"EnergyShieldRecharge": 743.1,
+"EvadeChance": 57,
+"Evasion": 12538,
+"FireMaximumHitTaken": 6805,
+"FireResist": 15,
+"FireResistOverCap": 0,
+"FrenzyChargesMax": 3,
+"FullDPS": 0,
+"HitChance": 100,
+"HitDamageByType": {
+"Cold": 864.25,
+"Physical": 135.6909143423
+},
+"Int": 116,
+"Life": 1,
+"LifeRegenRecovery": 0,
+"LifeUnreserved": 1,
+"LightningMaximumHitTaken": 21386,
+"LightningResist": 75,
+"LightningResistOverCap": 1,
+"Mana": 430,
+"ManaCost": 86,
+"ManaPerSecondCost": 189.4752,
+"ManaRegenRecovery": 19.8,
+"ManaUnreserved": 430,
+"MeleeEvadeChance": 57,
+"MovementSpeedMod": 1.416,
+"NonHitDPS": 0,
+"PhysicalDamageReduction": 0,
+"PhysicalMaximumHitTaken": 5988,
+"PowerChargesMax": 3,
+"PreEffectiveCritChance": 24.93,
+"ProjectileEvadeChance": 57,
+"ReservationDPS": 0,
+"Speed": 2.2032,
+"SpellBlockChance": 0,
+"SpellSuppressionChance": 0,
+"Spirit": 211,
+"SpiritReserved": 207,
+"SpiritUnreserved": 4,
+"Str": 110,
+"TotalDPS": 10067.676691443,
+"TotalDot": 0,
+"TotalDotDPS": 0,
+"TotalEHP": 24203.248399777,
+"Ward": 42,
+"WithBleedDPS": 10067.676691443,
+"WithIgniteDPS": 10067.676691443,
+"WithPoisonDPS": 10067.676691443
+}
+},
+"as_exported": {
+"mainSkill": {
+"flags": [],
+"id": "IceShotPlayer",
+"name": "Ice Shot",
+"types": [
+"Attack",
+"Barrageable",
+"Bow",
+"Cold",
+"HasUsageCondition",
+"Mineable",
+"MirageArcherCanUse",
+"Projectile",
+"ProjectilesFromUser",
+"RangedAttack",
+"SupportedByGarukhan",
+"SupportedByNovaProjectiles",
+"Totemable",
+"Trappable",
+"Triggerable",
+"UsableWhileMoving"
+]
+},
+"minionStats": null,
+"stats": {
+"Armour": 0,
+"AverageBurstDamage": 4479.9706182464,
+"AverageDamage": 4479.9706182464,
+"BlockChance": 0,
+"ChaosResist": 0,
+"ChaosResistOverCap": 0,
+"CharmLimit": 3,
+"ColdMaximumHitTaken": 5988,
+"ColdResist": 1,
+"ColdResistOverCap": 0,
+"CombinedDPS": 10067.676691443,
+"CritChance": 43.644951,
+"CritMultiplier": 7.57,
+"CullingDPS": 0,
+"DeflectChance": 71,
+"Dex": 192,
+"EffectiveBlockChance": 0,
+"EffectiveSpellBlockChance": 0,
+"EnduranceChargesMax": 3,
+"EnergyShield": 5945,
+"EnergyShieldRecharge": 743.1,
+"EvadeChance": 68,
+"Evasion": 16300,
+"FireMaximumHitTaken": 6805,
+"FireResist": 15,
+"FireResistOverCap": 0,
+"FrenzyChargesMax": 3,
+"FullDPS": 0,
+"HitChance": 100,
+"HitDamageByType": {
+"Cold": 864.25,
+"Physical": 135.6909143423
+},
+"Int": 116,
+"Life": 1,
+"LifeRegenRecovery": 0,
+"LifeUnreserved": 1,
+"LightningMaximumHitTaken": 21386,
+"LightningResist": 75,
+"LightningResistOverCap": 1,
+"Mana": 430,
+"ManaCost": 86,
+"ManaPerSecondCost": 189.4752,
+"ManaRegenRecovery": 19.8,
+"ManaUnreserved": 430,
+"MeleeEvadeChance": 68,
+"MovementSpeedMod": 1.416,
+"NonHitDPS": 0,
+"PhysicalDamageReduction": 0,
+"PhysicalMaximumHitTaken": 5988,
+"PowerChargesMax": 3,
+"PreEffectiveCritChance": 24.93,
+"ProjectileEvadeChance": 68,
+"ReservationDPS": 0,
+"Speed": 2.2032,
+"SpellBlockChance": 0,
+"SpellSuppressionChance": 0,
+"Spirit": 211,
+"SpiritReserved": 207,
+"SpiritUnreserved": 4,
+"Str": 110,
+"TotalDPS": 10067.676691443,
+"TotalDot": 0,
+"TotalDotDPS": 0,
+"TotalEHP": 36216.356665152,
+"Ward": 42,
+"WithBleedDPS": 10067.676691443,
+"WithIgniteDPS": 10067.676691443,
+"WithPoisonDPS": 10067.676691443
+}
+}
+},
+{
+"line": 219,
+"tags": {
+"activationCounts": {
+"manual": 6,
+"persistent": 1,
+"proxy": 0,
+"triggered": 1
+},
+"allocatedNodeCount": 133,
+"anyManualSpell": true,
+"ascendancy": "Blood Mage",
+"ascendancyNodes": [
+{
+"id": 3165,
+"name": "Life",
+"type": "Normal"
+},
+{
+"id": 8415,
+"name": "Sanguimancy",
+"type": "Notable"
+},
+{
+"id": 26383,
+"name": "Sunder the Flesh",
+"type": "Notable"
+},
+{
+"id": 30117,
+"name": "Spell Critical Chance",
+"type": "Normal"
+},
+{
+"id": 47442,
+"name": "Life Flasks",
+"type": "Normal"
+},
+{
+"id": 48551,
+"name": "Spell Critical Chance",
+"type": "Normal"
+},
+{
+"id": 52703,
+"name": "Gore Spike",
+"type": "Notable"
+},
+{
+"id": 56162,
+"name": "Grasping Wounds",
+"type": "Notable"
+},
+{
+"id": 65518,
+"name": "Sanguine Tides",
+"type": "Notable"
+}
+],
+"className": "Witch",
+"grantedSkills": [
+{
+"activation": "persistent",
+"name": "Life Remnants",
+"source": "Tree:8415"
+},
+{
+"activation": "manual",
+"name": "Power Siphon",
+"source": "Golem Spell"
+},
+{
+"activation": "manual",
+"name": "Parry",
+"source": "Nocturne"
+},
+{
+"activation": "persistent",
+"name": "Cast on Critical",
+"source": "Glyph Pendant"
+}
+],
+"itemGrantedManualDamagingSkills": [],
+"items": [
+{
+"base": "Absent Amulet",
+"name": "Glyph Pendant",
+"rarity": "RARE",
+"slot": "Amulet"
+},
+{
+"base": "Heavy Belt",
+"name": "Headhunter",
+"rarity": "UNIQUE",
+"slot": "Belt"
+},
+{
+"base": "Conqueror Plate",
+"name": "Kaom's Heart",
+"rarity": "UNIQUE",
+"slot": "Body Armour"
+},
+{
+"base": "Runeforged Cavalry Boots",
+"name": "Corpse Pace",
+"rarity": "RARE",
+"slot": "Boots"
+},
+{
+"base": "Runeforged Polished Bracers",
+"name": "Sorrow Grasp",
+"rarity": "RARE",
+"slot": "Gloves"
+},
+{
+"base": "Martyr Crown",
+"name": "Veil of the Night",
+"rarity": "UNIQUE",
+"slot": "Helmet"
+},
+{
+"base": "Time-Lost Sapphire",
+"name": "Dragon Wound",
+"rarity": "RARE",
+"slot": "Jewel 21984"
+},
+{
+"base": "Diamond",
+"name": "Megalomaniac",
+"rarity": "UNIQUE",
+"slot": "Jewel 26196"
+},
+{
+"base": "Time-Lost Sapphire",
+"name": "Armageddon Ornament",
+"rarity": "RARE",
+"slot": "Jewel 32763"
+},
+{
+"base": "Sapphire",
+"name": "Apocalypse Desire",
+"rarity": "RARE",
+"slot": "Jewel 61419"
+},
+{
+"base": "Diamond",
+"name": "Heart of the Well",
+"rarity": "UNIQUE",
+"slot": "Jewel 61834"
+},
+{
+"base": "Diamond",
+"name": "From Nothing",
+"rarity": "UNIQUE",
+"slot": "Jewel 7960"
+},
+{
+"base": "Gold Ring",
+"name": "Onslaught Finger",
+"rarity": "RARE",
+"slot": "Ring 1"
+},
+{
+"base": "Ring",
+"name": "Kalandra's Touch",
+"rarity": "UNIQUE",
+"slot": "Ring 2"
+},
+{
+"base": "Siphoning Wand",
+"name": "Golem Spell",
+"rarity": "RARE",
+"slot": "Weapon 1"
+},
+{
+"base": "Sacred Focus",
+"name": "Rathpith Globe",
+"rarity": "UNIQUE",
+"slot": "Weapon 2"
+}
+],
+"keystones": [],
+"level": 98,
+"manualDamagingSkillNames": [
+"Parry",
+"Flame Wall",
+"Spark",
+"Frost Bomb",
+"Orb of Storms"
+],
+"manualDamagingSkills": 5,
+"noCast": false,
+"notables": [
+{
+"id": 1506,
+"name": "Remnant Attraction"
+},
+{
+"id": 2335,
+"name": "Turn the Clock Forward"
+},
+{
+"id": 4810,
+"name": "Sanguine Tolerance"
+},
+{
+"id": 5501,
+"name": "Critical Overload"
+},
+{
+"id": 7782,
+"name": "Rupturing Pins"
+},
+{
+"id": 8831,
+"name": "Tempered Mind"
+},
+{
+"id": 10295,
+"name": "Overzealous"
+},
+{
+"id": 10398,
+"name": "Sudden Escalation"
+},
+{
+"id": 11838,
+"name": "Dreamcatcher"
+},
+{
+"id": 13407,
+"name": "Heartbreaking"
+},
+{
+"id": 13823,
+"name": "Controlling Magic"
+},
+{
+"id": 16466,
+"name": "Mental Alacrity"
+},
+{
+"id": 20677,
+"name": "For the Jugular"
+},
+{
+"id": 24721,
+"name": "Brain Freeze"
+},
+{
+"id": 26563,
+"name": "Bone Chains"
+},
+{
+"id": 27513,
+"name": "Material Solidification"
+},
+{
+"id": 28267,
+"name": "Desensitisation"
+},
+{
+"id": 32951,
+"name": "Preservation"
+},
+{
+"id": 35031,
+"name": "Chakra of Life"
+},
+{
+"id": 35564,
+"name": "Turn the Clock Back"
+},
+{
+"id": 36302,
+"name": "Practiced Signs"
+},
+{
+"id": 38342,
+"name": "Stupefy"
+},
+{
+"id": 38535,
+"name": "Stormcharged"
+},
+{
+"id": 38537,
+"name": "Heartstopping"
+},
+{
+"id": 41394,
+"name": "Invigorating Archon"
+},
+{
+"id": 43633,
+"name": "Energising Archon"
+},
+{
+"id": 47514,
+"name": "Dizzying Hits"
+},
+{
+"id": 50498,
+"name": "Brain Storm"
+},
+{
+"id": 51184,
+"name": "Raw Destruction"
+},
+{
+"id": 56265,
+"name": "Throatseeker"
+},
+{
+"id": 58016,
+"name": "All Natural"
+},
+{
+"id": 63400,
+"name": "Chakra of Elements"
+}
+],
+"oneButton": false,
+"oneButtonInclItemSkills": false,
+"socketGroups": [
+{
+"active": "Life Remnants",
+"enabled": true,
+"gems": [
+{
+"activation": "persistent",
+"damaging": false,
+"enabled": true,
+"id": "LifeRemnantsPlayer",
+"itemGranted": true,
+"known": true,
+"level": 20,
+"name": "Life Remnants",
+"proxyKind": [],
+"quality": 0,
+"spell": false,
+"support": false,
+"types": [
+"AttackInPlace",
+"Buff",
+"GeneratesRemnants",
+"HasReservation",
+"OngoingSkill",
+"Persistent"
+],
+"weaponDefault": false
+},
+{
+"enabled": true,
+"id": "SupportFleetingRemnantsPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Harmonic Remnants II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportInterludePlayerThree",
+"known": true,
+"level": 1,
+"name": "Remnant Potency III",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportKhatalsRejuvenationPlayer",
+"known": true,
+"level": 1,
+"name": "Khatal's Rejuvenation",
+"quality": 0,
+"support": true
+}
+],
+"grantedBy": "Tree:8415",
+"includeInFullDPS": false,
+"index": 1,
+"main": false,
+"metaGroup": false,
+"supports": [
+"Harmonic Remnants II",
+"Remnant Potency III",
+"Khatal's Rejuvenation"
+]
+},
+{
+"active": "Power Siphon",
+"enabled": true,
+"gems": [
+{
+"activation": "manual",
+"damaging": true,
+"enabled": true,
+"id": "PowerSiphonPlayer",
+"itemGranted": true,
+"known": true,
+"level": 18,
+"name": "Power Siphon",
+"proxyKind": [],
+"quality": 0,
+"spell": true,
+"support": false,
+"types": [
+"Damage",
+"GeneratesCharges",
+"Mineable",
+"Physical",
+"Spell",
+"Totemable",
+"Trappable",
+"UsableWhileMoving"
+],
+"weaponDefault": false
+}
+],
+"grantedBy": "Golem Spell",
+"includeInFullDPS": false,
+"index": 2,
+"main": false,
+"metaGroup": false,
+"slot": "Weapon 1",
+"supports": []
+},
+{
+"active": "Cast on Critical",
+"enabled": true,
+"gems": [
+{
+"activation": "persistent",
+"damaging": false,
+"enabled": true,
+"id": "MetaCastOnCritPlayer",
+"itemGranted": false,
+"known": true,
+"level": 18,
+"name": "Cast on Critical",
+"proxyKind": [],
+"quality": 0,
+"spell": false,
+"support": false,
+"types": [
+"Buff",
+"CanHaveMultipleOngoingSkillInstances",
+"GeneratesEnergy",
+"HasReservation",
+"Meta",
+"OngoingSkill",
+"Persistent",
+"Triggers"
+],
+"weaponDefault": false
+},
+{
+"activation": "triggered",
+"damaging": false,
+"enabled": true,
+"id": "PoweredByVerisiumPlayer",
+"itemGranted": false,
+"known": true,
+"level": 20,
+"name": "Powered by Verisium",
+"proxyKind": [],
+"quality": 20,
+"spell": true,
+"support": false,
+"types": [
+"Cooldown",
+"GeneratesInfusion",
+"Multicastable",
+"Spell",
+"Triggerable",
+"Triggered",
+"Unleashable"
+],
+"weaponDefault": false
+},
+{
+"enabled": true,
+"id": "SupportEfficiencyPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Efficiency II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportCooldownRecoveryPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Cooldown Recovery II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportBoundlessEnergyPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Boundless Energy II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportEnergyRetentionPlayer",
+"known": true,
+"level": 1,
+"name": "Energy Retention",
+"quality": 0,
+"support": true
+}
+],
+"includeInFullDPS": false,
+"index": 3,
+"main": false,
+"metaGroup": true,
+"supports": [
+"Efficiency II",
+"Cooldown Recovery II",
+"Boundless Energy II",
+"Energy Retention"
+]
+},
+{
+"active": "Parry",
+"enabled": true,
+"gems": [
+{
+"activation": "manual",
+"damaging": true,
+"enabled": true,
+"id": "ParryPlayer",
+"itemGranted": false,
+"known": true,
+"level": 1,
+"name": "Parry",
+"proxyKind": [],
+"quality": 0,
+"spell": false,
+"support": false,
+"types": [
+"ActiveBlock",
+"Attack",
+"Channel",
+"Duration",
+"Melee",
+"Physical",
+"RequiresBuckler",
+"UsableWhileMoving"
+],
+"weaponDefault": false
+},
+{
+"enabled": true,
+"id": "SupportZerphisLegacyPlayer",
+"known": true,
+"level": 1,
+"name": "Zerphi's Infamy",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportRapidAttacksPlayerThree",
+"known": true,
+"level": 1,
+"name": "Rapid Attacks III",
+"quality": 0,
+"support": true
+}
+],
+"includeInFullDPS": false,
+"index": 4,
+"main": false,
+"metaGroup": false,
+"supports": [
+"Zerphi's Infamy",
+"Rapid Attacks III"
+]
+},
+{
+"active": "Flame Wall",
+"enabled": true,
+"gems": [
+{
+"activation": "manual",
+"damaging": true,
+"enabled": true,
+"id": "FlameWallPlayer",
+"itemGranted": false,
+"known": true,
+"level": 20,
+"name": "Flame Wall",
+"proxyKind": [],
+"quality": 20,
+"spell": true,
+"support": false,
+"types": [
+"Area",
+"AreaSpell",
+"Cascadable",
+"CausesBurning",
+"Damage",
+"DamageOverTime",
+"Duration",
+"Fire",
+"Mineable",
+"Multicastable",
+"Spell",
+"Totemable",
+"Trappable",
+"Triggerable",
+"Unleashable",
+"UsableWhileMoving",
+"Wall"
+],
+"weaponDefault": false
+},
+{
+"enabled": true,
+"id": "SupportRapidCastingPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Rapid Casting II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportEfficiencyPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Efficiency II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportBloodMagicPlayer",
+"known": true,
+"level": 1,
+"name": "Lifetap",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportWallFortressPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Fortress II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "ProlongedDurationSupportPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Prolonged Duration II",
+"quality": 0,
+"support": true
+}
+],
+"includeInFullDPS": false,
+"index": 5,
+"main": false,
+"metaGroup": false,
+"supports": [
+"Rapid Casting II",
+"Efficiency II",
+"Lifetap",
+"Fortress II",
+"Prolonged Duration II"
+]
+},
+{
+"active": "Spark",
+"enabled": true,
+"gems": [
+{
+"activation": "manual",
+"damaging": true,
+"enabled": true,
+"id": "SparkPlayer",
+"itemGranted": false,
+"known": true,
+"level": 20,
+"name": "Spark",
+"proxyKind": [],
+"quality": 20,
+"spell": true,
+"support": false,
+"types": [
+"Damage",
+"Duration",
+"Invokable",
+"Lightning",
+"Mineable",
+"Multicastable",
+"Projectile",
+"ProjectilesFromUser",
+"Spell",
+"Totemable",
+"Trappable",
+"Triggerable",
+"Unleashable",
+"UsableWhileMoving"
+],
+"weaponDefault": false
+},
+{
+"enabled": true,
+"id": "SupportZenithPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Zenith II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportPiercePlayerTwo",
+"known": true,
+"level": 1,
+"name": "Pierce II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportVilentasPropulsionPlayer",
+"known": true,
+"level": 1,
+"name": "Vilenta's Propulsion",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportAtaluiBloodlettingPlayer",
+"known": true,
+"level": 1,
+"name": "Atalui's Bloodletting",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportRakiatasFlowPlayer",
+"known": true,
+"level": 1,
+"name": "Rakiata's Flow",
+"quality": 0,
+"support": true
+}
+],
+"includeInFullDPS": false,
+"index": 6,
+"main": true,
+"metaGroup": false,
+"supports": [
+"Zenith II",
+"Pierce II",
+"Vilenta's Propulsion",
+"Atalui's Bloodletting",
+"Rakiata's Flow"
+]
+},
+{
+"active": "Frost Bomb",
+"enabled": true,
+"gems": [
+{
+"activation": "manual",
+"damaging": true,
+"enabled": true,
+"id": "FrostBombPlayer",
+"itemGranted": false,
+"known": true,
+"level": 19,
+"name": "Frost Bomb",
+"proxyKind": [],
+"quality": 20,
+"spell": true,
+"support": false,
+"types": [
+"Area",
+"AreaSpell",
+"Cascadable",
+"Cold",
+"Cooldown",
+"Damage",
+"DetonatesAfterTime",
+"Duration",
+"GeneratesInfusion",
+"GeneratesRemnants",
+"Invokable",
+"Limit",
+"Mineable",
+"Multicastable",
+"Orb",
+"Spell",
+"Totemable",
+"Trappable",
+"Triggerable",
+"UsableWhileMoving"
+],
+"weaponDefault": false
+},
+{
+"enabled": true,
+"id": "SupportSecondWindPlayerThree",
+"known": true,
+"level": 1,
+"name": "Second Wind III",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportShortFusePlayerTwo",
+"known": true,
+"level": 1,
+"name": "Short Fuse II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportFleetingRemnantsPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Harmonic Remnants II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportSpellEchoPlayer",
+"known": true,
+"level": 1,
+"name": "Spell Echo",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportBloodMagicPlayer",
+"known": true,
+"level": 1,
+"name": "Lifetap",
+"quality": 0,
+"support": true
+}
+],
+"includeInFullDPS": false,
+"index": 7,
+"main": false,
+"metaGroup": false,
+"supports": [
+"Second Wind III",
+"Short Fuse II",
+"Harmonic Remnants II",
+"Spell Echo",
+"Lifetap"
+]
+},
+{
+"active": "Orb of Storms",
+"enabled": true,
+"gems": [
+{
+"activation": "manual",
+"damaging": true,
+"enabled": true,
+"id": "OrbOfStormsPlayer",
+"itemGranted": false,
+"known": true,
+"level": 20,
+"name": "Orb of Storms",
+"proxyKind": [],
+"quality": 20,
+"spell": true,
+"support": false,
+"types": [
+"Area",
+"AreaSpell",
+"Chains",
+"Damage",
+"Duration",
+"GeneratesInfusion",
+"GeneratesRemnants",
+"Lightning",
+"Limit",
+"Mineable",
+"Orb",
+"Spell",
+"Sustained",
+"Totemable",
+"Trappable",
+"Triggerable",
+"Unleashable",
+"UsableWhileMoving"
+],
+"weaponDefault": false
+},
+{
+"enabled": true,
+"id": "SupportBloodMagicPlayer",
+"known": true,
+"level": 1,
+"name": "Lifetap",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportFleetingRemnantsPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Harmonic Remnants II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportIncreaseLimitPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Overabundance II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "CompressedDurationSupportPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Compressed Duration II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportRapidCastingPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Rapid Casting II",
+"quality": 0,
+"support": true
+}
+],
+"includeInFullDPS": false,
+"index": 8,
+"main": false,
+"metaGroup": false,
+"supports": [
+"Lifetap",
+"Harmonic Remnants II",
+"Overabundance II",
+"Compressed Duration II",
+"Rapid Casting II"
+]
+},
+{
+"active": "Refutation",
+"enabled": true,
+"gems": [
+{
+"activation": "manual",
+"damaging": false,
+"enabled": true,
+"id": "RefutationPlayer",
+"itemGranted": false,
+"known": true,
+"level": 18,
+"name": "Refutation",
+"proxyKind": [],
+"quality": 20,
+"spell": true,
+"support": false,
+"types": [
+"Buff",
+"Cooldown",
+"Duration",
+"Spell",
+"Triggerable",
+"Unleashable",
+"UsableWhileMoving"
+],
+"weaponDefault": false
+},
+{
+"enabled": true,
+"id": "SupportRapidCastingPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Rapid Casting II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportEfficiencyPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Efficiency II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportCooldownRecoveryPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Cooldown Recovery II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "ProlongedDurationSupportPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Prolonged Duration II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportMobilityPlayer",
+"known": true,
+"level": 1,
+"name": "Mobility",
+"quality": 0,
+"support": true
+}
+],
+"includeInFullDPS": false,
+"index": 9,
+"main": false,
+"metaGroup": false,
+"supports": [
+"Rapid Casting II",
+"Efficiency II",
+"Cooldown Recovery II",
+"Prolonged Duration II",
+"Mobility"
+]
+},
+{
+"active": "Parry",
+"enabled": true,
+"gems": [
+{
+"activation": "manual",
+"damaging": true,
+"enabled": true,
+"id": "ParryPlayer",
+"itemGranted": true,
+"known": true,
+"level": 1,
+"name": "Parry",
+"proxyKind": [],
+"quality": 0,
+"spell": false,
+"support": false,
+"types": [
+"ActiveBlock",
+"Attack",
+"Channel",
+"Duration",
+"Melee",
+"Physical",
+"RequiresBuckler",
+"UsableWhileMoving"
+],
+"weaponDefault": false
+}
+],
+"grantedBy": "Nocturne",
+"includeInFullDPS": false,
+"index": 10,
+"main": false,
+"metaGroup": false,
+"slot": "Weapon 2 Swap",
+"supports": []
+},
+{
+"active": "Cast on Critical",
+"enabled": true,
+"gems": [
+{
+"activation": "persistent",
+"damaging": false,
+"enabled": true,
+"id": "MetaCastOnCritPlayer",
+"itemGranted": true,
+"known": true,
+"level": 18,
+"name": "Cast on Critical",
+"proxyKind": [],
+"quality": 0,
+"spell": false,
+"support": false,
+"types": [
+"Buff",
+"CanHaveMultipleOngoingSkillInstances",
+"GeneratesEnergy",
+"HasReservation",
+"Meta",
+"OngoingSkill",
+"Persistent",
+"Triggers"
+],
+"weaponDefault": false
+}
+],
+"grantedBy": "Glyph Pendant",
+"includeInFullDPS": false,
+"index": 11,
+"main": false,
+"metaGroup": true,
+"slot": "Amulet",
+"supports": []
+}
+],
+"uniques": [
+"Headhunter",
+"Kaom's Heart",
+"Veil of the Night",
+"Megalomaniac",
+"Heart of the Well",
+"From Nothing",
+"Kalandra's Touch",
+"Rathpith Globe"
+],
+"unsupportedModLines": 19
+},
+"pinnacle_locked": {
+"mainSkill": {
+"flags": [],
+"id": "SparkPlayer",
+"name": "Spark",
+"types": [
+"Damage",
+"Duration",
+"Invokable",
+"Lightning",
+"Mineable",
+"Multicastable",
+"Projectile",
+"ProjectilesFromUser",
+"Spell",
+"Totemable",
+"Trappable",
+"Triggerable",
+"Unleashable",
+"UsableWhileMoving"
+]
+},
+"minionStats": null,
+"stats": {
+"Armour": 884,
+"AverageBurstDamage": 167578.50103357,
+"AverageDamage": 167578.50103357,
+"AverageHit": 167578.50103357,
+"BleedDPS": 11078.456790767,
+"BlockChance": 0,
+"ChaosMaximumHitTaken": 9995,
+"ChaosResist": 0,
+"ChaosResistOverCap": 0,
+"CharmLimit": 3,
+"ColdMaximumHitTaken": 10112,
+"ColdResist": 0,
+"ColdResistOverCap": 0,
+"CombinedDPS": 646868.97139964,
+"CritChance": 99.75,
+"CritMultiplier": 12.26,
+"CullingDPS": 0,
+"DeflectChance": 0,
+"Dex": 102,
+"EffectiveBlockChance": 0,
+"EffectiveSpellBlockChance": 0,
+"EnduranceChargesMax": 3,
+"EnergyShield": 234,
+"EnergyShieldRecharge": 29.3,
+"EvadeChance": 6,
+"Evasion": 575,
+"FireMaximumHitTaken": 10112,
+"FireResist": 0,
+"FireResistOverCap": 0,
+"FrenzyChargesMax": 3,
+"FullDPS": 0,
+"HitChance": 100,
+"HitDamageByType": {
+"Cold": 1507.1,
+"Fire": 1763.3,
+"Lightning": 8447.6,
+"Physical": 1467.6282298496
+},
+"IgniteDPS": 3780.1678537055,
+"Int": 161,
+"Life": 7196,
+"LifeRegenRecovery": 0,
+"LifeUnreserved": 7196,
+"LightningMaximumHitTaken": 10112,
+"LightningResist": 0,
+"LightningResistOverCap": 0,
+"Mana": 956,
+"ManaCost": 0,
+"ManaPerSecondCost": 0,
+"ManaRegenRecovery": 44,
+"ManaUnreserved": 956,
+"MeleeEvadeChance": 6,
+"MovementSpeedMod": 1.207,
+"NonHitDPS": 14858.624644473,
+"PhysicalDamageReduction": 8,
+"PhysicalMaximumHitTaken": 10199,
+"PowerChargesMax": 3,
+"PreEffectiveCritChance": 99.75,
+"ProjectileEvadeChance": 6,
+"ReservationDPS": 0,
+"Speed": 3.7714285714286,
+"SpellBlockChance": 0,
+"SpellSuppressionChance": 0,
+"Spirit": 0,
+"SpiritReserved": 0,
+"SpiritUnreserved": -100,
+"Str": 203,
+"TotalDPS": 632010.34675516,
+"TotalDot": 0,
+"TotalDotDPS": 14858.624644473,
+"TotalEHP": 221334.04255319,
+"Ward": 283,
+"WithBleedDPS": 643088.80354593,
+"WithIgniteDPS": 635790.51460887,
+"WithPoisonDPS": 632010.34675516
+}
+},
+"as_exported": {
+"mainSkill": {
+"flags": [],
+"id": "SparkPlayer",
+"name": "Spark",
+"types": [
+"Damage",
+"Duration",
+"Invokable",
+"Lightning",
+"Mineable",
+"Multicastable",
+"Projectile",
+"ProjectilesFromUser",
+"Spell",
+"Totemable",
+"Trappable",
+"Triggerable",
+"Unleashable",
+"UsableWhileMoving"
+]
+},
+"minionStats": null,
+"stats": {
+"Armour": 884,
+"AverageBurstDamage": 195277.20434772,
+"AverageDamage": 195277.20434772,
+"AverageHit": 195277.20434772,
+"BleedDPS": 13369.541559429,
+"BlockChance": 0,
+"ChaosMaximumHitTaken": 9995,
+"ChaosResist": 0,
+"ChaosResistOverCap": 0,
+"CharmLimit": 3,
+"ColdMaximumHitTaken": 10112,
+"ColdResist": 0,
+"ColdResistOverCap": 0,
+"CombinedDPS": 781244.97129115,
+"CritChance": 100,
+"CritMultiplier": 12.26,
+"CullingDPS": 0,
+"DeflectChance": 0,
+"Dex": 102,
+"EffectiveBlockChance": 0,
+"EffectiveSpellBlockChance": 0,
+"EnduranceChargesMax": 3,
+"EnergyShield": 234,
+"EnergyShieldRecharge": 29.3,
+"EvadeChance": 6,
+"Evasion": 575,
+"FireMaximumHitTaken": 10112,
+"FireResist": 0,
+"FireResistOverCap": 0,
+"FrenzyChargesMax": 3,
+"FullDPS": 0,
+"HitChance": 100,
+"HitDamageByType": {
+"Cold": 1759.8,
+"Fire": 2725.1,
+"Lightning": 9116.1,
+"Physical": 1788.0339661589
+},
+"IgniteDPS": 9084.0071234361,
+"Int": 161,
+"Life": 7196,
+"LifeRegenRecovery": 0,
+"LifeUnreserved": 7196,
+"LightningMaximumHitTaken": 10112,
+"LightningResist": 0,
+"LightningResistOverCap": 0,
+"Mana": 956,
+"ManaCost": 0,
+"ManaPerSecondCost": 0,
+"ManaRegenRecovery": 44,
+"ManaUnreserved": 956,
+"MeleeEvadeChance": 6,
+"MovementSpeedMod": 1.207,
+"NonHitDPS": 22453.548682865,
+"PhysicalDamageReduction": 8,
+"PhysicalMaximumHitTaken": 10199,
+"PowerChargesMax": 3,
+"PreEffectiveCritChance": 100,
+"ProjectileEvadeChance": 6,
+"ReservationDPS": 0,
+"Speed": 3.8857142857143,
+"SpellBlockChance": 0,
+"SpellSuppressionChance": 0,
+"Spirit": 0,
+"SpiritReserved": 0,
+"SpiritUnreserved": -100,
+"Str": 203,
+"TotalDPS": 758791.42260829,
+"TotalDot": 0,
+"TotalDotDPS": 22453.548682865,
+"TotalEHP": 221334.04255319,
+"Ward": 283,
+"WithBleedDPS": 772160.96416772,
+"WithIgniteDPS": 767875.42973173,
+"WithPoisonDPS": 758791.42260829
+}
+}
+},
+{
+"line": 563,
+"tags": {
+"activationCounts": {
+"manual": 6,
+"persistent": 3,
+"proxy": 0,
+"triggered": 0
+},
+"allocatedNodeCount": 118,
+"anyManualSpell": true,
+"ascendancy": "Lich",
+"ascendancyNodes": [
+{
+"id": 17788,
+"name": "Crystalline Phylactery",
+"type": "Notable"
+},
+{
+"id": 28431,
+"name": "Eternal Life",
+"type": "Notable"
+},
+{
+"id": 33141,
+"name": "Life",
+"type": "Normal"
+},
+{
+"id": 33570,
+"name": "Soulless Form",
+"type": "Notable"
+},
+{
+"id": 36696,
+"name": "Life",
+"type": "Normal"
+},
+{
+"id": 58751,
+"name": "Energy Shield",
+"type": "Normal"
+}
+],
+"className": "Witch",
+"grantedSkills": [
+{
+"activation": "manual",
+"name": "Chaos Bolt",
+"source": "Foe Branch"
+},
+{
+"activation": "manual",
+"name": "Mana Drain",
+"source": "Oblivion Gnarl"
+}
+],
+"itemGrantedManualDamagingSkills": [
+"Chaos Bolt"
+],
+"items": [
+{
+"base": "Corona Amulet",
+"name": "Empyrean Beads",
+"rarity": "RARE",
+"slot": "Amulet"
+},
+{
+"base": "Rawhide Belt",
+"name": "Midnight Braid",
+"rarity": "UNIQUE",
+"slot": "Belt"
+},
+{
+"base": "Elementalist Robe",
+"name": "Gloamgown",
+"rarity": "UNIQUE",
+"slot": "Body Armour"
+},
+{
+"base": "Sekhema Sandals",
+"name": "Foe Span",
+"rarity": "RARE",
+"slot": "Boots"
+},
+{
+"base": "Stitched Gloves",
+"name": "Doedre's Tenure",
+"rarity": "UNIQUE",
+"slot": "Gloves"
+},
+{
+"base": "Kamasan Tiara",
+"name": "Morbid Crest",
+"rarity": "RARE",
+"slot": "Helmet"
+},
+{
+"base": "Sapphire",
+"name": "Spirit Drop",
+"rarity": "RARE",
+"slot": "Jewel 17788"
+},
+{
+"base": "Sapphire",
+"name": "Blight Splinter",
+"rarity": "RARE",
+"slot": "Jewel 21984"
+},
+{
+"base": "Diamond",
+"name": "Megalomaniac",
+"rarity": "UNIQUE",
+"slot": "Jewel 61419"
+},
+{
+"base": "Diamond",
+"name": "Prism of Belief",
+"rarity": "UNIQUE",
+"slot": "Jewel 7960"
+},
+{
+"base": "Gold Ring",
+"name": "Dire Gyre",
+"rarity": "RARE",
+"slot": "Ring 1"
+},
+{
+"base": "Unset Ring",
+"name": "Mind Gyre",
+"rarity": "RARE",
+"slot": "Ring 2"
+},
+{
+"base": "Withered Wand",
+"name": "Foe Branch",
+"rarity": "RARE",
+"slot": "Weapon 1"
+},
+{
+"base": "Druidic Focus",
+"name": "Dragon Pith",
+"rarity": "RARE",
+"slot": "Weapon 2"
+}
+],
+"keystones": [
+{
+"id": 42680,
+"name": "Blackflame Covenant"
+},
+{
+"id": 56349,
+"name": "Chaos Inoculation"
+}
+],
+"level": 86,
+"manualDamagingSkillNames": [
+"Detonate Dead",
+"Bone Cage",
+"Flameblast",
+"Despair",
+"Bonestorm",
+"Ice Nova"
+],
+"manualDamagingSkills": 6,
+"noCast": false,
+"notables": [
+{
+"id": 94,
+"name": "Efficient Killing"
+},
+{
+"id": 2254,
+"name": "Pure Energy"
+},
+{
+"id": 2335,
+"name": "Turn the Clock Forward"
+},
+{
+"id": 3215,
+"name": "Melding"
+},
+{
+"id": 4931,
+"name": "Dependable Ward"
+},
+{
+"id": 5501,
+"name": "Critical Overload"
+},
+{
+"id": 8397,
+"name": "Empowering Remains"
+},
+{
+"id": 9642,
+"name": "Dampening Shield"
+},
+{
+"id": 10398,
+"name": "Sudden Escalation"
+},
+{
+"id": 13823,
+"name": "Controlling Magic"
+},
+{
+"id": 16790,
+"name": "Efficient Casting"
+},
+{
+"id": 19125,
+"name": "Potent Incantation"
+},
+{
+"id": 27491,
+"name": "Heavy Buffer"
+},
+{
+"id": 36302,
+"name": "Practiced Signs"
+},
+{
+"id": 42077,
+"name": "Essence Infusion"
+},
+{
+"id": 46197,
+"name": "Careful Assassin"
+},
+{
+"id": 51169,
+"name": "Soul Bloom"
+},
+{
+"id": 51184,
+"name": "Raw Destruction"
+},
+{
+"id": 51335,
+"name": "Jagged Shards"
+},
+{
+"id": 57204,
+"name": "Critical Exploit"
+},
+{
+"id": 60269,
+"name": "Roil"
+},
+{
+"id": 62230,
+"name": "Patient Barrier"
+}
+],
+"oneButton": false,
+"oneButtonInclItemSkills": false,
+"socketGroups": [
+{
+"active": "Chaos Bolt",
+"enabled": true,
+"gems": [
+{
+"activation": "manual",
+"damaging": true,
+"enabled": true,
+"id": "WeaponGrantedChaosboltPlayer",
+"itemGranted": true,
+"known": true,
+"level": 19,
+"name": "Chaos Bolt",
+"proxyKind": [],
+"quality": 0,
+"spell": true,
+"support": false,
+"types": [
+"Chaos",
+"Damage",
+"Invokable",
+"Mineable",
+"Multicastable",
+"Projectile",
+"ProjectilesFromUser",
+"Spell",
+"Totemable",
+"Trappable",
+"Triggerable",
+"Unleashable",
+"UsableWhileMoving"
+],
+"weaponDefault": false
+},
+{
+"enabled": true,
+"id": "SupportRapidCastingPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Rapid Casting II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportGambleshotPlayer",
+"known": true,
+"level": 1,
+"name": "Gambleshot",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportProjectileAccelerationPlayerThree",
+"known": true,
+"level": 1,
+"name": "Projectile Acceleration III",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportExtractionPlayer",
+"known": true,
+"level": 1,
+"name": "Extraction",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportChaosMasteryPlayer",
+"known": true,
+"level": 1,
+"name": "Chaos Mastery",
+"quality": 0,
+"support": true
+}
+],
+"grantedBy": "Foe Branch",
+"includeInFullDPS": false,
+"index": 1,
+"main": false,
+"metaGroup": false,
+"slot": "Weapon 1",
+"supports": [
+"Rapid Casting II",
+"Gambleshot",
+"Projectile Acceleration III",
+"Extraction",
+"Chaos Mastery"
+]
+},
+{
+"active": "Mana Drain",
+"enabled": true,
+"gems": [
+{
+"activation": "manual",
+"damaging": false,
+"enabled": true,
+"id": "ManaDrainPlayer",
+"itemGranted": true,
+"known": true,
+"level": 19,
+"name": "Mana Drain",
+"proxyKind": [],
+"quality": 0,
+"spell": true,
+"support": false,
+"types": [
+"Mineable",
+"Spell",
+"Totemable",
+"Trappable",
+"UsableWhileMoving"
+],
+"weaponDefault": false
+}
+],
+"grantedBy": "Oblivion Gnarl",
+"includeInFullDPS": false,
+"index": 2,
+"main": false,
+"metaGroup": false,
+"slot": "Weapon 1 Swap",
+"supports": []
+},
+{
+"active": "Raging Spirits",
+"enabled": true,
+"gems": [
+{
+"activation": "persistent",
+"damaging": false,
+"enabled": true,
+"id": "RagingSpiritsPlayer",
+"itemGranted": false,
+"known": true,
+"level": 16,
+"name": "Raging Spirits",
+"proxyKind": [
+"minion"
+],
+"quality": 0,
+"spell": false,
+"support": false,
+"types": [
+"AttackInPlace",
+"Buff",
+"CreatesMinion",
+"Duration",
+"Fire",
+"HasReservation",
+"Limit",
+"Minion",
+"OngoingSkill",
+"Persistent"
+],
+"weaponDefault": false
+},
+{
+"enabled": true,
+"id": "SupportFeedingFrenzyPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Feeding Frenzy II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportMagnifiedAreaPlayer",
+"known": true,
+"level": 1,
+"name": "Magnified Area I",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportElementalArmamentPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Elemental Armament II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportFireMasteryPlayer",
+"known": true,
+"level": 1,
+"name": "Fire Mastery",
+"quality": 0,
+"support": true
+}
+],
+"includeInFullDPS": false,
+"index": 3,
+"main": false,
+"metaGroup": false,
+"supports": [
+"Feeding Frenzy II",
+"Magnified Area I",
+"Elemental Armament II",
+"Fire Mastery"
+]
+},
+{
+"active": "Detonate Dead",
+"enabled": true,
+"gems": [
+{
+"activation": "manual",
+"damaging": true,
+"enabled": true,
+"id": "DetonateDeadPlayer",
+"itemGranted": false,
+"known": true,
+"level": 19,
+"name": "Detonate Dead",
+"proxyKind": [],
+"quality": 20,
+"spell": true,
+"support": false,
+"types": [
+"Area",
+"AreaSpell",
+"Cascadable",
+"Damage",
+"Detonator",
+"Fire",
+"Mineable",
+"Multicastable",
+"Physical",
+"Spell",
+"TargetsDestructibleCorpses",
+"Totemable",
+"Trappable",
+"Triggerable",
+"Unleashable",
+"UsableWhileMoving"
+],
+"weaponDefault": false
+},
+{
+"enabled": true,
+"id": "SupportMagnifiedAreaPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Magnified Area II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportExtractionPlayer",
+"known": true,
+"level": 1,
+"name": "Extraction",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportCorpseConservationPlayer",
+"known": true,
+"level": 1,
+"name": "Corpse Conservation",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportMobilityPlayer",
+"known": true,
+"level": 1,
+"name": "Mobility",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportExecutePlayerTwo",
+"known": true,
+"level": 1,
+"name": "Execute II",
+"quality": 0,
+"support": true
+}
+],
+"includeInFullDPS": false,
+"index": 4,
+"main": true,
+"metaGroup": false,
+"supports": [
+"Magnified Area II",
+"Extraction",
+"Corpse Conservation",
+"Mobility",
+"Execute II"
+]
+},
+{
+"active": "Arctic Armour",
+"enabled": true,
+"gems": [
+{
+"activation": "persistent",
+"damaging": true,
+"enabled": true,
+"id": "ArcticArmourPlayer",
+"itemGranted": false,
+"known": true,
+"level": 17,
+"name": "Arctic Armour",
+"proxyKind": [],
+"quality": 20,
+"spell": true,
+"support": false,
+"types": [
+"AttackInPlace",
+"Buff",
+"Cold",
+"Cooldown",
+"Damage",
+"GainsStages",
+"HasReservation",
+"OngoingSkill",
+"Persistent",
+"Spell",
+"Sustained"
+],
+"weaponDefault": false
+},
+{
+"enabled": true,
+"id": "SupportFreezePlayer",
+"known": true,
+"level": 1,
+"name": "Freeze",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportColdMasteryPlayer",
+"known": true,
+"level": 1,
+"name": "Cold Mastery",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportMysticismPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Mysticism II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportLivingLightningPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Living Lightning II",
+"quality": 0,
+"support": true
+}
+],
+"includeInFullDPS": false,
+"index": 5,
+"main": false,
+"metaGroup": false,
+"supports": [
+"Freeze",
+"Cold Mastery",
+"Mysticism II",
+"Living Lightning II"
+]
+},
+{
+"active": "Bone Cage",
+"enabled": true,
+"gems": [
+{
+"activation": "manual",
+"damaging": true,
+"enabled": true,
+"id": "BoneCagePlayer",
+"itemGranted": false,
+"known": true,
+"level": 19,
+"name": "Bone Cage",
+"proxyKind": [],
+"quality": 20,
+"spell": true,
+"support": false,
+"types": [
+"Area",
+"Cascadable",
+"Damage",
+"Duration",
+"Necrotic",
+"Nova",
+"Physical",
+"Spell",
+"Totemable",
+"Triggerable",
+"Unleashable",
+"UsableWhileMoving"
+],
+"weaponDefault": false
+},
+{
+"enabled": true,
+"id": "SupportAstralProjectionPlayer",
+"known": true,
+"level": 1,
+"name": "Astral Projection",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportExecutePlayerTwo",
+"known": true,
+"level": 1,
+"name": "Execute II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportMobilityPlayer",
+"known": true,
+"level": 1,
+"name": "Mobility",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportExtractionPlayer",
+"known": true,
+"level": 1,
+"name": "Extraction",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportMagnifiedAreaPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Magnified Area II",
+"quality": 0,
+"support": true
+}
+],
+"includeInFullDPS": false,
+"index": 6,
+"main": false,
+"metaGroup": false,
+"supports": [
+"Astral Projection",
+"Execute II",
+"Mobility",
+"Extraction",
+"Magnified Area II"
+]
+},
+{
+"active": "Flameblast",
+"enabled": true,
+"gems": [
+{
+"activation": "manual",
+"damaging": true,
+"enabled": true,
+"id": "FlameblastPlayer",
+"itemGranted": false,
+"known": true,
+"level": 19,
+"name": "Flameblast",
+"proxyKind": [],
+"quality": 20,
+"spell": true,
+"support": false,
+"types": [
+"Area",
+"AreaSpell",
+"Channel",
+"Cooldown",
+"Damage",
+"Fire",
+"GainsStages",
+"Nova",
+"Spell",
+"Totemable",
+"UsableWhileMoving"
+],
+"weaponDefault": false
+},
+{
+"enabled": true,
+"id": "SupportAstralProjectionPlayer",
+"known": true,
+"level": 1,
+"name": "Astral Projection",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportSecondWindPlayerThree",
+"known": true,
+"level": 1,
+"name": "Second Wind III",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportConsideredCastingPlayer",
+"known": true,
+"level": 1,
+"name": "Considered Casting",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportExtractionPlayer",
+"known": true,
+"level": 1,
+"name": "Extraction",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportFireMasteryPlayer",
+"known": true,
+"level": 1,
+"name": "Fire Mastery",
+"quality": 0,
+"support": true
+}
+],
+"includeInFullDPS": false,
+"index": 7,
+"main": false,
+"metaGroup": false,
+"supports": [
+"Astral Projection",
+"Second Wind III",
+"Considered Casting",
+"Extraction",
+"Fire Mastery"
+]
+},
+{
+"active": "Despair",
+"enabled": true,
+"gems": [
+{
+"activation": "manual",
+"damaging": true,
+"enabled": true,
+"id": "DespairPlayer",
+"itemGranted": false,
+"known": true,
+"level": 19,
+"name": "Despair",
+"proxyKind": [],
+"quality": 0,
+"spell": true,
+"support": false,
+"types": [
+"AppliesCurse",
+"Area",
+"AreaSpell",
+"Cascadable",
+"Chaos",
+"Damage",
+"DamageOverTime",
+"Duration",
+"Mineable",
+"Multicastable",
+"Spell",
+"Totemable",
+"Trappable",
+"Triggerable",
+"Unleashable",
+"UsableWhileMoving"
+],
+"weaponDefault": false
+},
+{
+"enabled": true,
+"id": "SupportDecayingHexPlayer",
+"known": true,
+"level": 1,
+"name": "Decaying Hex",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportBurningRunesPlayer",
+"known": true,
+"level": 1,
+"name": "Burning Inscription",
+"quality": 0,
+"support": true
+}
+],
+"includeInFullDPS": false,
+"index": 8,
+"main": false,
+"metaGroup": false,
+"supports": [
+"Decaying Hex",
+"Burning Inscription"
+]
+},
+{
+"active": "Convalescence",
+"enabled": true,
+"gems": [
+{
+"activation": "persistent",
+"damaging": false,
+"enabled": true,
+"id": "ConvalescencePlayer",
+"itemGranted": false,
+"known": true,
+"level": 17,
+"name": "Convalescence",
+"proxyKind": [],
+"quality": 20,
+"spell": false,
+"support": false,
+"types": [
+"AttackInPlace",
+"Buff",
+"HasReservation",
+"OngoingSkill",
+"Persistent",
+"ReserveInAllSets"
+],
+"weaponDefault": false
+},
+{
+"enabled": true,
+"id": "SupportSecondWindPlayerThree",
+"known": true,
+"level": 1,
+"name": "Second Wind III",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportCooldownRecoveryPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Cooldown Recovery II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "ProlongedDurationSupportPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Prolonged Duration II",
+"quality": 0,
+"support": true
+}
+],
+"includeInFullDPS": false,
+"index": 9,
+"main": false,
+"metaGroup": false,
+"supports": [
+"Second Wind III",
+"Cooldown Recovery II",
+"Prolonged Duration II"
+]
+},
+{
+"active": "Bonestorm",
+"enabled": true,
+"gems": [
+{
+"activation": "manual",
+"damaging": true,
+"enabled": true,
+"id": "BonestormPlayer",
+"itemGranted": false,
+"known": true,
+"level": 19,
+"name": "Bonestorm",
+"proxyKind": [],
+"quality": 20,
+"spell": true,
+"support": false,
+"types": [
+"Area",
+"Channel",
+"ConsumesCharges",
+"Damage",
+"Necrotic",
+"Physical",
+"Projectile",
+"SkillConsumesPowerChargesOnUse",
+"Spell",
+"Totemable",
+"UsableWhileMoving"
+],
+"weaponDefault": false
+},
+{
+"enabled": true,
+"id": "SupportMobilityPlayer",
+"known": true,
+"level": 1,
+"name": "Mobility",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportProjectileAccelerationPlayerThree",
+"known": true,
+"level": 1,
+"name": "Projectile Acceleration III",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportBurgeonPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Burgeon II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportPinpointCriticalPlayer",
+"known": true,
+"level": 1,
+"name": "Pinpoint Critical",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportExtractionPlayer",
+"known": true,
+"level": 1,
+"name": "Extraction",
+"quality": 0,
+"support": true
+}
+],
+"includeInFullDPS": false,
+"index": 10,
+"main": false,
+"metaGroup": false,
+"supports": [
+"Mobility",
+"Projectile Acceleration III",
+"Burgeon II",
+"Pinpoint Critical",
+"Extraction"
+]
+},
+{
+"active": "Ice Nova",
+"enabled": true,
+"gems": [
+{
+"activation": "manual",
+"damaging": true,
+"enabled": true,
+"id": "IceNovaPlayer",
+"itemGranted": false,
+"known": true,
+"level": 19,
+"name": "Ice Nova",
+"proxyKind": [],
+"quality": 0,
+"spell": true,
+"support": false,
+"types": [
+"Area",
+"AreaSpell",
+"Cascadable",
+"Cold",
+"CreatesGroundEffect",
+"Damage",
+"Duration",
+"Invokable",
+"Mineable",
+"Multicastable",
+"Nova",
+"Spell",
+"Totemable",
+"Trappable",
+"Triggerable",
+"Unleashable",
+"UsableWhileMoving"
+],
+"weaponDefault": false
+},
+{
+"enabled": true,
+"id": "SupportMagnifiedAreaPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Magnified Area II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportRapidCastingPlayerThree",
+"known": true,
+"level": 1,
+"name": "Rapid Casting III",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportExtractionPlayer",
+"known": true,
+"level": 1,
+"name": "Extraction",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportConsideredCastingPlayer",
+"known": true,
+"level": 1,
+"name": "Considered Casting",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportAstralProjectionPlayer",
+"known": true,
+"level": 1,
+"name": "Astral Projection",
+"quality": 0,
+"support": true
+}
+],
+"includeInFullDPS": false,
+"index": 11,
+"main": false,
+"metaGroup": false,
+"supports": [
+"Magnified Area II",
+"Rapid Casting III",
+"Extraction",
+"Considered Casting",
+"Astral Projection"
+]
+}
+],
+"uniques": [
+"Midnight Braid",
+"Gloamgown",
+"Doedre's Tenure",
+"Megalomaniac",
+"Prism of Belief"
+],
+"unsupportedModLines": 5
+},
+"pinnacle_locked": {
+"mainSkill": {
+"flags": [],
+"id": "DetonateDeadPlayer",
+"name": "Detonate Dead",
+"types": [
+"Area",
+"AreaSpell",
+"Cascadable",
+"Damage",
+"Detonator",
+"Fire",
+"Mineable",
+"Multicastable",
+"Physical",
+"Spell",
+"TargetsDestructibleCorpses",
+"Totemable",
+"Trappable",
+"Triggerable",
+"Unleashable",
+"UsableWhileMoving"
+]
+},
+"minionStats": null,
+"stats": {
+"Armour": 0,
+"AverageBurstDamage": 78429.360457419,
+"AverageDamage": 78429.360457419,
+"AverageHit": 78429.360457419,
+"BlockChance": 0,
+"ChaosResist": 8,
+"ChaosResistOverCap": 0,
+"CharmLimit": 3,
+"ColdMaximumHitTaken": 26387,
+"ColdResist": 75,
+"ColdResistOverCap": 44,
+"CombinedDPS": 151145.76277421,
+"CritChance": 29.68,
+"CritMultiplier": 3.77,
+"CullingDPS": 0,
+"DeflectChance": 0,
+"Dex": 99,
+"EffectiveBlockChance": 0,
+"EffectiveSpellBlockChance": 0,
+"EnduranceChargesMax": 3,
+"EnergyShield": 5910,
+"EnergyShieldRecharge": 9677.6,
+"EvadeChance": 0,
+"Evasion": 10,
+"FireMaximumHitTaken": 16062,
+"FireResist": 57,
+"FireResistOverCap": 0,
+"FrenzyChargesMax": 3,
+"FullDPS": 0,
+"HitChance": 100,
+"HitDamageByType": {
+"Chaos": 15963.75,
+"Lightning": 3549,
+"Physical": 23180.949114356
+},
+"IgniteDPS": 4090.7119165539,
+"Int": 198,
+"Life": 1,
+"LifeRegenRecovery": 0,
+"LifeUnreserved": 1,
+"LightningMaximumHitTaken": 19443,
+"LightningResist": 65,
+"LightningResistOverCap": 0,
+"Mana": 1205,
+"ManaCost": 332,
+"ManaPerSecondCost": 622.5,
+"ManaRegenRecovery": 1.4,
+"ManaUnreserved": 1205,
+"MeleeEvadeChance": 0,
+"MovementSpeedMod": 1.358,
+"NonHitDPS": 4090.7119165539,
+"PhysicalDamageReduction": 0,
+"PhysicalMaximumHitTaken": 7389,
+"PowerChargesMax": 3,
+"PreEffectiveCritChance": 29.68,
+"ProjectileEvadeChance": 0,
+"ReservationDPS": 0,
+"Speed": 1.875,
+"SpellBlockChance": 0,
+"SpellSuppressionChance": 0,
+"Spirit": 131,
+"SpiritReserved": 120,
+"SpiritUnreserved": 11,
+"Str": 48,
+"TotalDPS": 147055.05085766,
+"TotalDot": 0,
+"TotalDotDPS": 4090.7119165539,
+"TotalEHP": 15164.027334002,
+"Ward": 0,
+"WithBleedDPS": 147055.05085766,
+"WithIgniteDPS": 151145.76277421,
+"WithPoisonDPS": 147055.05085766
+}
+},
+"as_exported": {
+"mainSkill": {
+"flags": [],
+"id": "DetonateDeadPlayer",
+"name": "Detonate Dead",
+"types": [
+"Area",
+"AreaSpell",
+"Cascadable",
+"Damage",
+"Detonator",
+"Fire",
+"Mineable",
+"Multicastable",
+"Physical",
+"Spell",
+"TargetsDestructibleCorpses",
+"Totemable",
+"Trappable",
+"Triggerable",
+"Unleashable",
+"UsableWhileMoving"
+]
+},
+"minionStats": null,
+"stats": {
+"Armour": 0,
+"AverageBurstDamage": 78429.360457419,
+"AverageDamage": 78429.360457419,
+"AverageHit": 78429.360457419,
+"BlockChance": 0,
+"ChaosResist": 8,
+"ChaosResistOverCap": 0,
+"CharmLimit": 3,
+"ColdMaximumHitTaken": 26387,
+"ColdResist": 75,
+"ColdResistOverCap": 44,
+"CombinedDPS": 159206.87012217,
+"CritChance": 29.68,
+"CritMultiplier": 3.77,
+"CullingDPS": 0,
+"DeflectChance": 0,
+"Dex": 99,
+"EffectiveBlockChance": 0,
+"EffectiveSpellBlockChance": 0,
+"EnduranceChargesMax": 3,
+"EnergyShield": 5910,
+"EnergyShieldRecharge": 9677.6,
+"EvadeChance": 0,
+"Evasion": 10,
+"FireMaximumHitTaken": 16062,
+"FireResist": 57,
+"FireResistOverCap": 0,
+"FrenzyChargesMax": 3,
+"FullDPS": 0,
+"HitChance": 100,
+"HitDamageByType": {
+"Chaos": 15963.75,
+"Lightning": 3549,
+"Physical": 23180.949114356
+},
+"IgniteDPS": 4308.8832187701,
+"Int": 198,
+"Life": 1,
+"LifeRegenRecovery": 0,
+"LifeUnreserved": 1,
+"LightningMaximumHitTaken": 19443,
+"LightningResist": 65,
+"LightningResistOverCap": 0,
+"Mana": 1205,
+"ManaCost": 332,
+"ManaPerSecondCost": 655.7,
+"ManaRegenRecovery": 1.4,
+"ManaUnreserved": 1205,
+"MeleeEvadeChance": 0,
+"MovementSpeedMod": 1.358,
+"NonHitDPS": 4308.8832187701,
+"PhysicalDamageReduction": 0,
+"PhysicalMaximumHitTaken": 7389,
+"PowerChargesMax": 3,
+"PreEffectiveCritChance": 29.68,
+"ProjectileEvadeChance": 0,
+"ReservationDPS": 0,
+"Speed": 1.975,
+"SpellBlockChance": 0,
+"SpellSuppressionChance": 0,
+"Spirit": 131,
+"SpiritReserved": 120,
+"SpiritUnreserved": 11,
+"Str": 48,
+"TotalDPS": 154897.9869034,
+"TotalDot": 0,
+"TotalDotDPS": 4308.8832187701,
+"TotalEHP": 15164.027334002,
+"Ward": 0,
+"WithBleedDPS": 154897.9869034,
+"WithIgniteDPS": 159206.87012217,
+"WithPoisonDPS": 154897.9869034
+}
+}
+},
+{
+"line": 852,
+"tags": {
+"activationCounts": {
+"manual": 5,
+"persistent": 4,
+"proxy": 1,
+"triggered": 3
+},
+"allocatedNodeCount": 137,
+"anyManualSpell": true,
+"ascendancy": "Oracle",
+"ascendancyNodes": [
+{
+"id": 378,
+"name": "Critical Hit Chance",
+"type": "Normal"
+},
+{
+"id": 5571,
+"name": "The Unseen Path",
+"type": "Notable"
+},
+{
+"id": 11335,
+"name": "Passive Point",
+"type": "Normal"
+},
+{
+"id": 25092,
+"name": "Critical Damage Bonus on You",
+"type": "Normal"
+},
+{
+"id": 32905,
+"name": "Entwined Realities",
+"type": "Notable"
+},
+{
+"id": 34313,
+"name": "The Lesser Harm",
+"type": "Notable"
+},
+{
+"id": 47190,
+"name": "Passive Point",
+"type": "Normal"
+},
+{
+"id": 55135,
+"name": "Forced Outcome",
+"type": "Notable"
+}
+],
+"className": "Druid",
+"grantedSkills": [
+{
+"activation": "persistent",
+"name": "Spellslinger",
+"source": "Pandemonium Chant"
+},
+{
+"activation": "triggered",
+"name": "Tornado",
+"source": "Pandemonium Chant"
+},
+{
+"activation": "manual",
+"name": "Sigil of Power",
+"source": "Sire of Shards"
+},
+{
+"activation": "persistent",
+"name": "Cast on Critical",
+"source": "Spirit Clasp"
+}
+],
+"itemGrantedManualDamagingSkills": [],
+"items": [
+{
+"base": "Absent Amulet",
+"name": "Spirit Clasp",
+"rarity": "RARE",
+"slot": "Amulet"
+},
+{
+"base": "Utility Belt",
+"name": "Mageblood",
+"rarity": "UNIQUE",
+"slot": "Belt"
+},
+{
+"base": "Vile Robe",
+"name": "Sol Veil",
+"rarity": "RARE",
+"slot": "Body Armour"
+},
+{
+"base": "Sekhema Sandals",
+"name": "Rage March",
+"rarity": "RARE",
+"slot": "Boots"
+},
+{
+"base": "Sirenscale Gloves",
+"name": "Woe Grasp",
+"rarity": "RARE",
+"slot": "Gloves"
+},
+{
+"base": "Ancestral Tiara",
+"name": "Hate Visor",
+"rarity": "RARE",
+"slot": "Helmet"
+},
+{
+"base": "Sapphire",
+"name": "Vivid Shard",
+"rarity": "RARE",
+"slot": "Jewel 11184"
+},
+{
+"base": "Time-Lost Sapphire",
+"name": "Eagle Scar",
+"rarity": "RARE",
+"slot": "Jewel 21984"
+},
+{
+"base": "Sapphire",
+"name": "Plague Star",
+"rarity": "RARE",
+"slot": "Jewel 26178"
+},
+{
+"base": "Sapphire",
+"name": "Voices",
+"rarity": "UNIQUE",
+"slot": "Jewel 26196"
+},
+{
+"base": "Diamond",
+"name": "Prism of Belief",
+"rarity": "UNIQUE",
+"slot": "Jewel 55190"
+},
+{
+"base": "Diamond",
+"name": "From Nothing",
+"rarity": "UNIQUE",
+"slot": "Jewel 61419"
+},
+{
+"base": "Sapphire",
+"name": "Bramble Sliver",
+"rarity": "RARE",
+"slot": "Jewel 62152"
+},
+{
+"base": "Diamond",
+"name": "Heart of the Well",
+"rarity": "UNIQUE",
+"slot": "Jewel 7960"
+},
+{
+"base": "Mnemonic Ring",
+"name": "Golem Spiral",
+"rarity": "RARE",
+"slot": "Ring 1"
+},
+{
+"base": "Gold Ring",
+"name": "Entropy Knuckle",
+"rarity": "RARE",
+"slot": "Ring 2"
+},
+{
+"base": "Dueling Wand",
+"name": "Pandemonium Chant",
+"rarity": "RARE",
+"slot": "Weapon 1"
+},
+{
+"base": "Tasalian Focus",
+"name": "Woe Song",
+"rarity": "RARE",
+"slot": "Weapon 2"
+}
+],
+"keystones": [
+{
+"id": 11230,
+"name": "Ritual Cadence"
+},
+{
+"id": 33979,
+"name": "Conduit"
+},
+{
+"id": 42680,
+"name": "Blackflame Covenant"
+},
+{
+"id": 46742,
+"name": "Elemental Equilibrium"
+},
+{
+"id": 49363,
+"name": "Wildsurge Incantation"
+}
+],
+"level": 98,
+"manualDamagingSkillNames": [
+"Entangle",
+"Thunderstorm",
+"Thrashing Vines",
+"Detonate Dead",
+"Volcano"
+],
+"manualDamagingSkills": 5,
+"noCast": false,
+"notables": [
+{
+"id": 1506,
+"name": "Remnant Attraction"
+},
+{
+"id": 1823,
+"name": "Illuminated Crown"
+},
+{
+"id": 2335,
+"name": "Turn the Clock Forward"
+},
+{
+"id": 5284,
+"name": "Shredding Force"
+},
+{
+"id": 5335,
+"name": "Shimmering Mirage"
+},
+{
+"id": 6898,
+"name": "Guardian of the Wilds"
+},
+{
+"id": 7128,
+"name": "Dangerous Blossom"
+},
+{
+"id": 7338,
+"name": "Abasement"
+},
+{
+"id": 8483,
+"name": "Ruin"
+},
+{
+"id": 8831,
+"name": "Tempered Mind"
+},
+{
+"id": 8957,
+"name": "Right Hand of Darkness"
+},
+{
+"id": 11838,
+"name": "Dreamcatcher"
+},
+{
+"id": 12683,
+"name": "Power of the Storm"
+},
+{
+"id": 12940,
+"name": "Cower Before the First Ones"
+},
+{
+"id": 16466,
+"name": "Mental Alacrity"
+},
+{
+"id": 16940,
+"name": "Arcane Nature"
+},
+{
+"id": 20963,
+"name": "Calculated Hunter"
+},
+{
+"id": 23738,
+"name": "Madness in the Bones"
+},
+{
+"id": 24721,
+"name": "Brain Freeze"
+},
+{
+"id": 27388,
+"name": "Aspiring Genius"
+},
+{
+"id": 27491,
+"name": "Heavy Buffer"
+},
+{
+"id": 30748,
+"name": "Controlled Chaos"
+},
+{
+"id": 32507,
+"name": "Cut to the Bone"
+},
+{
+"id": 35564,
+"name": "Turn the Clock Back"
+},
+{
+"id": 41394,
+"name": "Invigorating Archon"
+},
+{
+"id": 43139,
+"name": "Stormbreaker"
+},
+{
+"id": 43633,
+"name": "Energising Archon"
+},
+{
+"id": 45632,
+"name": "Mind Eraser"
+},
+{
+"id": 49153,
+"name": "Comradery"
+},
+{
+"id": 50498,
+"name": "Brain Storm"
+},
+{
+"id": 50562,
+"name": "Barbaric Strength"
+},
+{
+"id": 51934,
+"name": "Invocated Efficiency"
+},
+{
+"id": 54814,
+"name": "Profane Commander"
+},
+{
+"id": 58096,
+"name": "Lasting Incantations"
+},
+{
+"id": 58183,
+"name": "Blood Tearing"
+},
+{
+"id": 61444,
+"name": "Wasting Casts"
+},
+{
+"id": 63400,
+"name": "Chakra of Elements"
+},
+{
+"id": 64299,
+"name": "Harbinger of Disaster"
+}
+],
+"oneButton": false,
+"oneButtonInclItemSkills": false,
+"socketGroups": [
+{
+"active": "Spellslinger",
+"enabled": true,
+"gems": [
+{
+"activation": "persistent",
+"damaging": false,
+"enabled": true,
+"id": "MetaSpellslingerPlayer",
+"itemGranted": true,
+"known": true,
+"level": 18,
+"name": "Spellslinger",
+"proxyKind": [],
+"quality": 0,
+"spell": false,
+"support": false,
+"types": [
+"AttackInPlace",
+"Buff",
+"CanHaveMultipleOngoingSkillInstances",
+"Cooldown",
+"GeneratesEnergy",
+"HasReservation",
+"Invocation",
+"Meta",
+"OngoingSkill",
+"Persistent",
+"Triggers"
+],
+"weaponDefault": false
+},
+{
+"activation": "triggered",
+"damaging": true,
+"enabled": true,
+"id": "TornadoPlayer",
+"itemGranted": true,
+"known": true,
+"level": 17,
+"name": "Tornado",
+"proxyKind": [],
+"quality": 0,
+"spell": true,
+"support": false,
+"types": [
+"Area",
+"AreaSpell",
+"DamageOverTime",
+"DegenOnlySpellDamage",
+"Duration",
+"InteractsWithElementalGround",
+"Limit",
+"Physical",
+"Spell",
+"Storm",
+"Totemable",
+"Trappable",
+"Triggerable",
+"Triggered",
+"UsableWhileMoving",
+"Wind"
+],
+"weaponDefault": false
+},
+{
+"enabled": true,
+"id": "ProlongedDurationSupportPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Prolonged Duration II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportCatalysingElementsPlayer",
+"known": true,
+"level": 1,
+"name": "Catalysing Elements",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportEfficiencyPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Efficiency II",
+"quality": 0,
+"support": true
+}
+],
+"grantedBy": "Pandemonium Chant",
+"includeInFullDPS": false,
+"index": 1,
+"main": false,
+"metaGroup": true,
+"slot": "Weapon 1",
+"supports": [
+"Prolonged Duration II",
+"Catalysing Elements",
+"Efficiency II"
+]
+},
+{
+"active": "Cast on Critical",
+"enabled": true,
+"gems": [
+{
+"activation": "persistent",
+"damaging": false,
+"enabled": true,
+"id": "MetaCastOnCritPlayer",
+"itemGranted": false,
+"known": true,
+"level": 20,
+"name": "Cast on Critical",
+"proxyKind": [],
+"quality": 0,
+"spell": false,
+"support": false,
+"types": [
+"Buff",
+"CanHaveMultipleOngoingSkillInstances",
+"GeneratesEnergy",
+"HasReservation",
+"Meta",
+"OngoingSkill",
+"Persistent",
+"Triggers"
+],
+"weaponDefault": false
+},
+{
+"activation": "triggered",
+"damaging": true,
+"enabled": true,
+"id": "CometPlayer",
+"itemGranted": false,
+"known": true,
+"level": 20,
+"name": "Comet",
+"proxyKind": [],
+"quality": 23,
+"spell": true,
+"support": false,
+"types": [
+"Area",
+"AreaSpell",
+"Cascadable",
+"Cold",
+"Damage",
+"Invokable",
+"Mineable",
+"Multicastable",
+"Spell",
+"Totemable",
+"Trappable",
+"Triggerable",
+"Triggered",
+"Unleashable"
+],
+"weaponDefault": false
+},
+{
+"activation": "triggered",
+"damaging": true,
+"enabled": true,
+"id": "LivingBombPlayer",
+"itemGranted": false,
+"known": true,
+"level": 20,
+"name": "Living Bomb",
+"proxyKind": [],
+"quality": 23,
+"spell": true,
+"support": false,
+"types": [
+"Area",
+"AreaSpell",
+"Damage",
+"Duration",
+"Fire",
+"GeneratesInfusion",
+"GeneratesRemnants",
+"Limit",
+"Mineable",
+"Spell",
+"Totemable",
+"Trappable",
+"Triggerable",
+"Triggered",
+"UsableWhileMoving"
+],
+"weaponDefault": false
+},
+{
+"enabled": true,
+"id": "SupportSpellCascadePlayer",
+"known": true,
+"level": 1,
+"name": "Spell Cascade",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportTulsStillnessPlayer",
+"known": true,
+"level": 1,
+"name": "Tul's Stillness",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportEfficiencyPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Efficiency II",
+"quality": 0,
+"support": true
+}
+],
+"includeInFullDPS": false,
+"index": 2,
+"main": false,
+"metaGroup": true,
+"supports": [
+"Spell Cascade",
+"Tul's Stillness",
+"Efficiency II"
+]
+},
+{
+"active": "Sigil of Power",
+"enabled": true,
+"gems": [
+{
+"activation": "manual",
+"damaging": false,
+"enabled": true,
+"id": "SigilOfPowerPlayer",
+"itemGranted": true,
+"known": true,
+"level": 18,
+"name": "Sigil of Power",
+"proxyKind": [],
+"quality": 0,
+"spell": true,
+"support": false,
+"types": [
+"Area",
+"AreaSpell",
+"Cooldown",
+"Duration",
+"GainsStages",
+"Limit",
+"Mineable",
+"Spell",
+"Totemable",
+"Trappable",
+"Triggerable",
+"UsableWhileMoving"
+],
+"weaponDefault": false
+},
+{
+"enabled": true,
+"id": "SupportMagnifiedAreaPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Magnified Area II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "ProlongedDurationSupportPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Prolonged Duration II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportCooldownRecoveryPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Cooldown Recovery II",
+"quality": 0,
+"support": true
+}
+],
+"grantedBy": "Sire of Shards",
+"includeInFullDPS": false,
+"index": 3,
+"main": false,
+"metaGroup": false,
+"slot": "Weapon 1 Swap",
+"supports": [
+"Magnified Area II",
+"Prolonged Duration II",
+"Cooldown Recovery II"
+]
+},
+{
+"active": "Entangle",
+"enabled": true,
+"gems": [
+{
+"activation": "manual",
+"damaging": true,
+"enabled": true,
+"id": "EntanglePlayer",
+"itemGranted": false,
+"known": true,
+"level": 20,
+"name": "Entangle",
+"proxyKind": [],
+"quality": 20,
+"spell": true,
+"support": false,
+"types": [
+"Area",
+"CreatesFissure",
+"Damage",
+"Duration",
+"Limit",
+"Nature",
+"Physical",
+"Plant",
+"Spell",
+"Sustained",
+"Totemable",
+"Trappable",
+"Triggerable",
+"Unleashable",
+"UsableWhileMoving"
+],
+"weaponDefault": false
+},
+{
+"enabled": true,
+"id": "SupportZenithPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Zenith II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportBranchingFissuresPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Branching Fissures II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportExplosiveGrowthPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Accelerated Growth II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportMinionPactPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Minion Pact II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportRakiatasFlowPlayer",
+"known": true,
+"level": 1,
+"name": "Rakiata's Flow",
+"quality": 0,
+"support": true
+}
+],
+"includeInFullDPS": false,
+"index": 4,
+"main": false,
+"metaGroup": false,
+"supports": [
+"Zenith II",
+"Branching Fissures II",
+"Accelerated Growth II",
+"Minion Pact II",
+"Rakiata's Flow"
+]
+},
+{
+"active": "Thunderstorm",
+"enabled": true,
+"gems": [
+{
+"activation": "manual",
+"damaging": true,
+"enabled": true,
+"id": "ThunderstormPlayer",
+"itemGranted": false,
+"known": true,
+"level": 12,
+"name": "Thunderstorm",
+"proxyKind": [],
+"quality": 20,
+"spell": true,
+"support": false,
+"types": [
+"Area",
+"AreaSpell",
+"Cascadable",
+"Damage",
+"Duration",
+"Lightning",
+"Limit",
+"Spell",
+"Storm",
+"Sustained",
+"Totemable",
+"Trappable",
+"Triggerable",
+"UsableWhileMoving"
+],
+"weaponDefault": false
+},
+{
+"enabled": true,
+"id": "SupportLivingLightningPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Living Lightning II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportShockPlayer",
+"known": true,
+"level": 1,
+"name": "Shock",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "ProlongedDurationSupportPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Prolonged Duration II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportEfficiencyPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Efficiency II",
+"quality": 0,
+"support": true
+}
+],
+"includeInFullDPS": false,
+"index": 5,
+"main": false,
+"metaGroup": false,
+"supports": [
+"Living Lightning II",
+"Shock",
+"Prolonged Duration II",
+"Efficiency II"
+]
+},
+{
+"active": "Blasphemy",
+"enabled": true,
+"gems": [
+{
+"activation": "persistent",
+"damaging": false,
+"enabled": true,
+"id": "BlasphemyPlayer",
+"itemGranted": false,
+"known": true,
+"level": 20,
+"name": "Blasphemy",
+"proxyKind": [],
+"quality": 20,
+"spell": false,
+"support": false,
+"types": [
+"Area",
+"AreaSpell",
+"AttackInPlace",
+"Aura",
+"Buff",
+"CanHaveMultipleOngoingSkillInstances",
+"HasReservation",
+"IsBlasphemy",
+"Meta",
+"OngoingSkill",
+"Persistent"
+],
+"weaponDefault": false
+},
+{
+"activation": "triggered",
+"damaging": false,
+"enabled": true,
+"id": "TemporalChainsPlayer",
+"itemGranted": false,
+"known": true,
+"level": 15,
+"name": "Temporal Chains",
+"proxyKind": [],
+"quality": 20,
+"spell": true,
+"support": false,
+"types": [
+"AppliesCurse",
+"Area",
+"AreaSpell",
+"Aura",
+"AuraAffectsEnemies",
+"CanHaveBlessing",
+"Cascadable",
+"Duration",
+"HasReservation",
+"Mineable",
+"Multicastable",
+"Spell",
+"TotemCastsAlone",
+"TotemCastsWhenNotDetached",
+"Totemable",
+"Trappable",
+"Triggerable",
+"Triggered",
+"Unleashable",
+"UsableWhileMoving"
+],
+"weaponDefault": false
+},
+{
+"enabled": true,
+"id": "SupportRitualisticCursePlayer",
+"known": true,
+"level": 1,
+"name": "Ritualistic Curse",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportMagnifiedAreaPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Magnified Area II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportHexBloomPlayer",
+"known": true,
+"level": 1,
+"name": "Hex Bloom",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportSlowPotencyPlayer",
+"known": true,
+"level": 1,
+"name": "Slow Potency",
+"quality": 0,
+"support": true
+}
+],
+"includeInFullDPS": false,
+"index": 6,
+"main": false,
+"metaGroup": false,
+"supports": [
+"Ritualistic Curse",
+"Magnified Area II",
+"Hex Bloom",
+"Slow Potency"
+]
+},
+{
+"active": "Convalescence",
+"enabled": true,
+"gems": [
+{
+"activation": "persistent",
+"damaging": false,
+"enabled": true,
+"id": "ConvalescencePlayer",
+"itemGranted": false,
+"known": true,
+"level": 19,
+"name": "Convalescence",
+"proxyKind": [],
+"quality": 20,
+"spell": false,
+"support": false,
+"types": [
+"AttackInPlace",
+"Buff",
+"HasReservation",
+"OngoingSkill",
+"Persistent",
+"ReserveInAllSets"
+],
+"weaponDefault": false
+},
+{
+"enabled": true,
+"id": "ProlongedDurationSupportPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Prolonged Duration II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportCooldownRecoveryPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Cooldown Recovery II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportSecondWindPlayerThree",
+"known": true,
+"level": 1,
+"name": "Second Wind III",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportUhtredsRitePlayer",
+"known": true,
+"level": 1,
+"name": "Uhtred's Rite",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportCoolheadedPlayer",
+"known": true,
+"level": 1,
+"name": "Cool Headed",
+"quality": 0,
+"support": true
+}
+],
+"includeInFullDPS": false,
+"index": 7,
+"main": false,
+"metaGroup": false,
+"supports": [
+"Prolonged Duration II",
+"Cooldown Recovery II",
+"Second Wind III",
+"Uhtred's Rite",
+"Cool Headed"
+]
+},
+{
+"active": "Thrashing Vines",
+"enabled": true,
+"gems": [
+{
+"activation": "manual",
+"damaging": true,
+"enabled": true,
+"id": "ThrashingVinesPlayer",
+"itemGranted": false,
+"known": true,
+"level": 20,
+"name": "Thrashing Vines",
+"proxyKind": [],
+"quality": 20,
+"spell": true,
+"support": false,
+"types": [
+"Area",
+"AreaSpell",
+"Cascadable",
+"Cooldown",
+"Damage",
+"Duration",
+"GamepadDeflectable",
+"Limit",
+"Nature",
+"Physical",
+"Plant",
+"Spell",
+"SupportedByZarokh",
+"Sustained",
+"Totemable",
+"Trappable",
+"Triggerable"
+],
+"weaponDefault": false
+},
+{
+"enabled": true,
+"id": "SupportZarokhsRefrainPlayer",
+"known": true,
+"level": 1,
+"name": "Zarokh's Refrain",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportPhysicalMasteryPlayer",
+"known": true,
+"level": 1,
+"name": "Physical Mastery",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportConsideredCastingPlayer",
+"known": true,
+"level": 1,
+"name": "Considered Casting",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportConcentratedAreaPlayer",
+"known": true,
+"level": 1,
+"name": "Concentrated Area",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportHeftPlayer",
+"known": true,
+"level": 1,
+"name": "Heft",
+"quality": 0,
+"support": true
+}
+],
+"includeInFullDPS": false,
+"index": 8,
+"main": false,
+"metaGroup": false,
+"supports": [
+"Zarokh's Refrain",
+"Physical Mastery",
+"Considered Casting",
+"Concentrated Area",
+"Heft"
+]
+},
+{
+"active": "Detonate Dead",
+"enabled": true,
+"gems": [
+{
+"activation": "manual",
+"damaging": true,
+"enabled": true,
+"id": "DetonateDeadPlayer",
+"itemGranted": false,
+"known": true,
+"level": 20,
+"name": "Detonate Dead",
+"proxyKind": [],
+"quality": 20,
+"spell": true,
+"support": false,
+"types": [
+"Area",
+"AreaSpell",
+"Cascadable",
+"Damage",
+"Detonator",
+"Fire",
+"Mineable",
+"Multicastable",
+"Physical",
+"Spell",
+"TargetsDestructibleCorpses",
+"Totemable",
+"Trappable",
+"Triggerable",
+"Unleashable",
+"UsableWhileMoving"
+],
+"weaponDefault": false
+},
+{
+"enabled": true,
+"id": "SupportElementalFocusPlayer",
+"known": true,
+"level": 1,
+"name": "Elemental Focus",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportDeliberationPlayer",
+"known": true,
+"level": 1,
+"name": "Deliberation",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportConcentratedAreaPlayer",
+"known": true,
+"level": 1,
+"name": "Concentrated Area",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportConsideredCastingPlayer",
+"known": true,
+"level": 1,
+"name": "Considered Casting",
+"quality": 0,
+"support": true
+}
+],
+"includeInFullDPS": false,
+"index": 9,
+"main": true,
+"metaGroup": false,
+"supports": [
+"Elemental Focus",
+"Deliberation",
+"Concentrated Area",
+"Considered Casting"
+]
+},
+{
+"active": "Soul Offering",
+"enabled": true,
+"gems": [
+{
+"activation": "proxy",
+"damaging": false,
+"enabled": true,
+"id": "SoulOfferingPlayer",
+"itemGranted": false,
+"known": true,
+"level": 20,
+"name": "Soul Offering",
+"proxyKind": [
+"minion"
+],
+"quality": 20,
+"spell": false,
+"support": false,
+"types": [
+"Buff",
+"CreatesMinion",
+"Duration",
+"Limit",
+"Minion",
+"Offering",
+"Triggerable",
+"UsableWhileMoving"
+],
+"weaponDefault": false
+},
+{
+"enabled": true,
+"id": "SupportDanseMacabrePlayer",
+"known": true,
+"level": 1,
+"name": "Danse Macabre",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportMinionMasteryPlayer",
+"known": true,
+"level": 1,
+"name": "Minion Mastery",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportSacrificalOfferingPlayer",
+"known": true,
+"level": 1,
+"name": "Sacrificial Offering",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "ProlongedDurationSupportPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Prolonged Duration II",
+"quality": 0,
+"support": true
+}
+],
+"includeInFullDPS": false,
+"index": 10,
+"main": false,
+"metaGroup": false,
+"supports": [
+"Danse Macabre",
+"Minion Mastery",
+"Sacrificial Offering",
+"Prolonged Duration II"
+]
+},
+{
+"active": "Mana Remnants",
+"enabled": true,
+"gems": [
+{
+"activation": "persistent",
+"damaging": false,
+"enabled": true,
+"id": "ManaRemnantsPlayer",
+"itemGranted": false,
+"known": true,
+"level": 20,
+"name": "Mana Remnants",
+"proxyKind": [],
+"quality": 20,
+"spell": false,
+"support": false,
+"types": [
+"AttackInPlace",
+"Buff",
+"GeneratesRemnants",
+"HasReservation",
+"OngoingSkill",
+"Persistent",
+"TotemCastsAlone"
+],
+"weaponDefault": false
+},
+{
+"enabled": true,
+"id": "SupportInterludePlayer",
+"known": true,
+"level": 1,
+"name": "Remnant Potency I",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportFleetingRemnantsPlayerTwo",
+"known": true,
+"level": 1,
+"name": "Harmonic Remnants II",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportKhatalsRejuvenationPlayer",
+"known": true,
+"level": 1,
+"name": "Khatal's Rejuvenation",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportMysticismPlayer",
+"known": true,
+"level": 1,
+"name": "Mysticism I",
+"quality": 0,
+"support": true
+},
+{
+"enabled": true,
+"id": "SupportClarityPlayer",
+"known": true,
+"level": 1,
+"name": "Clarity I",
+"quality": 0,
+"support": true
+}
+],
+"includeInFullDPS": false,
+"index": 11,
+"main": false,
+"metaGroup": false,
+"supports": [
+"Remnant Potency I",
+"Harmonic Remnants II",
+"Khatal's Rejuvenation",
+"Mysticism I",
+"Clarity I"
+]
+},
+{
+"active": "Volcano",
+"enabled": true,
+"gems": [
+{
+"activation": "manual",
+"damaging": true,
+"enabled": true,
+"id": "VolcanoPlayer",
+"itemGranted": false,
+"known": true,
+"level": 19,
+"name": "Volcano",
+"proxyKind": [],
+"quality": 0,
+"spell": true,
+"support": false,
+"types": [
+"Area",
+"AreaSpell",
+"Channel",
+"Damage",
+"Duration",
+"Fire",
+"GamepadDeflectable",
+"Limit",
+"Mineable",
+"Projectile",
+"Spell",
+"Sustained",
+"Totemable",
+"Trappable",
+"UsableWhileMoving"
+],
+"weaponDefault": false
+},
+{
+"enabled": true,
+"id": "SupportBurgeonPlayer",
+"known": true,
+"level": 1,
+"name": "Burgeon I",
+"quality": 0,
+"support": true
+}
+],
+"includeInFullDPS": false,
+"index": 12,
+"main": false,
+"metaGroup": false,
+"supports": [
+"Burgeon I"
+]
+},
+{
+"active": "Cast on Critical",
+"enabled": true,
+"gems": [
+{
+"activation": "persistent",
+"damaging": false,
+"enabled": true,
+"id": "MetaCastOnCritPlayer",
+"itemGranted": true,
+"known": true,
+"level": 20,
+"name": "Cast on Critical",
+"proxyKind": [],
+"quality": 0,
+"spell": false,
+"support": false,
+"types": [
+"Buff",
+"CanHaveMultipleOngoingSkillInstances",
+"GeneratesEnergy",
+"HasReservation",
+"Meta",
+"OngoingSkill",
+"Persistent",
+"Triggers"
+],
+"weaponDefault": false
+}
+],
+"grantedBy": "Spirit Clasp",
+"includeInFullDPS": false,
+"index": 13,
+"main": false,
+"metaGroup": true,
+"slot": "Amulet",
+"supports": []
+}
+],
+"uniques": [
+"Mageblood",
+"Voices",
+"Prism of Belief",
+"From Nothing",
+"Heart of the Well"
+],
+"unsupportedModLines": 20
+},
+"pinnacle_locked": {
+"mainSkill": {
+"flags": [],
+"id": "DetonateDeadPlayer",
+"name": "Detonate Dead",
+"types": [
+"Area",
+"AreaSpell",
+"Cascadable",
+"Damage",
+"Detonator",
+"Fire",
+"Mineable",
+"Multicastable",
+"Physical",
+"Spell",
+"TargetsDestructibleCorpses",
+"Totemable",
+"Trappable",
+"Triggerable",
+"Unleashable",
+"UsableWhileMoving"
+]
+},
+"minionStats": null,
+"stats": {
+"Armour": 0,
+"AverageBurstDamage": 1754173.8025835,
+"AverageDamage": 1754173.8025835,
+"AverageHit": 1754173.8025835,
+"BlockChance": 0,
+"ChaosMaximumHitTaken": 10399,
+"ChaosResist": 51,
+"ChaosResistOverCap": 0,
+"CharmLimit": 3,
+"ColdMaximumHitTaken": 21285,
+"ColdResist": 62,
+"ColdResistOverCap": 0,
+"CombinedDPS": 5196739.8901538,
+"CritChance": 100,
+"CritMultiplier": 7.74,
+"CullingDPS": 0,
+"DeflectChance": 0,
+"Dex": 76,
+"EffectiveBlockChance": 0,
+"EffectiveSpellBlockChance": 0,
+"EnduranceChargesMax": 3,
+"EnergyShield": 7263,
+"EnergyShieldRecharge": 907.9,
+"EvadeChance": 0,
+"Evasion": 8,
+"FireMaximumHitTaken": 18568,
+"FireResist": 56,
+"FireResistOverCap": 0,
+"FrenzyChargesMax": 3,
+"FullDPS": 0,
+"HitChance": 100,
+"HitDamageByType": {
+"Chaos": 46291.79,
+"Cold": 24123.48,
+"Fire": 1458.295,
+"Lightning": 12719.205,
+"Physical": 141305.43986712
+},
+"Int": 180,
+"Life": 1464,
+"LifeRegenRecovery": 0,
+"LifeUnreserved": 1464,
+"LightningMaximumHitTaken": 21818,
+"LightningResist": 63,
+"LightningResistOverCap": 0,
+"Mana": 1365,
+"ManaCost": 354,
+"ManaPerSecondCost": 1048.725,
+"ManaRegenRecovery": 126.1,
+"ManaUnreserved": 1365,
+"MeleeEvadeChance": 0,
+"MovementSpeedMod": 1.261,
+"NonHitDPS": 0,
+"PhysicalDamageReduction": 0,
+"PhysicalMaximumHitTaken": 8727,
+"PowerChargesMax": 3,
+"PreEffectiveCritChance": 51.52,
+"ProjectileEvadeChance": 0,
+"ReservationDPS": 0,
+"Speed": 2.9625,
+"SpellBlockChance": 0,
+"SpellSuppressionChance": 0,
+"Spirit": 156,
+"SpiritReserved": 156,
+"SpiritUnreserved": -110,
+"Str": 91,
+"TotalDPS": 5196739.8901538,
+"TotalDot": 0,
+"TotalDotDPS": 0,
+"TotalEHP": 14540.249558758,
+"Ward": 0,
+"WithBleedDPS": 5196739.8901538,
+"WithIgniteDPS": 5196739.8901538,
+"WithPoisonDPS": 5196739.8901538
+}
+},
+"as_exported": {
+"mainSkill": {
+"flags": [],
+"id": "DetonateDeadPlayer",
+"name": "Detonate Dead",
+"types": [
+"Area",
+"AreaSpell",
+"Cascadable",
+"Damage",
+"Detonator",
+"Fire",
+"Mineable",
+"Multicastable",
+"Physical",
+"Spell",
+"TargetsDestructibleCorpses",
+"Totemable",
+"Trappable",
+"Triggerable",
+"Unleashable",
+"UsableWhileMoving"
+]
+},
+"minionStats": null,
+"stats": {
+"Armour": 0,
+"AverageBurstDamage": 2165464.6124874,
+"AverageDamage": 2165464.6124874,
+"AverageHit": 2165464.6124874,
+"BlockChance": 0,
+"ChaosMaximumHitTaken": 10399,
+"ChaosResist": 51,
+"ChaosResistOverCap": 0,
+"CharmLimit": 3,
+"ColdMaximumHitTaken": 21285,
+"ColdResist": 62,
+"ColdResistOverCap": 0,
+"CombinedDPS": 7037759.9905842,
+"CritChance": 100,
+"CritMultiplier": 7.74,
+"CullingDPS": 0,
+"DeflectChance": 0,
+"Dex": 76,
+"EffectiveBlockChance": 0,
+"EffectiveSpellBlockChance": 0,
+"EnduranceChargesMax": 3,
+"EnergyShield": 7263,
+"EnergyShieldRecharge": 907.9,
+"EvadeChance": 0,
+"Evasion": 8,
+"FireMaximumHitTaken": 18568,
+"FireResist": 56,
+"FireResistOverCap": 0,
+"FrenzyChargesMax": 3,
+"FullDPS": 0,
+"HitChance": 100,
+"HitDamageByType": {
+"Chaos": 75209.94,
+"Cold": 26579.765,
+"Fire": 1601.13,
+"Lightning": 20762.75,
+"Physical": 154882.53696848
+},
+"Int": 180,
+"Life": 1464,
+"LifeRegenRecovery": 0,
+"LifeUnreserved": 1464,
+"LightningMaximumHitTaken": 21818,
+"LightningResist": 63,
+"LightningResistOverCap": 0,
+"Mana": 1365,
+"ManaCost": 354,
+"ManaPerSecondCost": 1150.5,
+"ManaRegenRecovery": 171.5,
+"ManaUnreserved": 1365,
+"MeleeEvadeChance": 0,
+"MovementSpeedMod": 1.261,
+"NonHitDPS": 0,
+"PhysicalDamageReduction": 0,
+"PhysicalMaximumHitTaken": 8727,
+"PowerChargesMax": 3,
+"PreEffectiveCritChance": 51.52,
+"ProjectileEvadeChance": 0,
+"ReservationDPS": 0,
+"Speed": 3.25,
+"SpellBlockChance": 0,
+"SpellSuppressionChance": 0,
+"Spirit": 156,
+"SpiritReserved": 156,
+"SpiritUnreserved": -110,
+"Str": 91,
+"TotalDPS": 7037759.9905842,
+"TotalDot": 0,
+"TotalDotDPS": 0,
+"TotalEHP": 14540.249558758,
+"Ward": 0,
+"WithBleedDPS": 7037759.9905842,
+"WithIgniteDPS": 7037759.9905842,
+"WithPoisonDPS": 7037759.9905842
+}
+}
+}
+]

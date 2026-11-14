@@ -1,0 +1,1220 @@
+[
+{
+"id": 0,
+"skill": "Comet",
+"asc": "Disciple of Varashta",
+"base_dps": 595703.45335178,
+"strict_dps": 1142804.8486971,
+"best_dps": 1142804.8486971,
+"supports_before": [
+"Rakiata's Flow",
+"Spell Cascade"
+],
+"supports_after_strict": [
+"Rakiata's Flow",
+"Uhtred's Omen"
+],
+"supports_after_best": [
+"Rakiata's Flow",
+"Uhtred's Omen"
+],
+"best_case_conditional_new": [],
+"removal_loss_pct": [
+{
+"loss_pct": 57.026024026158,
+"name": "Rakiata's Flow"
+},
+{
+"loss_pct": -42.983254545103,
+"name": "Spell Cascade"
+}
+],
+"ehp_before": 17008.6913761,
+"ehp_after_strict": 17008.6913761,
+"support_ids": {
+"Spell Cascade": "SupportSpellCascadePlayer",
+"Rakiata's Flow": "SupportRakiatasFlowPlayer",
+"Uhtred's Omen": "SupportUhtredOmenPlayer"
+}
+},
+{
+"id": 1,
+"skill": "Ice Shot",
+"asc": "Ritualist",
+"base_dps": 549560.87476698,
+"strict_dps": 759471.48275377,
+"best_dps": 805065.51860283,
+"supports_before": [
+"Rakiata's Flow",
+"Garukhan's Resolve",
+"Elemental Armament II",
+"Execute III",
+"Nova Projectiles I"
+],
+"supports_after_strict": [
+"Rakiata's Flow",
+"Garukhan's Resolve",
+"Overextend",
+"Execute III",
+"Inexorable Critical I"
+],
+"supports_after_best": [
+"Rakiata's Flow",
+"Garukhan's Resolve",
+"Inexorable Critical I",
+"Execute III",
+"Minion Pact II"
+],
+"best_case_conditional_new": [
+"Minion Pact II (if you)"
+],
+"removal_loss_pct": [
+{
+"loss_pct": 63.314779989271,
+"name": "Rakiata's Flow"
+},
+{
+"loss_pct": 45.124061031559,
+"name": "Garukhan's Resolve"
+},
+{
+"loss_pct": 19.343114372979,
+"name": "Elemental Armament II"
+},
+{
+"loss_pct": 23.286572698898,
+"name": "Execute III"
+},
+{
+"loss_pct": 0,
+"name": "Nova Projectiles I"
+}
+],
+"ehp_before": 3915.9417905355,
+"ehp_after_strict": 3915.9417905355,
+"support_ids": {
+"Overextend": "SupportOverextendPlayer",
+"Rakiata's Flow": "SupportRakiatasFlowPlayer",
+"Inexorable Critical I": "SupportInevitableCriticalsPlayer",
+"Minion Pact II": "SupportMinionPactPlayerTwo",
+"Garukhan's Resolve": "SupportGarukhansResolvePlayer",
+"Elemental Armament II": "SupportElementalArmamentPlayerTwo",
+"Nova Projectiles I": "SupportNovaProjectilesPlayer",
+"Execute III": "SupportExecutePlayerThree"
+}
+},
+{
+"id": 2,
+"skill": "Twister",
+"asc": "Spirit Walker",
+"base_dps": 342948.37298061,
+"strict_dps": 902105.49254735,
+"best_dps": 1190970.8893145,
+"supports_before": [
+"Garukhan's Resolve",
+"Prolonged Duration II",
+"Elemental Armament II",
+"Projectile Acceleration III",
+"Concentrated Area"
+],
+"supports_after_strict": [
+"Garukhan's Resolve",
+"Rakiata's Flow",
+"Elemental Armament II",
+"Overextend",
+"Concentrated Area"
+],
+"supports_after_best": [
+"Garukhan's Resolve",
+"Rakiata's Flow",
+"Minion Pact II",
+"Zerphi's Infamy",
+"Concentrated Area"
+],
+"best_case_conditional_new": [
+"Minion Pact II (if you)",
+"Zerphi's Infamy (glory)"
+],
+"removal_loss_pct": [
+{
+"loss_pct": 44.539275236689,
+"name": "Garukhan's Resolve"
+},
+{
+"loss_pct": 0,
+"name": "Prolonged Duration II"
+},
+{
+"loss_pct": 13.53423171494,
+"name": "Elemental Armament II"
+},
+{
+"loss_pct": 6.8991356990072,
+"name": "Projectile Acceleration III"
+},
+{
+"loss_pct": 23.30022341231,
+"name": "Concentrated Area"
+}
+],
+"ehp_before": 49570.96468902,
+"ehp_after_strict": 49570.96468902,
+"support_ids": {
+"Projectile Acceleration III": "SupportProjectileAccelerationPlayerThree",
+"Prolonged Duration II": "ProlongedDurationSupportPlayerTwo",
+"Concentrated Area": "SupportConcentratedAreaPlayer",
+"Overextend": "SupportOverextendPlayer",
+"Rakiata's Flow": "SupportRakiatasFlowPlayer",
+"Minion Pact II": "SupportMinionPactPlayerTwo",
+"Zerphi's Infamy": "SupportZerphisLegacyPlayer",
+"Garukhan's Resolve": "SupportGarukhansResolvePlayer",
+"Elemental Armament II": "SupportElementalArmamentPlayerTwo"
+}
+},
+{
+"id": 3,
+"skill": "Flameblast",
+"asc": "Gemling Legionnaire",
+"base_dps": 380181.10876047,
+"strict_dps": 1158347.8714427,
+"best_dps": 1158347.8714427,
+"supports_before": [
+"Burgeon II",
+"Inexorable Critical I",
+"Concentrated Area",
+"Searing Flame II",
+"Considered Casting"
+],
+"supports_after_strict": [
+"Atziri's Impatience",
+"Eternal Flame II",
+"Concentrated Area",
+"Scouring Flame",
+"Considered Casting"
+],
+"supports_after_best": [
+"Atziri's Impatience",
+"Eternal Flame II",
+"Concentrated Area",
+"Scouring Flame",
+"Considered Casting"
+],
+"best_case_conditional_new": [],
+"removal_loss_pct": [
+{
+"loss_pct": 0,
+"name": "Burgeon II"
+},
+{
+"loss_pct": 16.89405266759,
+"name": "Inexorable Critical I"
+},
+{
+"loss_pct": 27.372911053928,
+"name": "Concentrated Area"
+},
+{
+"loss_pct": 20.707831876783,
+"name": "Searing Flame II"
+},
+{
+"loss_pct": 32.275580446403,
+"name": "Considered Casting"
+}
+],
+"ehp_before": 60389.751216036,
+"ehp_after_strict": 60389.751216036,
+"support_ids": {
+"Concentrated Area": "SupportConcentratedAreaPlayer",
+"Burgeon II": "SupportBurgeonPlayerTwo",
+"Searing Flame II": "SupportDeadlyIgnitesPlayerTwo",
+"Inexorable Critical I": "SupportInevitableCriticalsPlayer",
+"Eternal Flame II": "SupportIgniteDurationPlayerTwo",
+"Scouring Flame": "SupportScouringFlamePlayer",
+"Atziri's Impatience": "SupportAtzirisImpatiencePlayer",
+"Considered Casting": "SupportConsideredCastingPlayer"
+}
+},
+{
+"id": 4,
+"skill": "Frostbolt",
+"asc": "Gemling Legionnaire",
+"base_dps": 2836.80851725,
+"strict_dps": 13992.526914375,
+"best_dps": 13992.526914375,
+"supports_before": [
+"Breachlord's Amalgam",
+"Verglas",
+"Considered Casting",
+"Deliberation",
+"Rakiata's Flow"
+],
+"supports_after_strict": [
+"Atalui's Bloodletting",
+"Embitter",
+"Inexorable Critical I",
+"Concentrated Area",
+"Rakiata's Flow"
+],
+"supports_after_best": [
+"Atalui's Bloodletting",
+"Embitter",
+"Inexorable Critical I",
+"Concentrated Area",
+"Rakiata's Flow"
+],
+"best_case_conditional_new": [],
+"removal_loss_pct": [
+{
+"loss_pct": -91.815856777494,
+"name": "Breachlord's Amalgam"
+},
+{
+"loss_pct": 0,
+"name": "Verglas"
+},
+{
+"loss_pct": 25.926892950392,
+"name": "Considered Casting"
+},
+{
+"loss_pct": 16.657963446475,
+"name": "Deliberation"
+},
+{
+"loss_pct": 66.666666666667,
+"name": "Rakiata's Flow"
+}
+],
+"ehp_before": 352868.71194656,
+"ehp_after_strict": 352868.71194656,
+"support_ids": {
+"Atalui's Bloodletting": "SupportAtaluiBloodlettingPlayer",
+"Embitter": "SupportEmbitterPlayer",
+"Concentrated Area": "SupportConcentratedAreaPlayer",
+"Breachlord's Amalgam": "SupportBreachlordsAmalgam",
+"Rakiata's Flow": "SupportRakiatasFlowPlayer",
+"Deliberation": "SupportDeliberationPlayer",
+"Inexorable Critical I": "SupportInevitableCriticalsPlayer",
+"Verglas": "SupportVerglasPlayer",
+"Considered Casting": "SupportConsideredCastingPlayer"
+}
+},
+{
+"id": 5,
+"skill": "Grim Pillars",
+"asc": "Oracle",
+"base_dps": 169420.875,
+"strict_dps": 270028.625,
+"best_dps": 270028.625,
+"supports_before": [
+"Vorana's Siege",
+"Uhtred's Augury",
+"Urgent Totems III",
+"Rakiata's Flow"
+],
+"supports_after_strict": [
+"Concentrated Area",
+"Tul's Stillness",
+"Dialla's Desire",
+"Rakiata's Flow"
+],
+"supports_after_best": [
+"Concentrated Area",
+"Tul's Stillness",
+"Dialla's Desire",
+"Rakiata's Flow"
+],
+"best_case_conditional_new": [],
+"removal_loss_pct": [
+{
+"loss_pct": -32.571399480731,
+"name": "Vorana's Siege"
+},
+{
+"loss_pct": 0,
+"name": "Uhtred's Augury"
+},
+{
+"loss_pct": -32.571399480731,
+"name": "Urgent Totems III"
+},
+{
+"loss_pct": 55.809533506423,
+"name": "Rakiata's Flow"
+}
+],
+"ehp_before": 28222.445479933,
+"ehp_after_strict": 28222.445479933,
+"support_ids": {
+"Vorana's Siege": "SupportVoranasSiege",
+"Concentrated Area": "SupportConcentratedAreaPlayer",
+"Rakiata's Flow": "SupportRakiatasFlowPlayer",
+"Urgent Totems III": "SupportUrgentTotemsPlayerThree",
+"Tul's Stillness": "SupportTulsStillnessPlayer",
+"Uhtred's Augury": "SupportUhtredAuguryPlayer",
+"Dialla's Desire": "SupportDiallasDesirePlayer"
+}
+},
+{
+"id": 6,
+"skill": "Spark",
+"asc": "Infernalist",
+"base_dps": 822086.98929209,
+"strict_dps": 1303639.883463,
+"best_dps": 1303639.883463,
+"supports_before": [
+"Rising Tempest",
+"Projectile Acceleration III",
+"Pierce III",
+"Commiserate",
+"Rakiata's Flow"
+],
+"supports_after_strict": [
+"Considered Casting",
+"Esh's Radiance",
+"Atalui's Bloodletting",
+"Inexorable Critical I",
+"Rakiata's Flow"
+],
+"supports_after_best": [
+"Considered Casting",
+"Esh's Radiance",
+"Atalui's Bloodletting",
+"Inexorable Critical I",
+"Rakiata's Flow"
+],
+"best_case_conditional_new": [],
+"removal_loss_pct": [
+{
+"loss_pct": 0,
+"name": "Rising Tempest"
+},
+{
+"loss_pct": 7.9805696913702,
+"name": "Projectile Acceleration III"
+},
+{
+"loss_pct": 0,
+"name": "Pierce III"
+},
+{
+"loss_pct": 0,
+"name": "Commiserate"
+},
+{
+"loss_pct": 55.245578386117,
+"name": "Rakiata's Flow"
+}
+],
+"ehp_before": 43198.284138762,
+"ehp_after_strict": 43198.284138762,
+"support_ids": {
+"Projectile Acceleration III": "SupportProjectileAccelerationPlayerThree",
+"Atalui's Bloodletting": "SupportAtaluiBloodlettingPlayer",
+"Esh's Radiance": "SupportEshsRadiancePlayer",
+"Pierce III": "SupportPiercePlayerThree",
+"Rakiata's Flow": "SupportRakiatasFlowPlayer",
+"Inexorable Critical I": "SupportInevitableCriticalsPlayer",
+"Commiserate": "SupportCommiseratePlayer",
+"Rising Tempest": "SupportTempestuousTempoPlayer",
+"Considered Casting": "SupportConsideredCastingPlayer"
+}
+},
+{
+"id": 7,
+"skill": "Dark Consequences",
+"asc": "Oracle",
+"base_dps": 1110641.8415412,
+"strict_dps": 1292800.4527845,
+"best_dps": 1292800.4527845,
+"supports_before": [
+"Potent Exposure"
+],
+"supports_after_strict": [
+"Dialla's Desire"
+],
+"supports_after_best": [
+"Dialla's Desire"
+],
+"best_case_conditional_new": [],
+"removal_loss_pct": [
+{
+"loss_pct": 0,
+"name": "Potent Exposure"
+}
+],
+"ehp_before": 31331.176093462,
+"ehp_after_strict": 31331.176093462,
+"support_ids": {
+"Dialla's Desire": "SupportDiallasDesirePlayer",
+"Potent Exposure": "SupportPotentExposurePlayer"
+}
+},
+{
+"id": 8,
+"skill": "Companion: Zekoa, the Headcrusher",
+"asc": "Spirit Walker",
+"base_dps": 910441.75845402,
+"strict_dps": 1269858.5621008,
+"best_dps": 1269858.5621008,
+"supports_before": [
+"Muster",
+"Feeding Frenzy II",
+"Rapid Attacks II",
+"Loyalty",
+"Minion Splash II"
+],
+"supports_after_strict": [
+"Muster",
+"Feeding Frenzy II",
+"Poison II",
+"Loyalty",
+"Rakiata's Flow"
+],
+"supports_after_best": [
+"Muster",
+"Feeding Frenzy II",
+"Poison II",
+"Loyalty",
+"Rakiata's Flow"
+],
+"best_case_conditional_new": [],
+"removal_loss_pct": [
+{
+"loss_pct": 25.967737854547,
+"name": "Muster"
+},
+{
+"loss_pct": 23.096108699997,
+"name": "Feeding Frenzy II"
+},
+{
+"loss_pct": 10,
+"name": "Rapid Attacks II"
+},
+{
+"loss_pct": 0,
+"name": "Loyalty"
+},
+{
+"loss_pct": 0,
+"name": "Minion Splash II"
+}
+],
+"ehp_before": 51489.327718913,
+"ehp_after_strict": 51489.327718913,
+"support_ids": {
+"Rapid Attacks II": "SupportRapidAttacksPlayerTwo",
+"Minion Splash II": "SupportMinionMeleeSplashPlayerTwo",
+"Muster": "SupportMusterPlayer",
+"Rakiata's Flow": "SupportRakiatasFlowPlayer",
+"Feeding Frenzy II": "SupportFeedingFrenzyPlayerTwo",
+"Loyalty": "SupportLoyaltyPlayer",
+"Poison II": "SupportPoisonPlayerTwo"
+}
+},
+{
+"id": 9,
+"skill": "Falling Thunder",
+"asc": "Gemling Legionnaire",
+"base_dps": 462428.74781252,
+"strict_dps": 1066865.4010552,
+"best_dps": 1294098.4771489,
+"supports_before": [
+"Rakiata's Flow",
+"Perpetual Charge",
+"Atalui's Bloodletting",
+"Nova Projectiles I",
+"Verglas"
+],
+"supports_after_strict": [
+"Rakiata's Flow",
+"Overextend",
+"Elemental Armament I",
+"Concentrated Area",
+"Garukhan's Resolve"
+],
+"supports_after_best": [
+"Rakiata's Flow",
+"Concentrated Area",
+"Overextend",
+"Hit and Run",
+"Minion Pact II"
+],
+"best_case_conditional_new": [
+"Hit and Run (after )",
+"Minion Pact II (if you)"
+],
+"removal_loss_pct": [
+{
+"loss_pct": 63.741379940033,
+"name": "Rakiata's Flow"
+},
+{
+"loss_pct": 4.9888402013482,
+"name": "Perpetual Charge"
+},
+{
+"loss_pct": 9.4892747884357,
+"name": "Atalui's Bloodletting"
+},
+{
+"loss_pct": 3.3333333333333,
+"name": "Nova Projectiles I"
+},
+{
+"loss_pct": 4.9888402013482,
+"name": "Verglas"
+}
+],
+"ehp_before": 19831.425404743,
+"ehp_after_strict": 19831.425404743,
+"support_ids": {
+"Atalui's Bloodletting": "SupportAtaluiBloodlettingPlayer",
+"Overextend": "SupportOverextendPlayer",
+"Concentrated Area": "SupportConcentratedAreaPlayer",
+"Perpetual Charge": "SupportPerpetualChargePlayer",
+"Rakiata's Flow": "SupportRakiatasFlowPlayer",
+"Elemental Armament I": "SupportElementalArmamentPlayer",
+"Minion Pact II": "SupportMinionPactPlayerTwo",
+"Garukhan's Resolve": "SupportGarukhansResolvePlayer",
+"Verglas": "SupportVerglasPlayer",
+"Nova Projectiles I": "SupportNovaProjectilesPlayer",
+"Hit and Run": "SupportHitAndRunPlayer"
+}
+},
+{
+"id": 10,
+"skill": "Flicker Strike",
+"asc": "Martial Artist",
+"base_dps": 2106186.7593299,
+"strict_dps": 4419914.7408967,
+"best_dps": 5810562.582245,
+"supports_before": [
+"Perpetual Charge",
+"Heightened Charges",
+"Hit and Run",
+"Close Combat II",
+"Elemental Armament II"
+],
+"supports_after_strict": [
+"Living Lightning II",
+"Concentrated Area",
+"Hit and Run",
+"Uul-Netol's Embrace",
+"Overextend"
+],
+"supports_after_best": [
+"Zerphi's Infamy",
+"Living Lightning II",
+"Hit and Run",
+"Concentrated Area",
+"Minion Pact II"
+],
+"best_case_conditional_new": [
+"Zerphi's Infamy (glory)",
+"Minion Pact II (if you)"
+],
+"removal_loss_pct": [
+{
+"loss_pct": 0,
+"name": "Perpetual Charge"
+},
+{
+"loss_pct": 0,
+"name": "Heightened Charges"
+},
+{
+"loss_pct": 28.53501204975,
+"name": "Hit and Run"
+},
+{
+"loss_pct": 15.304275210596,
+"name": "Close Combat II"
+},
+{
+"loss_pct": 6.3908444911777,
+"name": "Elemental Armament II"
+}
+],
+"ehp_before": 63666.076480995,
+"ehp_after_strict": 63666.076480995,
+"support_ids": {
+"Close Combat II": "SupportCloseCombatPlayerTwo",
+"Concentrated Area": "SupportConcentratedAreaPlayer",
+"Overextend": "SupportOverextendPlayer",
+"Perpetual Charge": "SupportPerpetualChargePlayer",
+"Uul-Netol's Embrace": "SupportUulNetolsEmbracePlayer",
+"Living Lightning II": "SupportLivingLightningPlayerTwo",
+"Zerphi's Infamy": "SupportZerphisLegacyPlayer",
+"Minion Pact II": "SupportMinionPactPlayerTwo",
+"Elemental Armament II": "SupportElementalArmamentPlayerTwo",
+"Hit and Run": "SupportHitAndRunPlayer",
+"Heightened Charges": "SupportHeightenedChargesPlayer"
+}
+},
+{
+"id": 11,
+"skill": "Oil Barrage",
+"asc": "Witchhunter",
+"base_dps": 180273.53725846,
+"strict_dps": 400614.05904312,
+"best_dps": 522272.71852943,
+"supports_before": [
+"Hit and Run",
+"Nova Projectiles I",
+"Close Combat II",
+"Salvo",
+"Ricochet I"
+],
+"supports_after_strict": [
+"Hit and Run",
+"Living Lightning II",
+"Rigwald's Ferocity",
+"Concentrated Area",
+"Uul-Netol's Embrace"
+],
+"supports_after_best": [
+"Hit and Run",
+"Minion Pact II",
+"Living Lightning II",
+"Uul-Netol's Embrace",
+"Zerphi's Infamy"
+],
+"best_case_conditional_new": [
+"Minion Pact II (if you)",
+"Zerphi's Infamy (glory)"
+],
+"removal_loss_pct": [
+{
+"loss_pct": 28.648648648649,
+"name": "Hit and Run"
+},
+{
+"loss_pct": 0,
+"name": "Nova Projectiles I"
+},
+{
+"loss_pct": 15.785525163156,
+"name": "Close Combat II"
+},
+{
+"loss_pct": 0,
+"name": "Salvo"
+},
+{
+"loss_pct": 0,
+"name": "Ricochet I"
+}
+],
+"ehp_before": 60790.997072893,
+"ehp_after_strict": 60790.997072893,
+"support_ids": {
+"Close Combat II": "SupportCloseCombatPlayerTwo",
+"Salvo": "SupportSalvoPlayer",
+"Concentrated Area": "SupportConcentratedAreaPlayer",
+"Nova Projectiles I": "SupportNovaProjectilesPlayer",
+"Ricochet I": "SupportRicochetPlayer",
+"Uul-Netol's Embrace": "SupportUulNetolsEmbracePlayer",
+"Living Lightning II": "SupportLivingLightningPlayerTwo",
+"Rigwald's Ferocity": "SupportRigwaldsFerocityPlayer",
+"Minion Pact II": "SupportMinionPactPlayerTwo",
+"Zerphi's Infamy": "SupportZerphisLegacyPlayer",
+"Hit and Run": "SupportHitAndRunPlayer"
+}
+},
+{
+"id": 12,
+"skill": "Shattering Palm",
+"asc": "Invoker",
+"base_dps": 199393.24101056,
+"strict_dps": 429905.2202342,
+"best_dps": 551252.19335102,
+"supports_before": [
+"Rakiata's Flow",
+"Rigwald's Ferocity",
+"Vorana's Siege",
+"Supercritical",
+"Rage III"
+],
+"supports_after_strict": [
+"Rakiata's Flow",
+"Rigwald's Ferocity",
+"Concentrated Area",
+"Overextend",
+"Elemental Focus"
+],
+"supports_after_best": [
+"Rakiata's Flow",
+"Rigwald's Ferocity",
+"Concentrated Area",
+"Zerphi's Infamy",
+"Minion Pact II"
+],
+"best_case_conditional_new": [
+"Zerphi's Infamy (glory)",
+"Minion Pact II (if you)"
+],
+"removal_loss_pct": [
+{
+"loss_pct": 33.569284857783,
+"name": "Rakiata's Flow"
+},
+{
+"loss_pct": 23.129338230435,
+"name": "Rigwald's Ferocity"
+},
+{
+"loss_pct": 0,
+"name": "Vorana's Siege"
+},
+{
+"loss_pct": -4.9045908580208,
+"name": "Supercritical"
+},
+{
+"loss_pct": 0,
+"name": "Rage III"
+}
+],
+"ehp_before": 69219.506131012,
+"ehp_after_strict": 69219.506131012,
+"support_ids": {
+"Vorana's Siege": "SupportVoranasSiege",
+"Concentrated Area": "SupportConcentratedAreaPlayer",
+"Overextend": "SupportOverextendPlayer",
+"Rage III": "SupportRagePlayerThree",
+"Rakiata's Flow": "SupportRakiatasFlowPlayer",
+"Rigwald's Ferocity": "SupportRigwaldsFerocityPlayer",
+"Supercritical": "SupportIncreasedCriticalDamagePlayer",
+"Zerphi's Infamy": "SupportZerphisLegacyPlayer",
+"Minion Pact II": "SupportMinionPactPlayerTwo",
+"Elemental Focus": "SupportElementalFocusPlayer"
+}
+},
+{
+"id": 13,
+"skill": "Rend",
+"asc": "Acolyte of Chayula",
+"base_dps": 19482.445797773,
+"strict_dps": 52253.912362425,
+"best_dps": 78531.666492374,
+"supports_before": [
+"Living Lightning II",
+"Garukhan's Resolve",
+"Magnified Area II",
+"Withering Touch",
+"Knockback"
+],
+"supports_after_strict": [
+"Living Lightning II",
+"Close Combat II",
+"Xoph's Pyre",
+"Poison II",
+"Rigwald's Ferocity"
+],
+"supports_after_best": [
+"Living Lightning II",
+"Rigwald's Ferocity",
+"Xoph's Pyre",
+"Zerphi's Infamy",
+"Minion Pact II"
+],
+"best_case_conditional_new": [
+"Zerphi's Infamy (glory)",
+"Minion Pact II (if you)"
+],
+"removal_loss_pct": [
+{
+"loss_pct": 24.242424242424,
+"name": "Living Lightning II"
+},
+{
+"loss_pct": 7.0123326663849,
+"name": "Garukhan's Resolve"
+},
+{
+"loss_pct": 0,
+"name": "Magnified Area II"
+},
+{
+"loss_pct": -33.729309682037,
+"name": "Withering Touch"
+},
+{
+"loss_pct": 0,
+"name": "Knockback"
+}
+],
+"ehp_before": 91945.692578268,
+"ehp_after_strict": 91945.692578268,
+"support_ids": {
+"Close Combat II": "SupportCloseCombatPlayerTwo",
+"Living Lightning II": "SupportLivingLightningPlayerTwo",
+"Rigwald's Ferocity": "SupportRigwaldsFerocityPlayer",
+"Garukhan's Resolve": "SupportGarukhansResolvePlayer",
+"Zerphi's Infamy": "SupportZerphisLegacyPlayer",
+"Magnified Area II": "SupportMagnifiedAreaPlayerTwo",
+"Xoph's Pyre": "SupportXophsPyrePlayer",
+"Minion Pact II": "SupportMinionPactPlayerTwo",
+"Withering Touch": "SupportWitheringTouchPlayer",
+"Knockback": "SupportKnockbackPlayer",
+"Poison II": "SupportPoisonPlayerTwo"
+}
+},
+{
+"id": 14,
+"skill": "Essence Drain",
+"asc": "Chronomancer",
+"base_dps": 200598.89109333,
+"strict_dps": 330273.9860832,
+"best_dps": 367866.1471008,
+"supports_before": [
+"Swift Affliction II",
+"Chain III",
+"Considered Casting",
+"Zenith II",
+"Efficiency II"
+],
+"supports_after_strict": [
+"Swift Affliction II",
+"Derange",
+"Considered Casting",
+"Dialla's Desire",
+"Hourglass"
+],
+"supports_after_best": [
+"Swift Affliction II",
+"Dialla's Desire",
+"Considered Casting",
+"Deliberation",
+"Hourglass"
+],
+"best_case_conditional_new": [
+"Deliberation (moving)"
+],
+"removal_loss_pct": [
+{
+"loss_pct": 23.295454545455,
+"name": "Swift Affliction II"
+},
+{
+"loss_pct": 0,
+"name": "Chain III"
+},
+{
+"loss_pct": 26.136363636364,
+"name": "Considered Casting"
+},
+{
+"loss_pct": 0,
+"name": "Zenith II"
+},
+{
+"loss_pct": 0,
+"name": "Efficiency II"
+}
+],
+"ehp_before": 15263.687920708,
+"ehp_after_strict": 15263.687920708,
+"support_ids": {
+"Hourglass": "SupportHourglassPlayer",
+"Derange": "SupportDerangePlayer",
+"Deliberation": "SupportDeliberationPlayer",
+"Chain III": "SupportChainPlayerThree",
+"Zenith II": "SupportZenithPlayerTwo",
+"Swift Affliction II": "SupportSwiftAfflictionPlayerTwo",
+"Efficiency II": "SupportEfficiencyPlayerTwo",
+"Dialla's Desire": "SupportDiallasDesirePlayer",
+"Considered Casting": "SupportConsideredCastingPlayer"
+}
+},
+{
+"id": 15,
+"skill": "Skeletal Storm Mage Minion",
+"asc": "None",
+"base_dps": 2514.074248,
+"strict_dps": 7404.528708,
+"best_dps": 7404.528708,
+"supports_before": [
+"Elemental Focus",
+"Lightning Mastery",
+"Feeding Frenzy II",
+"Rapid Casting II"
+],
+"supports_after_strict": [
+"Elemental Focus",
+"Rakiata's Flow",
+"Feeding Frenzy II",
+"Lightning Attunement"
+],
+"supports_after_best": [
+"Elemental Focus",
+"Rakiata's Flow",
+"Feeding Frenzy II",
+"Lightning Attunement"
+],
+"best_case_conditional_new": [],
+"removal_loss_pct": [
+{
+"loss_pct": 20.002884338044,
+"name": "Elemental Focus"
+},
+{
+"loss_pct": 10.311508508797,
+"name": "Lightning Mastery"
+},
+{
+"loss_pct": 23.060282665128,
+"name": "Feeding Frenzy II"
+},
+{
+"loss_pct": 12.422360248447,
+"name": "Rapid Casting II"
+}
+],
+"ehp_before": 33650.246305419,
+"ehp_after_strict": 33650.246305419,
+"support_ids": {
+"Lightning Attunement": "SupportAddedLightningDamagePlayer",
+"Rakiata's Flow": "SupportRakiatasFlowPlayer",
+"Rapid Casting II": "SupportRapidCastingPlayerTwo",
+"Lightning Mastery": "SupportLightningMasteryPlayer",
+"Elemental Focus": "SupportElementalFocusPlayer",
+"Feeding Frenzy II": "SupportFeedingFrenzyPlayerTwo"
+}
+},
+{
+"id": 16,
+"skill": "Poisonburst Arrow",
+"asc": "Acolyte of Chayula",
+"base_dps": 567758.40034976,
+"strict_dps": 1719084.781731,
+"best_dps": 2258266.6945057,
+"supports_before": [
+"Poison III",
+"Bursting Plague",
+"Escalating Poison",
+"Deadly Poison II",
+"Fork"
+],
+"supports_after_strict": [
+"Olroth's Hubris",
+"Inexorable Critical I",
+"Garukhan's Resolve",
+"Close Combat II",
+"Overextend"
+],
+"supports_after_best": [
+"Garukhan's Resolve",
+"Olroth's Hubris",
+"Zerphi's Infamy",
+"Inexorable Critical I",
+"Minion Pact II"
+],
+"best_case_conditional_new": [
+"Zerphi's Infamy (glory)",
+"Minion Pact II (if you)"
+],
+"removal_loss_pct": [
+{
+"loss_pct": 0,
+"name": "Poison III"
+},
+{
+"loss_pct": 0,
+"name": "Bursting Plague"
+},
+{
+"loss_pct": -2.4412780561772,
+"name": "Escalating Poison"
+},
+{
+"loss_pct": 9.4970074930087,
+"name": "Deadly Poison II"
+},
+{
+"loss_pct": 0,
+"name": "Fork"
+}
+],
+"ehp_before": 7912.8260869565,
+"ehp_after_strict": 7912.8260869565,
+"support_ids": {
+"Close Combat II": "SupportCloseCombatPlayerTwo",
+"Overextend": "SupportOverextendPlayer",
+"Fork": "SupportForkPlayer",
+"Deadly Poison II": "SupportDeadlyPoisonPlayerTwo",
+"Escalating Poison": "SupportEscalatingPoisonPlayer",
+"Inexorable Critical I": "SupportInevitableCriticalsPlayer",
+"Zerphi's Infamy": "SupportZerphisLegacyPlayer",
+"Minion Pact II": "SupportMinionPactPlayerTwo",
+"Garukhan's Resolve": "SupportGarukhansResolvePlayer",
+"Bursting Plague": "SupportBurstingPlaguePlayer",
+"Olroth's Hubris": "SupportOlrothsHubrisPlayer",
+"Poison III": "SupportPoisonPlayerThree"
+}
+},
+{
+"id": 17,
+"skill": "Wolf Pack",
+"asc": "Tactician",
+"base_dps": 554.31357563874,
+"strict_dps": 891.62607563874,
+"best_dps": 891.62607563874,
+"supports_before": [
+"Infernal Legion II",
+"Feeding Frenzy II",
+"Loyalty"
+],
+"supports_after_strict": [
+"Uul-Netol's Embrace",
+"Feeding Frenzy II",
+"Loyalty"
+],
+"supports_after_best": [
+"Uul-Netol's Embrace",
+"Feeding Frenzy II",
+"Loyalty"
+],
+"best_case_conditional_new": [],
+"removal_loss_pct": [
+{
+"loss_pct": 0,
+"name": "Infernal Legion II"
+},
+{
+"loss_pct": 30.487250920242,
+"name": "Feeding Frenzy II"
+},
+{
+"loss_pct": 0,
+"name": "Loyalty"
+}
+],
+"ehp_before": 25212.332969747,
+"ehp_after_strict": 25212.332969747,
+"support_ids": {
+"Feeding Frenzy II": "SupportFeedingFrenzyPlayerTwo",
+"Infernal Legion II": "SupportInfernalLegionPlayerTwo",
+"Loyalty": "SupportLoyaltyPlayer",
+"Uul-Netol's Embrace": "SupportUulNetolsEmbracePlayer"
+}
+},
+{
+"id": 18,
+"skill": "Ember Fusillade",
+"asc": "Gemling Legionnaire",
+"base_dps": 942105.19467001,
+"strict_dps": 1237751.8078336,
+"best_dps": 1296726.490734,
+"supports_before": [
+"Zenith II",
+"Execute III",
+"Wildshards II"
+],
+"supports_after_strict": [
+"Chaos Attunement",
+"Execute III",
+"Fire Mastery"
+],
+"supports_after_best": [
+"Deliberation",
+"Execute III",
+"Chaos Attunement"
+],
+"best_case_conditional_new": [
+"Deliberation (moving)"
+],
+"removal_loss_pct": [
+{
+"loss_pct": 0,
+"name": "Zenith II"
+},
+{
+"loss_pct": 23.144379431812,
+"name": "Execute III"
+},
+{
+"loss_pct": 0,
+"name": "Wildshards II"
+}
+],
+"ehp_before": 25765.438568017,
+"ehp_after_strict": 25765.438568017,
+"support_ids": {
+"Chaos Attunement": "SupportAddedChaosDamagePlayer",
+"Deliberation": "SupportDeliberationPlayer",
+"Wildshards II": "SupportWildshardsPlayerTwo",
+"Fire Mastery": "SupportFireMasteryPlayer",
+"Zenith II": "SupportZenithPlayerTwo",
+"Execute III": "SupportExecutePlayerThree"
+}
+},
+{
+"id": 19,
+"skill": "Detonate Dead",
+"asc": "Lich",
+"base_dps": 106343.82664051,
+"strict_dps": 510243.39624719,
+"best_dps": 510243.39624719,
+"supports_before": [
+"Zarokh's Revolt",
+"Magnified Area II",
+"Fire Mastery",
+"Controlled Destruction",
+"Deliberation"
+],
+"supports_after_strict": [
+"Uul-Netol's Embrace",
+"Inexorable Critical I",
+"Scouring Flame",
+"Supercritical",
+"Deliberation"
+],
+"supports_after_best": [
+"Uul-Netol's Embrace",
+"Inexorable Critical I",
+"Scouring Flame",
+"Supercritical",
+"Deliberation"
+],
+"best_case_conditional_new": [],
+"removal_loss_pct": [
+{
+"loss_pct": -179.72321354097,
+"name": "Zarokh's Revolt"
+},
+{
+"loss_pct": 0,
+"name": "Magnified Area II"
+},
+{
+"loss_pct": 2.8165993300661,
+"name": "Fire Mastery"
+},
+{
+"loss_pct": 12.941510780615,
+"name": "Controlled Destruction"
+},
+{
+"loss_pct": 16.694428703273,
+"name": "Deliberation"
+}
+],
+"ehp_before": 19462.398575699,
+"ehp_after_strict": 19462.398575699,
+"support_ids": {
+"Deliberation": "SupportDeliberationPlayer",
+"Inexorable Critical I": "SupportInevitableCriticalsPlayer",
+"Fire Mastery": "SupportFireMasteryPlayer",
+"Controlled Destruction": "SupportControlledDestructionPlayer",
+"Uul-Netol's Embrace": "SupportUulNetolsEmbracePlayer",
+"Supercritical": "SupportIncreasedCriticalDamagePlayer",
+"Scouring Flame": "SupportScouringFlamePlayer",
+"Magnified Area II": "SupportMagnifiedAreaPlayerTwo",
+"Zarokh's Revolt": "SupportZarokhsRevoltPlayer"
+}
+}
+]
