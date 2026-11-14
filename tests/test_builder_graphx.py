@@ -85,4 +85,7 @@ def test_leveling_factor_and_levels():
     assert leveling.factor(20, 1, False) == leveling.BOSS_FACTOR
     assert leveling.factor(20, 0, True) == 0.0
     assert leveling.level_for_passives(1) <= leveling.level_for_passives(40) <= leveling.level_for_passives(100)
-    assert [leveling.level_for_ascendancy(p) for p in (1, 2, 3, 8)] == [22, 22, 38, 75]
+    assert [leveling.level_for_ascendancy(p) for p in (1, 2, 3, 8)] == [22, 22, 33, 75]
+    assert leveling.level_for_passives(12) == 11 and leveling.level_for_passives(14) == 12
+    assert leveling.level_for_spirit(30) == (11, False) and leveling.level_for_spirit(60) == (33, False)
+    assert leveling.level_for_spirit(130) == (55, True)

@@ -12,8 +12,9 @@ leveling option on, graphx multiplies the chain score by `factor`: chains that o
 boss drop, rank lower, and chains with an item that can no longer drop are removed.
 
 The facts come from PoB data (`python3 -m exilegen.builder.leveling --pob-root <PathOfBuilding-PoE2>/src`).
-The curves in ASSUMED are NOT from PoB and have not been checked against the game; they are plain constants here
-so they are easy to correct.
+The schedule in ASSUMED is not in PoB. It is taken from the PoE2 Codex campaign guide for patch 0.5.5
+(https://domistae.github.io/poe2-leveling/, MIT, by domistae): the zone level of each quest that gives passive
+points or Spirit, and the level of each ascendancy trial. It is a community guide, so treat it as a good estimate.
 """
 from __future__ import annotations
 
@@ -29,12 +30,14 @@ from . import catalog as catmod
 PATH = os.path.join(catmod.DATA_DIR, "leveling.json")
 
 ASSUMED = {
-    # ascendancy points held -> character level at which the trial giving them is normally done
-    "ascendancy_points_level": {2: 22, 4: 38, 6: 60, 8: 75},
-    # passive points from campaign quests, earned roughly evenly up to this level
-    "quest_passive_points": 24,
-    "quest_points_by_level": 65,
-    # boss-only drops come from endgame bosses
+    # ascendancy points held -> earliest character level for the trial that gives them. The guide runs the 1st at
+    # 28 for an easier trial and says the 4th usually comes around level 85; these are the earliest keys.
+    "ascendancy_points_level": {2: 22, 4: 33, 6: 60, 8: 75},
+    # character level -> passive points from campaign quests held by then (2 per quest, 24 in total)
+    "quest_passive_points": {10: 2, 12: 4, 22: 6, 26: 8, 30: 10, 39: 12, 47: 14, 48: 16, 52: 18, 54: 20, 56: 22, 58: 24},
+    # character level -> Spirit from campaign quests held by then (+30 Act 1, +30 Act 3, +40 Interludes)
+    "quest_spirit": {11: 30, 33: 60, 55: 100},
+    # boss-only drops come from endgame bosses; Tier 11 maps are area level 75
     "boss_drop_level": 75,
     "max_level": 100,
 }
@@ -163,10 +166,19 @@ def load(path: str = PATH) -> dict:
 def level_for_passives(points: int) -> int:
     a = ASSUMED
     for lvl in range(1, a["max_level"] + 1):
-        quest = round(a["quest_passive_points"] * min(lvl, a["quest_points_by_level"]) / a["quest_points_by_level"])
+        quest = max([n for at, n in a["quest_passive_points"].items() if at <= lvl], default=0)
         if lvl - 1 + quest >= points:
             return lvl
     return a["max_level"]
+
+
+def level_for_spirit(spirit: float) -> tuple[int, bool]:
+    """Level at which campaign quests alone give this much Spirit, and whether gear has to add the rest."""
+    table = sorted(ASSUMED["quest_spirit"].items())
+    for lvl, have in table:
+        if spirit <= have:
+            return lvl, False
+    return table[-1][0], True
 
 
 def level_for_ascendancy(points: int) -> int:
@@ -210,9 +222,10 @@ def _skill_step(sid: str, sk: dict, chain: dict, data: dict) -> dict:
     return s
 
 
-def plan(chain: dict, data: dict, cls: str | None = None, skills: dict | None = None, path_skills: list | None = None) -> dict:
+def plan(chain: dict, data: dict, cls: str | None = None, skills: dict | None = None, path_skills: list | None = None,
+         spirit: float = 0.0) -> dict:
     """Leveling path for one chain. `cls` is the class the build starts as (None = the closest class per keystone).
-    `skills` is the catalogue's skill table; `path_skills` are the ids of the helper skills in the chain's path."""
+    `skills` is the catalogue's skill table; `path_skills` are the ids of the helper skills in the chain's path; `spirit` is the Spirit the chain reserves."""
     steps = []
     skills = skills or {}
     seen = set()
@@ -245,6 +258,11 @@ def plan(chain: dict, data: dict, cls: str | None = None, skills: dict | None = 
         pts = (data.get("ascendancy", {}).get(a) or {}).get(n)
         steps.append({"kind": "asc", "name": n, "ascendancy": a, "gate": "ascendancy", "known": pts is not None,
                       "points": pts, "level": level_for_ascendancy(pts) if pts is not None else ASSUMED["ascendancy_points_level"][2]})
+    need = float(spirit or 0)
+    if need > 0:
+        lvl, gear = level_for_spirit(need)
+        steps.append({"kind": "spirit", "name": f"{need:g} Spirit", "level": lvl, "gate": "spirit_gear" if gear else "spirit",
+                      "known": True, "points": need, "quest": max(ASSUMED["quest_spirit"].values())})
     steps.sort(key=lambda s: (s["level"], s["kind"], s["name"]))
     online = max((s["level"] for s in steps), default=1)
     start = next((s["level"] for s in steps if s.get("main")), 1)

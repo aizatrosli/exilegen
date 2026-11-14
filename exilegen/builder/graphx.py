@@ -175,7 +175,7 @@ def preflight(cat: catmod.Catalog, req: Requirements, unknown_keys: list[str] | 
     has_lvl = bool(levelmod.load())
     out.insert(6, _check("data.leveling", "data", "ok" if has_lvl else ("fail" if req.leveling or req.online_by else "warn"),
                          "Level and drop data",
-                         "gem, item, passive and ascendancy gates from PoB data; trial and quest-point levels are assumed"
+                         "gem, item, passive and ascendancy gates from PoB data; trial, quest-point and Spirit levels from the PoE2 Codex campaign guide"
                          if has_lvl else "missing (python3 -m exilegen.builder.leveling): chains have no leveling path"))
     ok_lvl = isinstance(req.online_by, int) and 0 <= req.online_by <= 100
     out.append(_check("req.leveling", "requirements", "ok" if ok_lvl else "fail", "Leveling",
@@ -248,7 +248,7 @@ def mechanics(cat: catmod.Catalog, req: Requirements) -> dict:
             ascs = [a for a, _ in c["asc_nodes"]] + [a for a, _ in main.get("asc_granted") or []]
             cls = req.cls or (cat.class_of(req.ascendancy) if req.ascendancy else None) or (cat.class_of(ascs[0]) if ascs else None)
             path_skills = [g.entities[k].meta.get("skill") for k in c["path"] if g.entities[k].kind in ("skill", "util")]
-            c["leveling"] = levelmod.plan(c, lvl, cls, cat.skills, path_skills)
+            c["leveling"] = levelmod.plan(c, lvl, cls, cat.skills, path_skills, c["tempo"].get("spirit_total", 0))
             if req.leveling:
                 c["score"] = round(c["score"] * c["leveling"]["factor"], 4)
     if lvl and (req.leveling or req.online_by):
