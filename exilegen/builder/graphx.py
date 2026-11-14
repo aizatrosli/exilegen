@@ -1,0 +1,386 @@
+"""Graph export for the pob-redux Graph view, gated by a requirements check.
+
+    python3 -m exilegen.builder.graphx --requirements req.json --out graph.json [--corpus-dir DIR] [--check]
+
+Nothing is analysed until the requirements pass. The check has two halves:
+
+  data          catalog present, mod-parse coverage, corpus summary, ladder corpus (optional), networkx (optional)
+  requirements  the user's request is well formed: constraints parse, profiles / ascendancy / uniques /
+                keystones exist, class matches ascendancy, nothing is both required and forbidden
+
+A failed check exits 2 and writes no graph (with --out it still writes the check, so the app can show why).
+The requirements object uses the builder's own names (contracts.Skeleton, scoring.constraints, profiles.json):
+
+  {"constraints": ["one_button"], "profiles": ["pinnacle_v1", "mapping_v1"], "budget_tier": "mid",
+   "cls": null, "ascendancy": "Lich", "damage_types": ["Chaos"], "uniques": [{"name": "Liminal Coil"}],
+   "forbid_uniques": [], "keystones": [], "chain_kinds": [], "min_novelty": 0.0, "top": 150}
+
+The exported document ("format": "exilegen-graph", "version": 1) holds the requirements, the check, the
+mechanics graph restricted to the kept chains, the chains, and (with --corpus-dir) the ladder co-occurrence
+graph with its kits and untried-but-predicted pairs.
+"""
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import sys
+import time
+from collections import Counter
+from dataclasses import dataclass, field, asdict
+
+from . import catalog as catmod
+from . import mechgraph
+
+FORMAT, VERSION = "exilegen-graph", 1
+BUDGET_TIERS = ("low", "mid", "high")
+CHAIN_KINDS = ("self_feed", "enabler", "graft", "bridge")
+CONSTRAINT_TYPES = ("one_button", "no_cast", "no_minions", "max_manual_skills", "require_gem", "forbid_gem",
+                    "require_unique", "forbid_unique", "require_keystone", "forbid_keystone")
+DMG = ("Physical", "Fire", "Cold", "Lightning", "Chaos")
+MIN_PARSE_COVERAGE = 0.7
+MIN_CORPUS_BUILDS = 500
+PROFILES_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "profiles.json")
+
+
+@dataclass
+class Requirements:
+    constraints: list = field(default_factory=list)
+    profiles: list = field(default_factory=lambda: ["pinnacle_v1", "mapping_v1"])
+    budget_tier: str = "mid"
+    cls: str | None = None
+    ascendancy: str | None = None
+    damage_types: list = field(default_factory=list)
+    uniques: list = field(default_factory=list)          # [{"name": ...}] chains must touch one of these
+    forbid_uniques: list = field(default_factory=list)   # names
+    keystones: list = field(default_factory=list)        # chains must touch one of these
+    chain_kinds: list = field(default_factory=list)      # empty = all
+    min_novelty: float = 0.0
+    top: int = 150
+
+    @classmethod
+    def from_dict(cls, d: dict) -> tuple["Requirements", list[str]]:
+        known = {f for f in cls.__dataclass_fields__}
+        unknown = sorted(set(d) - known)
+        r = cls(**{k: v for k, v in d.items() if k in known and v is not None})
+        r.uniques = [u if isinstance(u, dict) else {"name": str(u)} for u in r.uniques or []]
+        return r, unknown
+
+    def unique_names(self) -> list[str]:
+        return [u.get("name", "") for u in self.uniques]
+
+
+def _check(cid: str, group: str, status: str, label: str, detail: str = "") -> dict:
+    return {"id": cid, "group": group, "status": status, "label": label, "detail": detail}
+
+
+def preflight(cat: catmod.Catalog, req: Requirements, unknown_keys: list[str] | None = None,
+              corpus_dir: str | None = None) -> list[dict]:
+    """-> checks [{id, group: data|requirements, status: ok|warn|fail, label, detail}]."""
+    out = []
+    # ---- data
+    counts = {"skills": len(cat.skills), "uniques": len(cat.uniques), "keystones": len(cat.keystones),
+              "ascendancies": len(cat.ascendancies)}
+    missing = [k for k, v in counts.items() if not v]
+    out.append(_check("data.catalog", "data", "fail" if missing else "ok", "Game data catalog",
+                      ("missing: " + ", ".join(missing) + " (run python3 -m exilegen.builder.catalog)") if missing else
+                      ", ".join(f"{v} {k}" for k, v in counts.items())))
+    n = len(cat.parsed or {})
+    cov = sum(1 for v in cat.parsed.values() if v.get("mods")) / n if n else 0.0
+    out.append(_check("data.parse_coverage", "data", "fail" if not n else "warn" if cov < MIN_PARSE_COVERAGE else "ok",
+                      "Mod lines PoB can parse",
+                      f"{cov:.0%} of {n} lines; links through the rest fall back to text matching"))
+    sample = (cat.corpus or {}).get("sample_n") or 0
+    out.append(_check("data.corpus_summary", "data", "ok" if sample >= MIN_CORPUS_BUILDS else "warn",
+                      "Ladder summary for novelty",
+                      f"{sample} builds, {(cat.corpus or {}).get('total_characters', 0)} ladder characters" if sample else
+                      "none: every chain will count as fully novel"))
+    ev = os.path.join(corpus_dir, "evaluated.jsonl") if corpus_dir else None
+    if ev and os.path.exists(ev):
+        age = (time.time() - os.path.getmtime(ev)) / 86400
+        out.append(_check("data.ladder_corpus", "data", "warn" if age > 45 else "ok", "Ladder corpus for kits",
+                          f"{ev} ({age:.0f} days old)"))
+    else:
+        out.append(_check("data.ladder_corpus", "data", "warn", "Ladder corpus for kits",
+                          "not given (--corpus-dir): ladder kits and untried pairs are skipped"))
+    try:
+        import networkx  # noqa: F401
+        import numpy  # noqa: F401
+        out.append(_check("data.graph_libs", "data", "ok", "numpy and networkx", "installed"))
+    except ImportError as e:
+        out.append(_check("data.graph_libs", "data", "warn", "numpy and networkx", f"{e}: ladder kits are skipped"))
+    # ---- requirements
+    if unknown_keys:
+        out.append(_check("req.keys", "requirements", "fail", "Known fields only", "unknown: " + ", ".join(unknown_keys)))
+    bad = []
+    try:
+        from ..scoring.constraints import Constraint
+        for c in req.constraints:
+            try:
+                if Constraint.parse(c).type not in CONSTRAINT_TYPES:
+                    bad.append(f"{c} (unknown constraint)")
+            except Exception as e:  # noqa: BLE001
+                bad.append(f"{c} ({e})")
+    except ImportError:
+        pass
+    out.append(_check("req.constraints", "requirements", "fail" if bad else "ok", "Constraints",
+                      "; ".join(bad) if bad else (", ".join(map(str, req.constraints)) or "none")))
+    try:
+        profs = set(json.load(open(PROFILES_PATH))["profiles"])
+    except Exception:  # noqa: BLE001
+        profs = set()
+    badp = [p for p in req.profiles if profs and p not in profs]
+    out.append(_check("req.profiles", "requirements", "fail" if badp or not req.profiles else "ok", "Scoring profiles",
+                      ("unknown: " + ", ".join(badp)) if badp else (", ".join(req.profiles) or "pick at least one")))
+    out.append(_check("req.budget_tier", "requirements", "ok" if req.budget_tier in BUDGET_TIERS else "fail", "Budget tier",
+                      req.budget_tier if req.budget_tier in BUDGET_TIERS else f"{req.budget_tier!r} is not one of {BUDGET_TIERS}"))
+    asc = cat.ascendancies.get(req.ascendancy) if req.ascendancy else None
+    classes = {a["class"] for a in cat.ascendancies.values()}
+    if req.ascendancy and not asc:
+        out.append(_check("req.ascendancy", "requirements", "fail", "Class and ascendancy", f"unknown ascendancy {req.ascendancy!r}"))
+    elif req.cls and req.cls not in classes:
+        out.append(_check("req.ascendancy", "requirements", "fail", "Class and ascendancy", f"unknown class {req.cls!r}"))
+    elif asc and req.cls and asc["class"] != req.cls:
+        out.append(_check("req.ascendancy", "requirements", "fail", "Class and ascendancy",
+                          f"{req.ascendancy} belongs to {asc['class']}, not {req.cls}"))
+    else:
+        out.append(_check("req.ascendancy", "requirements", "ok", "Class and ascendancy",
+                          " / ".join(x for x in (req.cls, req.ascendancy) if x) or "any"))
+    badd = [d for d in req.damage_types if d not in DMG]
+    out.append(_check("req.damage_types", "requirements", "fail" if badd else "ok", "Damage types",
+                      ("unknown: " + ", ".join(badd)) if badd else (", ".join(req.damage_types) or "any")))
+    unames = {u["name"] for u in cat.uniques.values()}
+    badu = [u for u in req.unique_names() + list(req.forbid_uniques) if u not in unames]
+    both = sorted(set(req.unique_names()) & set(req.forbid_uniques))
+    detail = "; ".join(x for x in (("unknown: " + ", ".join(badu)) if badu else "",
+                                   ("required and forbidden: " + ", ".join(both)) if both else "") if x)
+    out.append(_check("req.uniques", "requirements", "fail" if detail else "ok", "Uniques",
+                      detail or (", ".join(req.unique_names()) or "any")))
+    knames = {k["name"] for k in cat.keystones.values()}
+    badk = [k for k in req.keystones if k not in knames]
+    out.append(_check("req.keystones", "requirements", "fail" if badk else "ok", "Keystones",
+                      ("unknown: " + ", ".join(badk)) if badk else (", ".join(req.keystones) or "any")))
+    badc = [k for k in req.chain_kinds if k not in CHAIN_KINDS]
+    ok_num = 0.0 <= float(req.min_novelty) <= 1.0 and 1 <= int(req.top) <= 2000
+    out.append(_check("req.scope", "requirements", "fail" if badc or not ok_num else "ok", "Chain kinds, novelty and size",
+                      ("unknown kinds: " + ", ".join(badc)) if badc else
+                      "min_novelty must be 0..1 and top 1..2000" if not ok_num else
+                      f"{', '.join(req.chain_kinds) or 'all kinds'}; novelty >= {req.min_novelty}; top {req.top}"))
+    return out
+
+
+def passed(checks: list[dict]) -> bool:
+    return not any(c["status"] == "fail" for c in checks)
+
+
+# ---------------------------------------------------------------------------------------------- mechanics
+def _chain_ok(ch: dict, req: Requirements, cat: catmod.Catalog) -> bool:
+    s = cat.skills.get(ch["main_skill"]) or {}
+    types = set(s.get("types") or [])
+    ascs = {a for a, _ in ch["asc_nodes"]} | {a for a, _ in s.get("asc_granted") or []}
+    if req.ascendancy and ascs and req.ascendancy not in ascs:
+        return False
+    if req.cls and not req.ascendancy and ascs and not any(cat.class_of(a) == req.cls for a in ascs):
+        return False
+    if req.damage_types and not set(req.damage_types) & set(s.get("damage_types") or []):
+        return False
+    if req.chain_kinds and ch["kind"] not in req.chain_kinds:
+        return False
+    if ch["novelty"] < req.min_novelty:
+        return False
+    if set(ch["uniques"]) & set(req.forbid_uniques):
+        return False
+    want_u, want_k = set(req.unique_names()), set(req.keystones)
+    if (want_u or want_k) and not (want_u & set(ch["uniques"]) or want_k & set(ch["keystones"])):
+        return False
+    for c in map(str, req.constraints):
+        if c == "no_cast:strict" and "Spell" in types:
+            return False
+        if c == "no_minions" and ({"CreatesMinion", "Minion"} & types):
+            return False
+        if c.startswith("forbid_unique:") and c.split(":", 1)[1] in ch["uniques"]:
+            return False
+        if c.startswith("forbid_keystone:") and c.split(":", 1)[1] in ch["keystones"]:
+            return False
+        if c.startswith("forbid_gem:") and c.split(":", 1)[1] in (ch["main_skill"], ch["main_name"]):
+            return False
+    return True
+
+
+def mechanics(cat: catmod.Catalog, req: Requirements) -> dict:
+    g = mechgraph.MechGraph(cat)
+    pool = g.chains(top=max(4 * req.top, 1200), per_token=10 ** 6, per_main=24, per_entity=24)
+    chains = [c for c in pool if _chain_ok(c, req, cat)][: req.top]
+    ents = {k for c in chains for k in c["path"]}
+    toks = {t for c in chains for t in c["tokens"]}
+    nodes, edges = [], []
+    for k in sorted(ents):
+        e = g.entities[k]
+        meta = {m: e.meta[m] for m in ("ascendancy", "class", "slot") if e.meta.get(m)}
+        nodes.append({"id": k, "kind": e.kind, "name": e.name, **meta})
+        for side, links in (("produces", e.produces), ("consumes", e.consumes)):
+            for tok, l in links.items():
+                if tok in toks:
+                    edges.append({"s": k if side == "produces" else "token:" + tok,
+                                  "t": "token:" + tok if side == "produces" else k,
+                                  "type": side, "w": round(l.weight if side == "produces" else max(l.payoff, 0.2), 2),
+                                  "line": l.line[:200]})
+    for t in sorted(toks):
+        nodes.append({"id": "token:" + t, "kind": "token", "name": t.split(":", 1)[-1], "group": t.split(":", 1)[0],
+                      "spec": round(g.spec.get(t, 0), 3)})
+    for c in chains:
+        c["path_tokens"] = ["token:" + t for t in c["tokens"]]
+    return {"nodes": nodes, "edges": edges, "chains": chains,
+            "info": {**g.size(), "raw_chains": g.n_raw_chains, "pool": len(pool), "kept": len(chains),
+                     "by_kind": dict(Counter(c["kind"] for c in chains))}}
+
+
+# ---------------------------------------------------------------------------------------------- ladder
+def ladder(corpus_dir: str, max_nodes: int = 260, max_edges: int = 1600, max_gaps: int = 150) -> dict | None:
+    """Co-occurrence graph of the ladder corpus: kits (Louvain) and untried-but-predicted pairs."""
+    try:
+        import numpy as np
+        import networkx as nx
+    except ImportError:
+        return None
+    ev = os.path.join(corpus_dir, "evaluated.jsonl")
+    bm = os.path.join(corpus_dir, "analysis-synergy", "builds_main_skill_dps.json")
+    if not (os.path.exists(ev) and os.path.exists(bm)):
+        return None
+    bms = {b["hash"]: b for b in json.load(open(bm))}
+    builds = []
+    for line in open(ev):
+        r = json.loads(line)
+        b, t = bms.get(r["hash"]), r["tags"]
+        if not b:
+            continue
+        comps = {"M:" + b["skill"], "A:" + (t.get("ascendancy") or "none")}
+        comps |= {"S:" + s for s in b["sup"]} | {"U:" + u for u in t.get("uniques") or []}
+        comps |= {"K:" + k["name"] for k in t.get("keystones") or []}
+        comps |= {"AN:" + x["name"] for x in t.get("ascendancyNodes") or [] if x.get("type") == "Notable"}
+        comps |= {"N:" + x["name"] for x in t.get("notables") or []}
+        for grp in t.get("socketGroups") or []:
+            if grp.get("enabled", True):
+                comps |= {"G:" + x["name"] for x in grp.get("gems") or []
+                          if not x.get("support") and x.get("name") and x["name"] != b["skill"] and not x.get("weaponDefault")}
+        builds.append((b["skill"], b.get("resid"), comps))
+    cnt = Counter(c for _, _, cs in builds for c in cs)
+    vocab = sorted(c for c, k in cnt.items() if k >= 3)
+    idx = {c: i for i, c in enumerate(vocab)}
+    nb = len(builds)
+    X = np.zeros((nb, len(vocab)), dtype=np.float32)
+    for i, (_, _, cs) in enumerate(builds):
+        for c in cs:
+            if c in idx:
+                X[i, idx[c]] = 1
+    C = X.T @ X
+    n = np.diag(C).copy()
+    with np.errstate(divide="ignore", invalid="ignore"):
+        pmi = np.log((C * nb) / np.outer(n, n))
+        npmi = pmi / -np.log(C / nb)
+    pmi[C == 0] = 0
+    npmi[C == 0] = 0
+    np.fill_diagonal(pmi, 0)
+    np.fill_diagonal(npmi, 0)
+    kind = np.array([c.split(":", 1)[0] for c in vocab])
+    keep = kind != "N"          # passive notables encode tree region, not a kit
+    G = nx.Graph()
+    ii, jj = np.where(np.triu((C >= 3) & (npmi > 0.15) & np.outer(keep, keep), 1))
+    for a, b in zip(ii, jj):
+        G.add_edge(vocab[a], vocab[b], weight=float(npmi[a, b]))
+    comms = sorted(nx.community.louvain_communities(G, weight="weight", resolution=2.0, seed=7), key=len, reverse=True)
+    memb = {c: k for k, cm in enumerate(comms) for c in cm}
+    resid = np.array([r if r is not None else np.nan for _, r, _ in builds])
+    skill_of = np.array([s for s, _, _ in builds])
+    kits = []
+    for k, cm in enumerate(comms):
+        sub = G.subgraph(cm)
+        top = sorted(cm, key=lambda c: -sub.degree(c, weight="weight"))
+        core = [idx[c] for c in top[:8]]
+        inb = X[:, core].sum(1) >= min(4, max(2, len(core) // 2))
+        sk = Counter(skill_of[inb].tolist()).most_common(3)
+        asc = next((c[2:] for c in top if c.startswith("A:")), None)
+        main = next((c[2:] for c in top if c.startswith("M:")), None)
+        kits.append({"id": k, "label": " / ".join(x for x in (asc, main) if x) or top[0].split(":", 1)[1],
+                     "size": len(cm), "builds": int(inb.sum()),
+                     "mean_resid": round(float(np.nanmean(resid[inb])), 3) if inb.sum() else None,
+                     "skills": [{"name": s, "n": c} for s, c in sk], "core": top[:12]})
+    # the drawn graph: the strongest members of each kit, and the strongest edges between drawn nodes
+    order = sorted(G.nodes, key=lambda c: -G.degree(c, weight="weight"))
+    per_kit, chosen = Counter(), []
+    cap = max(6, max_nodes // max(1, len(comms)) * 2)
+    for c in order:
+        if per_kit[memb[c]] < cap and len(chosen) < max_nodes:
+            per_kit[memb[c]] += 1
+            chosen.append(c)
+    cs = set(chosen)
+    es = sorted(((d["weight"], a, b) for a, b, d in G.edges(data=True) if a in cs and b in cs), reverse=True)[:max_edges]
+    nodes = [{"id": c, "kind": c.split(":", 1)[0], "name": c.split(":", 1)[1], "kit": memb[c], "n": int(n[idx[c]])}
+             for c in chosen]
+    edges = [{"s": a, "t": b, "type": "cooc", "w": round(w, 3), "n": int(C[idx[a], idx[b]])} for w, a, b in es]
+    # untried-but-predicted (main skill, support | unique)
+    gaps = []
+    for s, nsk in Counter(skill_of.tolist()).items():
+        if nsk < 8:
+            continue
+        prof = X[skill_of == s].mean(0)
+        ctx = np.where(prof >= 0.25)[0]
+        for tk in ("S", "U"):
+            cand = np.where((kind == tk) & (prof == 0) & (n >= 5))[0]
+            if not len(cand):
+                continue
+            P = np.clip(pmi[np.ix_(ctx, cand)], 0, None) * prof[ctx][:, None]
+            sc = P.sum(0)
+            for j in np.argsort(-sc)[:4]:
+                if sc[j] > 0:
+                    gaps.append({"skill": s, "skill_builds": int(nsk), "kind": tk, "candidate": vocab[cand[j]][2:],
+                                 "candidate_builds": int(n[cand[j]]), "score": round(float(sc[j]), 2),
+                                 "driven_by": [vocab[ctx[k]] for k in np.argsort(-P[:, j])[:3] if P[k, j] > 0]})
+    gaps.sort(key=lambda r: -r["score"])
+    return {"nodes": nodes, "edges": edges, "kits": kits, "gaps": gaps[:max_gaps],
+            "info": {"builds": nb, "components": len(vocab), "graph_nodes": G.number_of_nodes(),
+                     "graph_edges": G.number_of_edges(), "kits": len(comms),
+                     "modularity": round(nx.community.modularity(G, comms, weight="weight"), 3)}}
+
+
+# ---------------------------------------------------------------------------------------------- export
+def run(req_dict: dict, corpus_dir: str | None = None, check_only: bool = False, cat: catmod.Catalog | None = None) -> dict:
+    cat = cat or catmod.load()
+    req, unknown = Requirements.from_dict(req_dict or {})
+    checks = preflight(cat, req, unknown, corpus_dir)
+    doc = {"format": FORMAT, "version": VERSION, "game": "poe2", "generated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+           "requirements": asdict(req), "preflight": checks, "passed": passed(checks)}
+    if check_only or not doc["passed"]:
+        return doc
+    doc["catalog"] = {"ascendancies": sorted(({"name": a["name"], "class": a["class"]} for a in cat.ascendancies.values()),
+                                              key=lambda a: (a["class"], a["name"]))}
+    doc["mechanics"] = mechanics(cat, req)
+    lad = ladder(corpus_dir) if corpus_dir else None
+    if lad:
+        doc["ladder"] = lad
+    return doc
+
+
+def main(argv=None) -> int:
+    ap = argparse.ArgumentParser(description="requirements-gated graph export for the pob-redux Graph view")
+    ap.add_argument("--requirements", help="JSON file (default: no restrictions)")
+    ap.add_argument("--corpus-dir", help="ladder corpus directory (evaluated.jsonl + analysis-synergy/)")
+    ap.add_argument("--out", help="write the graph document here")
+    ap.add_argument("--check", action="store_true", help="run the requirements check only")
+    a = ap.parse_args(argv)
+    req = json.load(open(a.requirements)) if a.requirements else {}
+    doc = run(req, a.corpus_dir, a.check)
+    for c in doc["preflight"]:
+        print(f"[{c['status']:4}] {c['label']}: {c['detail']}", file=sys.stderr)
+    if a.out:
+        json.dump(doc, open(a.out, "w"), separators=(",", ":"))
+    if not doc["passed"]:
+        print("requirements not met: nothing analysed", file=sys.stderr)
+        return 2
+    if "mechanics" in doc:
+        print(json.dumps({"mechanics": doc["mechanics"]["info"], "ladder": (doc.get("ladder") or {}).get("info")}))
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
