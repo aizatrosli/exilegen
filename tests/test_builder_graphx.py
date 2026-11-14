@@ -59,3 +59,30 @@ def test_tight_budget_lowers_scores(cat):
     both = set(loose) & set(tight)
     assert both and all(tight[i] <= loose[i] + 1e-9 for i in both) and any(tight[i] < loose[i] for i in both)
     assert not graphx.run({"mana_per_second": 0}, cat=cat)["passed"]
+
+
+def test_leveling_path_and_ranking(cat):
+    from exilegen.builder import leveling
+    if not leveling.load():
+        pytest.skip("leveling data missing")
+    plain = graphx.run({"top": 400}, cat=cat)["mechanics"]["chains"]
+    assert all(c["leveling"]["online_level"] == max(s["level"] for s in c["leveling"]["steps"]) for c in plain)
+    assert all([s["level"] for s in c["leveling"]["steps"]] == sorted(s["level"] for s in c["leveling"]["steps"]) for c in plain)
+    by_id = {c["id"]: c for c in plain}
+    ranked = graphx.run({"top": 400, "leveling": True}, cat=cat)["mechanics"]["chains"]
+    assert not any(c["leveling"]["unobtainable"] for c in ranked)
+    for c in ranked:
+        if c["id"] in by_id:
+            assert c["score"] == pytest.approx(by_id[c["id"]]["score"] * c["leveling"]["factor"], abs=2e-4)
+    early = graphx.run({"top": 400, "online_by": 30}, cat=cat)["mechanics"]["chains"]
+    assert early and all(c["leveling"]["online_level"] <= 30 for c in early)
+
+
+def test_leveling_factor_and_levels():
+    from exilegen.builder import leveling
+    assert leveling.factor(20, 0, False) == 1.0
+    assert leveling.factor(90, 0, False) == leveling.LATE_FACTOR
+    assert leveling.factor(20, 1, False) == leveling.BOSS_FACTOR
+    assert leveling.factor(20, 0, True) == 0.0
+    assert leveling.level_for_passives(1) <= leveling.level_for_passives(40) <= leveling.level_for_passives(100)
+    assert [leveling.level_for_ascendancy(p) for p in (1, 2, 3, 8)] == [22, 22, 38, 75]

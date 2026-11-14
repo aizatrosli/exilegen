@@ -31,6 +31,7 @@ from dataclasses import dataclass, field, asdict
 
 from . import catalog as catmod
 from . import mechgraph
+from . import leveling as levelmod
 from . import tempo as tempomod
 
 FORMAT, VERSION = "exilegen-graph", 1
@@ -60,6 +61,8 @@ class Requirements:
     top: int = 150
     mana_per_second: float = tempomod.DEFAULT_BUDGET["mana_per_second"]   # sustainable resource spend
     spirit: float = tempomod.DEFAULT_BUDGET["spirit"]                     # Spirit available for reservations
+    leveling: bool = False        # rank by how early the chain works while leveling and what must be farmed for it
+    online_by: int = 0            # drop chains that are not complete by this character level (0 = no limit)
 
     @classmethod
     def from_dict(cls, d: dict) -> tuple["Requirements", list[str]]:
@@ -169,6 +172,16 @@ def preflight(cat: catmod.Catalog, req: Requirements, unknown_keys: list[str] | 
     out.insert(5, _check("data.tempo", "data", "ok" if has_tempo else "warn", "Skill cost, cast time and cooldown",
                          "from PoB skill data at gem level 20" if has_tempo else
                          "missing (python3 -m exilegen.builder.tempo): chains are ranked as if skills were free"))
+    has_lvl = bool(levelmod.load())
+    out.insert(6, _check("data.leveling", "data", "ok" if has_lvl else ("fail" if req.leveling or req.online_by else "warn"),
+                         "Level and drop data",
+                         "gem, item, passive and ascendancy gates from PoB data; trial and quest-point levels are assumed"
+                         if has_lvl else "missing (python3 -m exilegen.builder.leveling): chains have no leveling path"))
+    ok_lvl = isinstance(req.online_by, int) and 0 <= req.online_by <= 100
+    out.append(_check("req.leveling", "requirements", "ok" if ok_lvl else "fail", "Leveling",
+                      (("ranked for leveling" if req.leveling else "off") +
+                       (f", complete by level {req.online_by}" if req.online_by else "")) if ok_lvl else
+                      "online_by must be a whole level from 0 to 100"))
     out.append(_check("req.budget", "requirements", "ok" if ok_budget else "fail", "Resource and Spirit budget",
                       f"{req.mana_per_second:g} mana per second, {req.spirit:g} Spirit" if ok_budget else
                       "mana_per_second must be above 0 and spirit 0 or more"))
@@ -223,6 +236,7 @@ def mechanics(cat: catmod.Catalog, req: Requirements) -> dict:
     pool = g.chains(top=max(4 * req.top, 1200), per_token=10 ** 6, per_main=24, per_entity=24)
     tempo = tempomod.load()
     budget = {"mana_per_second": float(req.mana_per_second), "spirit": float(req.spirit)}
+    lvl = levelmod.load()
     for c in pool:
         main = cat.skills[c["main_skill"]]
         helpers = [cat.skills[g.entities[k].meta["skill"]] for k in c["path"]
@@ -230,6 +244,16 @@ def mechanics(cat: catmod.Catalog, req: Requirements) -> dict:
         c["tempo"] = tempomod.weigh(main, helpers, tempo, budget)
         c["score_raw"] = c["score"]
         c["score"] = round(c["score_raw"] * c["tempo"]["tempo"], 4)
+        if lvl:
+            ascs = [a for a, _ in c["asc_nodes"]] + [a for a, _ in main.get("asc_granted") or []]
+            cls = req.cls or (cat.class_of(req.ascendancy) if req.ascendancy else None) or (cat.class_of(ascs[0]) if ascs else None)
+            path_skills = [g.entities[k].meta.get("skill") for k in c["path"] if g.entities[k].kind in ("skill", "util")]
+            c["leveling"] = levelmod.plan(c, lvl, cls, cat.skills, path_skills)
+            if req.leveling:
+                c["score"] = round(c["score"] * c["leveling"]["factor"], 4)
+    if lvl and (req.leveling or req.online_by):
+        pool = [c for c in pool if not (req.leveling and c["leveling"]["unobtainable"])
+                and not (req.online_by and c["leveling"]["online_level"] > req.online_by)]
     pool.sort(key=lambda c: (-c["score"], c["id"]))
     chains = [c for c in pool if _chain_ok(c, req, cat)][: req.top]
     ents = {k for c in chains for k in c["path"]}
