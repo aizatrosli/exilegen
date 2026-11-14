@@ -229,7 +229,11 @@ def mechanics(cat: catmod.Catalog, req: Requirements) -> dict:
         nodes.append({"id": "token:" + t, "kind": "token", "name": t.split(":", 1)[-1], "group": t.split(":", 1)[0],
                       "spec": round(g.spec.get(t, 0), 3)})
     for c in chains:
+        sk = cat.skills.get(c["main_skill"]) or {}
         c["path_tokens"] = ["token:" + t for t in c["tokens"]]
+        c["main_damage_types"] = list(sk.get("damage_types") or [])
+        c["main_spell"] = "Spell" in (sk.get("types") or [])
+        c["main_minion"] = bool({"CreatesMinion", "Minion"} & set(sk.get("types") or []))
     return {"nodes": nodes, "edges": edges, "chains": chains,
             "info": {**g.size(), "raw_chains": g.n_raw_chains, "pool": len(pool), "kept": len(chains),
                      "by_kind": dict(Counter(c["kind"] for c in chains))}}
