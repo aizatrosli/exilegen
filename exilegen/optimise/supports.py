@@ -170,7 +170,7 @@ class SupportStep:
         out = []
         for g in cand:
             gg = gs.get(g)
-            if g is None or g in out or not gg or gg.get("enabled") is False or gg.get("grantedBy"):
+            if g is None or g in out or not gg or gg.get("enabled") is False or gg.get("noSupports"):
                 continue
             out.append(g)
         return out

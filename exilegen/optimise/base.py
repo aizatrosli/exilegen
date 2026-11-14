@@ -376,9 +376,11 @@ class Context:
         if fa != fb:
             return fa
         if not fa:
-            # both infeasible: smaller total violation first (sum of normalised shortfalls), so a move
-            # that closes most of a large gap counts as progress and repair can climb towards feasibility
-            va, vb = violation_size(a), violation_size(b)
-            if abs(va - vb) > 1e-6:
+            # both infeasible: fewer violations first (a step must not trade one violation for two).
+            # Ranking by violation_size() instead was tried on a 16-skeleton A/B: it made every small
+            # defence gain beat any DPS gain, lowered DPS on infeasible builds and won no extra useful
+            # feasible builds, so size is reported (violation_size) but does not rank.
+            va, vb = _nviol(a), _nviol(b)
+            if va != vb:
                 return va < vb
         return (a.get("objective") or float("-inf")) > (b.get("objective") or float("-inf")) + eps

@@ -31,12 +31,12 @@ def test_violation_size_dedupes_profiles_and_defaults():
     assert abs(violation_size(r) - 1.4) < 1e-9
 
 
-def test_better_prefers_smaller_total_violation_over_count():
+def test_better_ranks_infeasible_by_count_then_objective():
     one_big = _r({"rule": "floor", "entry": "ehp", "shortfall": 0.6}, obj=5.0)
     two_small = _r({"rule": "floor", "entry": "res_fire", "shortfall": 0.05},
                    {"rule": "floor", "entry": "res_cold", "shortfall": 0.05}, obj=1.0)
-    assert Context.better(two_small, one_big)
-    assert not Context.better(one_big, two_small)
+    assert Context.better(one_big, two_small)
+    assert violation_size(two_small) < violation_size(one_big)
     feasible = {"feasible": True, "objective": -10.0, "violations": []}
     assert Context.better(feasible, two_small)
 
