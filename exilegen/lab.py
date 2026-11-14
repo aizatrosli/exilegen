@@ -125,7 +125,7 @@ def _entry_view(e, codes: bool) -> dict:
     s = rec.get("score") or {}
     out = {"uid": e.uid, "cell": e.cell, "tier": e.tier, "feasible": e.feasible, "verified": e.verified,
            "objective": e.objective, "dps_honest": e.dps_honest, "ehp": e.ehp,
-           "max_hit": s.get("max_hit_min") or s.get("max_hit"),
+           "max_hit": rec.get("max_hit"),
            "class": sk.get("cls"), "ascendancy": sk.get("ascendancy"), "main_skill": sk.get("main_skill"),
            "main_skill_name": (sk.get("tags") or {}).get("main_skill_name"),
            "uniques": [u.get("name") for u in sk.get("uniques") or []], "trigger": sk.get("trigger"),
