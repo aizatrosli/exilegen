@@ -433,8 +433,9 @@ class BuildView:
             e = e.get("groups") or e.get("energy") or []
         return [normalise_energy_group(x, default_feeder) for x in e]
 
-    def marginal(self, group_index, gem: Gem) -> float | None:
-        """DPS of the group's skill with `gem` disabled (engine drop-one), if supplied."""
+    def marginal(self, group_index, gem: Gem, group_level: bool = False) -> float | None:
+        """DPS of the group's skill with `gem` disabled (engine drop-one), if supplied.
+        group_level=True prefers the group's own DPS (group_dps_without) for triggered/meta parts."""
         m = self.raw("marginals")
         if not m:
             return None
@@ -442,6 +443,8 @@ class BuildView:
             if r.get("group") not in (None, group_index):
                 continue
             if r.get("gem_id") in gem.key() or (r.get("gem") or "").lower() in gem.key() or r.get("name", "").lower() in gem.key():
+                if group_level and r.get("group_dps_without") is not None:
+                    return _num(r.get("group_dps_without"))
                 return _num(r.get("dps_without", r.get("dpsWithout")))
         return None
 

@@ -373,7 +373,7 @@ class Registry:
                 continue
             else:
                 share = float(e.get("typical_share", 0.25 if e.get("role") != "global" else 0.2))
-                m = bv.marginal(group.index if group else None, gem) if gem is not None else None
+                m = bv.marginal(group.index if group else None, gem, group_level=p.label.startswith("trig:")) if gem is not None else None
                 if m is not None and p.dps_raw > 0:
                     f = (m + credit * (p.dps_raw - m)) / p.dps_raw
                 else:
