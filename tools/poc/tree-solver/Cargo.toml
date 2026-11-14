@@ -1,0 +1,10 @@
+[package]
+name = "pobrepl"
+version = "0.1.0"
+edition = "2021"
+[dependencies]
+pob-engine = { path = "../../../../pob-redux/crates/pob-engine", default-features = false }
+serde_json = "1"
+[profile.release]
+opt-level = 3
+[workspace]

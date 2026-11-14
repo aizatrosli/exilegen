@@ -10,9 +10,11 @@ Tools and research for an automated Path of Exile 2 build optimiser. The optimis
 | `docs/build-search-design.md` | Search design: encoding, constraints (1-button, no-cast), search methods, ML vs simple algorithms, corpus-guided search, phased plan |
 | `docs/corpus-findings.md` | Main findings from 1,488 poe.ninja ladder builds scored in PoB |
 | `docs/analysis-meta.md`, `docs/analysis-synergy.md` | Detailed corpus analyses |
+| `docs/poc-results.md` | Results of the support, tree and 1-button proof-of-concept optimisers |
 | `docs/corpus-collection.md` | How the corpus was sampled: endpoints, strata, snapshot |
 | `tools/ninja-collect/` | Polite (~1 req/s) poe.ninja build sampler. Decodes the protobuf search API and fetches PoB export codes |
 | `tools/corpus-eval/` | Rust batch evaluator that links `pob_engine`. N worker engines; locked Pinnacle profile plus the exported config; tags each skill's activation class |
+| `tools/poc/` | Proof-of-concept optimisers: `support-opt`, `tree-solver` (with the `pobrepl` engine REPL), `one-button` (with the Energy model) |
 | `tools/analysis/meta/` | Meta, power vs popularity, constraint builds, defence floors, PoB gap report |
 | `tools/analysis/synergy/` | Co-occurrence lift, ridge outliers, anti-meta gaps, unique and support what-ifs (`engine-exp/` is the PoB driver) |
 
