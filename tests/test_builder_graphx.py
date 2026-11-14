@@ -113,3 +113,23 @@ def test_leveling_config_overrides(cat):
                 assert s["level"] >= 80
         assert c["leveling"]["online_level"] >= base[c["id"]]["leveling"]["online_level"]
     assert moved
+
+
+def test_measured_results_rank_and_attach(cat, tmp_path):
+    import json
+    ids = [c["id"] for c in graphx.run({"top": 30}, cat=cat)["mechanics"]["chains"]]
+    rows = [{"id": ids[20], "ok": True, "feasible": True, "dps_honest": 3000.0, "ehp": 20000, "base_key": "a"},
+            {"id": ids[3], "ok": True, "feasible": True, "dps_honest": 900.0, "ehp": 20000, "base_key": "a"},
+            {"id": ids[5], "ok": False, "error": "no skeleton for this chain"}]
+    (tmp_path / "chain_scores.jsonl").write_text("".join(json.dumps(r) + "\n" for r in rows))
+    (tmp_path / "baselines.jsonl").write_text(json.dumps({"base_key": "a", "ok": True, "dps_honest": 1000.0}) + "\n")
+    (tmp_path / "states.jsonl").write_text(json.dumps({"id": ids[3], "vars": ["usePowerCharges"], "chain_off": 900.0,
+                                                       "chain_on": 1800.0, "base_off": 1000.0, "base_on": 1000.0}) + "\n")
+    doc = graphx.run({"top": 30}, cat=cat, scores_dir=str(tmp_path))
+    by = {c["id"]: c for c in doc["mechanics"]["chains"]}
+    assert by[ids[20]]["measured"]["gain"] == 3.0 and by[ids[3]]["measured"]["gain_credited"] == 1.8
+    assert by[ids[3]]["measured"]["payoff"] == 2.0 and not by[ids[5]]["measured"]["built"]
+    assert doc["mechanics"]["info"]["measured"]["scored"] == 3 and [c["id"] for c in doc["mechanics"]["chains"]] == ids
+    ranked = graphx.run({"top": 30, "rank_by": "measured"}, cat=cat, scores_dir=str(tmp_path))["mechanics"]["chains"]
+    assert [c["id"] for c in ranked[:2]] == [ids[20], ids[3]]
+    assert not graphx.run({"rank_by": "measured"}, cat=cat)["passed"]

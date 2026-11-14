@@ -31,6 +31,7 @@ from dataclasses import dataclass, field, asdict
 
 from . import catalog as catmod
 from . import mechgraph
+from . import chainresults
 from . import leveling as levelmod
 from . import tempo as tempomod
 
@@ -63,6 +64,7 @@ class Requirements:
     spirit: float = tempomod.DEFAULT_BUDGET["spirit"]                     # Spirit available for reservations
     leveling: bool = False        # rank by how early the chain works while leveling and what must be farmed for it
     online_by: int = 0            # drop chains that are not complete by this character level (0 = no limit)
+    rank_by: str = "formula"      # "formula", or "measured": PoB-measured gain first (needs --scores)
     leveling_config: dict = field(default_factory=dict)   # overrides of leveling.DEFAULT_CONFIG (trial levels, ...)
 
     @classmethod
@@ -82,7 +84,7 @@ def _check(cid: str, group: str, status: str, label: str, detail: str = "") -> d
 
 
 def preflight(cat: catmod.Catalog, req: Requirements, unknown_keys: list[str] | None = None,
-              corpus_dir: str | None = None) -> list[dict]:
+              corpus_dir: str | None = None, scores: dict | None = None) -> list[dict]:
     """-> checks [{id, group: data|requirements, status: ok|warn|fail, label, detail}]."""
     out = []
     # ---- data
@@ -185,6 +187,13 @@ def preflight(cat: catmod.Catalog, req: Requirements, unknown_keys: list[str] | 
                           ", ".join(f"{x:g}" for x in lvl_cfg["trial_levels"]), lvl_cfg["boss_level"], lvl_cfg["early_level"],
                           lvl_cfg["late_factor"], lvl_cfg["late_level"],
                           " (changed: " + ", ".join(sorted(req.leveling_config)) + ")" if req.leveling_config else "")))
+    if req.rank_by not in ("formula", "measured"):
+        out.append(_check("req.rank_by", "requirements", "fail", "Ranking", f"{req.rank_by!r} is not 'formula' or 'measured'"))
+    elif req.rank_by == "measured":
+        n = len(scores or {})
+        out.append(_check("req.rank_by", "requirements", "ok" if n else "fail", "Ranking",
+                          f"by PoB-measured gain ({n} chains measured)" if n else
+                          "rank_by 'measured' needs --scores with a chainscore run directory that has results"))
     ok_lvl = isinstance(req.online_by, int) and 0 <= req.online_by <= 100
     out.append(_check("req.leveling", "requirements", "ok" if ok_lvl else "fail", "Leveling",
                       (("ranked for leveling" if req.leveling else "off") +
@@ -239,7 +248,7 @@ def _chain_ok(ch: dict, req: Requirements, cat: catmod.Catalog) -> bool:
     return True
 
 
-def mechanics(cat: catmod.Catalog, req: Requirements) -> dict:
+def mechanics(cat: catmod.Catalog, req: Requirements, scores: dict | None = None) -> dict:
     g = mechgraph.MechGraph(cat)
     pool = g.chains(top=max(4 * req.top, 1200), per_token=10 ** 6, per_main=24, per_entity=24)
     tempo = tempomod.load()
@@ -264,6 +273,18 @@ def mechanics(cat: catmod.Catalog, req: Requirements) -> dict:
         pool = [c for c in pool if not (req.leveling and c["leveling"]["unobtainable"])
                 and not (req.online_by and c["leveling"]["online_level"] > req.online_by)]
     pool.sort(key=lambda c: (-c["score"], c["id"]))
+    for rank, c in enumerate(pool):
+        c["formula_rank"] = rank
+        if scores and c["id"] in scores:
+            c["measured"] = scores[c["id"]]
+    if scores and req.rank_by == "measured":
+        # measured gain first (credited with the chain's own states), then built ones without a baseline, then the rest
+        def key(c):
+            m = c.get("measured")
+            if m and m.get("gain_credited") is not None:
+                return (0, -m["gain_credited"])
+            return (1, -(m or {}).get("dps", 0)) if m and m.get("built") else (2 if not m else 3, -c["score"])
+        pool.sort(key=key)
     chains = [c for c in pool if _chain_ok(c, req, cat)][: req.top]
     ents = {k for c in chains for k in c["path"]}
     toks = {t for c in chains for t in c["tokens"]}
@@ -292,6 +313,8 @@ def mechanics(cat: catmod.Catalog, req: Requirements) -> dict:
         c["main_minion"] = bool({"CreatesMinion", "Minion"} & set(sk.get("types") or []))
     return {"nodes": nodes, "edges": edges, "chains": chains,
             "info": {**g.size(), "raw_chains": g.n_raw_chains, "pool": len(pool), "kept": len(chains),
+                     **({"measured": chainresults.summary({k: v for k, v in scores.items() if k in {c["id"] for c in pool}}, len(pool))}
+                        if scores else {}),
                      "by_kind": dict(Counter(c["kind"] for c in chains))}}
 
 
@@ -404,17 +427,19 @@ def ladder(corpus_dir: str, max_nodes: int = 260, max_edges: int = 1600, max_gap
 
 
 # ---------------------------------------------------------------------------------------------- export
-def run(req_dict: dict, corpus_dir: str | None = None, check_only: bool = False, cat: catmod.Catalog | None = None) -> dict:
+def run(req_dict: dict, corpus_dir: str | None = None, check_only: bool = False, cat: catmod.Catalog | None = None,
+        scores_dir: str | None = None) -> dict:
     cat = cat or catmod.load()
     req, unknown = Requirements.from_dict(req_dict or {})
-    checks = preflight(cat, req, unknown, corpus_dir)
+    scores = chainresults.measured(scores_dir) if scores_dir else None
+    checks = preflight(cat, req, unknown, corpus_dir, scores)
     doc = {"format": FORMAT, "version": VERSION, "game": "poe2", "generated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
            "requirements": asdict(req), "preflight": checks, "passed": passed(checks)}
     if check_only or not doc["passed"]:
         return doc
     doc["catalog"] = {"ascendancies": sorted(({"name": a["name"], "class": a["class"]} for a in cat.ascendancies.values()),
                                               key=lambda a: (a["class"], a["name"]))}
-    doc["mechanics"] = mechanics(cat, req)
+    doc["mechanics"] = mechanics(cat, req, scores)
     lad = ladder(corpus_dir) if corpus_dir else None
     if lad:
         doc["ladder"] = lad
@@ -426,10 +451,11 @@ def main(argv=None) -> int:
     ap.add_argument("--requirements", help="JSON file (default: no restrictions)")
     ap.add_argument("--corpus-dir", help="ladder corpus directory (evaluated.jsonl + analysis-synergy/)")
     ap.add_argument("--out", help="write the graph document here")
+    ap.add_argument("--scores", help="chainscore run directory: attach PoB-measured results to the chains")
     ap.add_argument("--check", action="store_true", help="run the requirements check only")
     a = ap.parse_args(argv)
     req = json.load(open(a.requirements)) if a.requirements else {}
-    doc = run(req, a.corpus_dir, a.check)
+    doc = run(req, a.corpus_dir, a.check, scores_dir=a.scores)
     for c in doc["preflight"]:
         print(f"[{c['status']:4}] {c['label']}: {c['detail']}", file=sys.stderr)
     if a.out:
