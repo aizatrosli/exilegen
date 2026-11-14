@@ -80,12 +80,36 @@ def test_leveling_path_and_ranking(cat):
 
 def test_leveling_factor_and_levels():
     from exilegen.builder import leveling
+    cfg = leveling.DEFAULT_CONFIG
     assert leveling.factor(20, 0, False) == 1.0
-    assert leveling.factor(90, 0, False) == leveling.LATE_FACTOR
-    assert leveling.factor(20, 1, False) == leveling.BOSS_FACTOR
+    assert leveling.factor(90, 0, False) == cfg["late_factor"]
+    assert leveling.factor(20, 1, False) == cfg["boss_factor"]
     assert leveling.factor(20, 0, True) == 0.0
     assert leveling.level_for_passives(1) <= leveling.level_for_passives(40) <= leveling.level_for_passives(100)
     assert [leveling.level_for_ascendancy(p) for p in (1, 2, 3, 8)] == [22, 22, 33, 75]
     assert leveling.level_for_passives(12) == 11 and leveling.level_for_passives(14) == 12
     assert leveling.level_for_spirit(30) == (11, False) and leveling.level_for_spirit(60) == (33, False)
     assert leveling.level_for_spirit(130) == (55, True)
+
+
+def test_leveling_config_overrides(cat):
+    from exilegen.builder import leveling
+    if not leveling.load():
+        pytest.skip("leveling data missing")
+    cfg, errors = leveling.config({"trial_levels": [28, 40, 65, 85], "boss_level": 80})
+    assert not errors and leveling.level_for_ascendancy(2, cfg) == 28 and leveling.level_for_ascendancy(8, cfg) == 85
+    assert leveling.config({"trial_levels": [30, 20, 60, 75]})[1] and leveling.config({"nope": 1})[1]
+    bad = graphx.run({"leveling_config": {"late_factor": 2}}, cat=cat)
+    assert not bad["passed"] and "req.leveling_config" in {c["id"] for c in bad["preflight"] if c["status"] == "fail"}
+    base = {c["id"]: c for c in graphx.run({"top": 400}, cat=cat)["mechanics"]["chains"]}
+    late = graphx.run({"top": 400, "leveling_config": {"trial_levels": [28, 40, 65, 85], "boss_level": 80}}, cat=cat)["mechanics"]["chains"]
+    moved = 0
+    for c in late:
+        for s in c["leveling"]["steps"]:
+            if s["gate"] == "ascendancy" and s["points"] is not None:
+                assert s["level"] in (28, 40, 65, 85)
+                moved += 1
+            if s["gate"] == "boss":
+                assert s["level"] >= 80
+        assert c["leveling"]["online_level"] >= base[c["id"]]["leveling"]["online_level"]
+    assert moved

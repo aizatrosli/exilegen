@@ -63,6 +63,7 @@ class Requirements:
     spirit: float = tempomod.DEFAULT_BUDGET["spirit"]                     # Spirit available for reservations
     leveling: bool = False        # rank by how early the chain works while leveling and what must be farmed for it
     online_by: int = 0            # drop chains that are not complete by this character level (0 = no limit)
+    leveling_config: dict = field(default_factory=dict)   # overrides of leveling.DEFAULT_CONFIG (trial levels, ...)
 
     @classmethod
     def from_dict(cls, d: dict) -> tuple["Requirements", list[str]]:
@@ -177,6 +178,13 @@ def preflight(cat: catmod.Catalog, req: Requirements, unknown_keys: list[str] | 
                          "Level and drop data",
                          "gem, item, passive and ascendancy gates from PoB data; trial, quest-point and Spirit levels from the PoE2 Codex campaign guide"
                          if has_lvl else "missing (python3 -m exilegen.builder.leveling): chains have no leveling path"))
+    lvl_cfg, cfg_errors = levelmod.config(req.leveling_config if isinstance(req.leveling_config, dict) else {"": 0})
+    out.append(_check("req.leveling_config", "requirements", "fail" if cfg_errors else "ok", "Leveling settings",
+                      "; ".join(cfg_errors) if cfg_errors else
+                      "trials at levels {}; boss drops at {}; full score to level {}, x{} at {}{}".format(
+                          ", ".join(f"{x:g}" for x in lvl_cfg["trial_levels"]), lvl_cfg["boss_level"], lvl_cfg["early_level"],
+                          lvl_cfg["late_factor"], lvl_cfg["late_level"],
+                          " (changed: " + ", ".join(sorted(req.leveling_config)) + ")" if req.leveling_config else "")))
     ok_lvl = isinstance(req.online_by, int) and 0 <= req.online_by <= 100
     out.append(_check("req.leveling", "requirements", "ok" if ok_lvl else "fail", "Leveling",
                       (("ranked for leveling" if req.leveling else "off") +
@@ -237,6 +245,7 @@ def mechanics(cat: catmod.Catalog, req: Requirements) -> dict:
     tempo = tempomod.load()
     budget = {"mana_per_second": float(req.mana_per_second), "spirit": float(req.spirit)}
     lvl = levelmod.load()
+    lvl_cfg, _ = levelmod.config(req.leveling_config)
     for c in pool:
         main = cat.skills[c["main_skill"]]
         helpers = [cat.skills[g.entities[k].meta["skill"]] for k in c["path"]
@@ -248,7 +257,7 @@ def mechanics(cat: catmod.Catalog, req: Requirements) -> dict:
             ascs = [a for a, _ in c["asc_nodes"]] + [a for a, _ in main.get("asc_granted") or []]
             cls = req.cls or (cat.class_of(req.ascendancy) if req.ascendancy else None) or (cat.class_of(ascs[0]) if ascs else None)
             path_skills = [g.entities[k].meta.get("skill") for k in c["path"] if g.entities[k].kind in ("skill", "util")]
-            c["leveling"] = levelmod.plan(c, lvl, cls, cat.skills, path_skills, c["tempo"].get("spirit_total", 0))
+            c["leveling"] = levelmod.plan(c, lvl, cls, cat.skills, path_skills, c["tempo"].get("spirit_total", 0), lvl_cfg)
             if req.leveling:
                 c["score"] = round(c["score"] * c["leveling"]["factor"], 4)
     if lvl and (req.leveling or req.online_by):

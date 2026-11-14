@@ -12,7 +12,7 @@ leveling option on, graphx multiplies the chain score by `factor`: chains that o
 boss drop, rank lower, and chains with an item that can no longer drop are removed.
 
 The facts come from PoB data (`python3 -m exilegen.builder.leveling --pob-root <PathOfBuilding-PoE2>/src`).
-The schedule in ASSUMED is not in PoB. It is taken from the PoE2 Codex campaign guide for patch 0.5.5
+The schedule in DEFAULT_CONFIG is not in PoB. It is taken from the PoE2 Codex campaign guide for patch 0.5.5
 (https://domistae.github.io/poe2-leveling/, MIT, by domistae): the zone level of each quest that gives passive
 points or Spirit, and the level of each ascendancy trial. It is a community guide, so treat it as a good estimate.
 """
@@ -29,23 +29,56 @@ from . import catalog as catmod
 
 PATH = os.path.join(catmod.DATA_DIR, "leveling.json")
 
-ASSUMED = {
-    # ascendancy points held -> earliest character level for the trial that gives them. The guide runs the 1st at
-    # 28 for an easier trial and says the 4th usually comes around level 85; these are the earliest keys.
-    "ascendancy_points_level": {2: 22, 4: 33, 6: 60, 8: 75},
+# Defaults for everything that is a choice or an estimate. A request overrides any of them with `leveling_config`.
+DEFAULT_CONFIG = {
+    # character level at which each ascendancy trial is done (2 points each). These are the earliest keys; the
+    # guide runs the 1st at 28 for an easier trial and says the 4th usually comes around level 85.
+    "trial_levels": [22, 33, 60, 75],
     # character level -> passive points from campaign quests held by then (2 per quest, 24 in total)
-    "quest_passive_points": {10: 2, 12: 4, 22: 6, 26: 8, 30: 10, 39: 12, 47: 14, 48: 16, 52: 18, 54: 20, 56: 22, 58: 24},
+    "quest_passive_points": {"10": 2, "12": 4, "22": 6, "26": 8, "30": 10, "39": 12, "47": 14, "48": 16,
+                             "52": 18, "54": 20, "56": 22, "58": 24},
     # character level -> Spirit from campaign quests held by then (+30 Act 1, +30 Act 3, +40 Interludes)
-    "quest_spirit": {11: 30, 33: 60, 55: 100},
-    # boss-only drops come from endgame bosses; Tier 11 maps are area level 75
-    "boss_drop_level": 75,
+    "quest_spirit": {"11": 30, "33": 60, "55": 100},
+    "boss_level": 75,       # level at which boss-only uniques can be farmed (Tier 11 maps are area level 75)
+    "early_level": 30,      # a chain complete by here keeps its full score
+    "late_level": 90,       # a chain complete only here gets late_factor
+    "late_factor": 0.4,
+    "boss_factor": 0.8,     # score multiplier per boss-only unique
+    "farm_floor": 0.5,      # boss-only uniques never cut the score below this
     "max_level": 100,
 }
-EARLY_LEVEL = 30        # online by here costs nothing
-LATE_LEVEL = 90         # online only here costs the most
-LATE_FACTOR = 0.4
-BOSS_FACTOR = 0.8       # per boss-only unique
-FARM_FLOOR = 0.5
+
+
+def config(overrides: dict | None = None) -> tuple[dict, list[str]]:
+    """Defaults with the request's overrides on top, and what is wrong with the overrides."""
+    cfg = json.loads(json.dumps(DEFAULT_CONFIG))
+    errors = []
+    for k, v in (overrides or {}).items():
+        if k not in cfg:
+            errors.append(f"unknown key {k!r}")
+        else:
+            cfg[k] = v
+    num = lambda x: isinstance(x, (int, float)) and not isinstance(x, bool)
+    t = cfg["trial_levels"]
+    if not (isinstance(t, list) and len(t) == 4 and all(num(x) and 1 <= x <= 100 for x in t) and t == sorted(t)):
+        errors.append("trial_levels must be 4 rising levels from 1 to 100")
+    for k in ("quest_passive_points", "quest_spirit"):
+        d = cfg[k]
+        ok = isinstance(d, dict) and all(str(a).isdigit() and num(b) and b >= 0 for a, b in d.items())
+        if ok:
+            vals = [b for _, b in sorted(d.items(), key=lambda kv: int(kv[0]))]
+            ok = vals == sorted(vals)
+        if not ok:
+            errors.append(f"{k} must map a level to the running total held by then")
+    for k in ("boss_level", "early_level", "late_level", "max_level"):
+        if not (num(cfg[k]) and 1 <= cfg[k] <= 100):
+            errors.append(f"{k} must be a level from 1 to 100")
+    if not errors and cfg["late_level"] <= cfg["early_level"]:
+        errors.append("late_level must be above early_level")
+    for k in ("late_factor", "boss_factor", "farm_floor"):
+        if not (num(cfg[k]) and 0 < cfg[k] <= 1):
+            errors.append(f"{k} must be above 0 and at most 1")
+    return cfg, errors
 
 
 # ---------------------------------------------------------------------------------------------- parse PoB data
@@ -163,36 +196,65 @@ def load(path: str = PATH) -> dict:
 
 
 # ---------------------------------------------------------------------------------------------- levels
-def level_for_passives(points: int) -> int:
-    a = ASSUMED
-    for lvl in range(1, a["max_level"] + 1):
-        quest = max([n for at, n in a["quest_passive_points"].items() if at <= lvl], default=0)
+def _table(d: dict) -> list[tuple[int, float]]:
+    return sorted((int(k), v) for k, v in d.items())
+
+
+def level_for_passives(points: int, cfg: dict = DEFAULT_CONFIG) -> int:
+    quests = _table(cfg["quest_passive_points"])
+    for lvl in range(1, int(cfg["max_level"]) + 1):
+        quest = max([n for at, n in quests if at <= lvl], default=0)
         if lvl - 1 + quest >= points:
             return lvl
-    return a["max_level"]
+    return int(cfg["max_level"])
 
 
-def level_for_spirit(spirit: float) -> tuple[int, bool]:
+def level_for_spirit(spirit: float, cfg: dict = DEFAULT_CONFIG) -> tuple[int, bool]:
     """Level at which campaign quests alone give this much Spirit, and whether gear has to add the rest."""
-    table = sorted(ASSUMED["quest_spirit"].items())
+    table = _table(cfg["quest_spirit"])
     for lvl, have in table:
         if spirit <= have:
             return lvl, False
-    return table[-1][0], True
+    return (table[-1][0] if table else 1), True
 
 
-def level_for_ascendancy(points: int) -> int:
-    for have, lvl in sorted(ASSUMED["ascendancy_points_level"].items()):
-        if points <= have:
-            return lvl
-    return ASSUMED["max_level"]
+def level_for_ascendancy(points: int, cfg: dict = DEFAULT_CONFIG) -> int:
+    trials = cfg["trial_levels"]
+    n = max((int(points) + 1) // 2, 1)          # trials needed: 2 points each
+    return int(trials[n - 1]) if n <= len(trials) else int(cfg["max_level"])
 
 
-def factor(online_level: int, boss_items: int, unobtainable: bool) -> float:
+def factor(online_level: int, boss_items: int, unobtainable: bool, cfg: dict = DEFAULT_CONFIG) -> float:
     if unobtainable:
         return 0.0
-    span = min(max((online_level - EARLY_LEVEL) / (LATE_LEVEL - EARLY_LEVEL), 0.0), 1.0)
-    return round((1 - (1 - LATE_FACTOR) * span) * max(BOSS_FACTOR ** boss_items, FARM_FLOOR), 3)
+    span = min(max((online_level - cfg["early_level"]) / (cfg["late_level"] - cfg["early_level"]), 0.0), 1.0)
+    return round((1 - (1 - cfg["late_factor"]) * span) * max(cfg["boss_factor"] ** boss_items, cfg["farm_floor"]), 3)
+
+
+def settle(steps: list[dict], cfg: dict = DEFAULT_CONFIG) -> dict:
+    """Give every step its level under `cfg` and sum the path up. Steps keep the raw facts (`points`,
+    `item_level`), so the same steps can be settled again under another config without the game data."""
+    for s in steps:
+        g = s["gate"]
+        if g == "boss":
+            s["level"] = max(int(s.get("item_level") or 1), int(cfg["boss_level"]))
+        elif g == "passives" and s.get("points") is not None:
+            s["level"] = level_for_passives(s["points"], cfg)
+        elif g == "ascendancy":
+            s["level"] = level_for_ascendancy(s["points"] if s.get("points") is not None else 2, cfg)
+        elif g in ("spirit", "spirit_gear"):
+            lvl, gear = level_for_spirit(s["points"], cfg)
+            s.update(level=lvl, gate="spirit_gear" if gear else "spirit",
+                     quest=max([v for _, v in _table(cfg["quest_spirit"])], default=0))
+    steps.sort(key=lambda s: (s["level"], s["kind"], s["name"]))
+    online = max((s["level"] for s in steps), default=1)
+    start = next((s["level"] for s in steps if s.get("main")), 1)
+    bosses = [s for s in steps if s["gate"] == "boss"]
+    dead = any(s["gate"] == "unobtainable" for s in steps)
+    return {"steps": steps, "start_level": start, "online_level": online,
+            "farm": sorted({s["boss"] for s in bosses}), "drops": [s["name"] for s in steps if s["gate"] == "drop"],
+            "unobtainable": dead, "unknown": [s["name"] for s in steps if not s["known"]],
+            "factor": factor(online, len(bosses), dead, cfg)}
 
 
 def _skill_step(sid: str, sk: dict, chain: dict, data: dict) -> dict:
@@ -206,8 +268,7 @@ def _skill_step(sid: str, sk: dict, chain: dict, data: dict) -> dict:
     if sk.get("asc_granted"):
         a, n = sk["asc_granted"][0]
         pts = (data.get("ascendancy", {}).get(a) or {}).get(n)
-        s.update(gate="ascendancy", ascendancy=a, points=pts, known=pts is not None,
-                 level=level_for_ascendancy(pts) if pts is not None else ASSUMED["ascendancy_points_level"][2])
+        s.update(gate="ascendancy", ascendancy=a, points=pts, known=pts is not None)
         return s
     base = data.get("base_granted", {}).get(name)
     owners = [u for u in sk.get("granted_by") or [] if u in data.get("uniques", {})]
@@ -223,9 +284,10 @@ def _skill_step(sid: str, sk: dict, chain: dict, data: dict) -> dict:
 
 
 def plan(chain: dict, data: dict, cls: str | None = None, skills: dict | None = None, path_skills: list | None = None,
-         spirit: float = 0.0) -> dict:
+         spirit: float = 0.0, cfg: dict = DEFAULT_CONFIG) -> dict:
     """Leveling path for one chain. `cls` is the class the build starts as (None = the closest class per keystone).
-    `skills` is the catalogue's skill table; `path_skills` are the ids of the helper skills in the chain's path; `spirit` is the Spirit the chain reserves."""
+    `skills` is the catalogue's skill table; `path_skills` are the ids of the helper skills in the chain's path;
+    `spirit` is the Spirit the chain reserves; `cfg` is `config()` of the request's overrides."""
     steps = []
     skills = skills or {}
     seen = set()
@@ -238,11 +300,12 @@ def plan(chain: dict, data: dict, cls: str | None = None, skills: dict | None = 
             steps.append(_skill_step(sid, sk, chain, data))
     for u in chain.get("uniques") or []:
         d = data.get("uniques", {}).get(u)
-        s = {"kind": "unique", "name": u, "level": max((d or {}).get("level", 1), 1), "gate": "drop", "known": d is not None}
+        lv = max((d or {}).get("level", 1), 1)
+        s = {"kind": "unique", "name": u, "level": lv, "item_level": lv, "gate": "drop", "known": d is not None}
         if d and d.get("unobtainable"):
             s["gate"] = "unobtainable"
         elif d and d.get("boss"):
-            s.update(gate="boss", boss=d["boss"], level=max(s["level"], ASSUMED["boss_drop_level"]))
+            s.update(gate="boss", boss=d["boss"])
             if d.get("area"):
                 s["area"] = d["area"]
         if d and d.get("league"):
@@ -253,25 +316,15 @@ def plan(chain: dict, data: dict, cls: str | None = None, skills: dict | None = 
         pick = cls if cls in per else (min(per, key=per.get) if per else None)
         pts = per.get(pick)
         steps.append({"kind": "keystone", "name": k, "gate": "passives", "known": pts is not None,
-                      "points": pts, "cls": pick, "level": level_for_passives(pts) if pts is not None else 1})
+                      "points": pts, "cls": pick, "level": 1})
     for a, n in chain.get("asc_nodes") or []:
         pts = (data.get("ascendancy", {}).get(a) or {}).get(n)
         steps.append({"kind": "asc", "name": n, "ascendancy": a, "gate": "ascendancy", "known": pts is not None,
-                      "points": pts, "level": level_for_ascendancy(pts) if pts is not None else ASSUMED["ascendancy_points_level"][2]})
+                      "points": pts, "level": 1})
     need = float(spirit or 0)
     if need > 0:
-        lvl, gear = level_for_spirit(need)
-        steps.append({"kind": "spirit", "name": f"{need:g} Spirit", "level": lvl, "gate": "spirit_gear" if gear else "spirit",
-                      "known": True, "points": need, "quest": max(ASSUMED["quest_spirit"].values())})
-    steps.sort(key=lambda s: (s["level"], s["kind"], s["name"]))
-    online = max((s["level"] for s in steps), default=1)
-    start = next((s["level"] for s in steps if s.get("main")), 1)
-    bosses = [s for s in steps if s["gate"] == "boss"]
-    dead = any(s["gate"] == "unobtainable" for s in steps)
-    return {"steps": steps, "start_level": start, "online_level": online,
-            "farm": sorted({s["boss"] for s in bosses}), "drops": [s["name"] for s in steps if s["gate"] == "drop"],
-            "unobtainable": dead, "unknown": [s["name"] for s in steps if not s["known"]],
-            "factor": factor(online, len(bosses), dead)}
+        steps.append({"kind": "spirit", "name": f"{need:g} Spirit", "level": 1, "gate": "spirit", "known": True, "points": need})
+    return settle(steps, cfg)
 
 
 def main(argv=None):
@@ -282,8 +335,7 @@ def main(argv=None):
     a = ap.parse_args(argv)
     d = parse(a.pob_root)
     with open(a.out, "w") as f:
-        json.dump({**d, "source": a.source, "assumed": {k: ({str(x): y for x, y in v.items()} if isinstance(v, dict) else v)
-                                                        for k, v in ASSUMED.items()}}, f, sort_keys=True, separators=(",", ":"))
+        json.dump({**d, "source": a.source}, f, sort_keys=True, separators=(",", ":"))
     print(f"{len(d['skills'])} skills, {len(d['uniques'])} uniques, {len(d['keystones'])} keystones, "
           f"{len(d['ascendancy'])} ascendancies -> {a.out}")
 
