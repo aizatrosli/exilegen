@@ -4,6 +4,10 @@
                                  [--budget N] [--steps tree,supports,triggers] [--seed S] [--out out.json]
     python3 -m exilegen score --code CODE [--profile ...] [--constraint ...]
     python3 -m exilegen check --code CODE --constraint one_button      (exit status 0 feasible, 1 infeasible)
+    python3 -m exilegen build --run-dir runs/NAME [--constraint one_button] [--workers 3] [--minutes 60]
+                              [--max-evals N] [--max-jobs N] [--budget 6000] [--job-timeout 600] [--seed S]
+                              (from-scratch MAP-Elites search; resumable; stop with Ctrl-C or a STOP file)
+    python3 -m exilegen build-report --run-dir runs/NAME [--out-dir DIR] [--redescribe]
 
 --file F reads the code from a file: a bare share code, or JSON / JSONL with a "code" field (first line).
 Needs the engine: EXG_ENGINE_BIN (or engine/target) and EXG_POB_ROOT.
@@ -82,7 +86,43 @@ def main(argv=None) -> int:
     _common(ps)
     pc = sub.add_parser("check", help="check constraints and floors (exit 1 if infeasible)")
     _common(pc)
+    pb = sub.add_parser("build", help="from-scratch build search (MAP-Elites) into a run directory")
+    pb.add_argument("--run-dir", required=True, help="run directory (created; re-use it to resume)")
+    pb.add_argument("--constraint", action="append", default=[], help="as for optimise (repeatable)")
+    pb.add_argument("--profile", action="append", default=[], help="scoring profile (repeatable)")
+    pb.add_argument("--workers", type=int, default=None, help="engines (default min(3, cores-1))")
+    pb.add_argument("--minutes", type=float, default=60.0, help="wall-clock budget of this session")
+    pb.add_argument("--max-evals", type=int, default=None, help="engine-evaluation budget of this session")
+    pb.add_argument("--max-jobs", type=int, default=None, help="skeleton budget of this session")
+    pb.add_argument("--budget", type=int, default=6000, help="engine evaluations per skeleton (synth budget)")
+    pb.add_argument("--job-timeout", type=float, default=600.0, help="seconds per skeleton before the engine is killed")
+    pb.add_argument("--seed", type=int, default=0)
+    pb.add_argument("--report-every", type=float, default=300.0, help="seconds between report rewrites")
+    pb.add_argument("-v", "--verbose", action="store_true", help="log each job to stderr")
+    pr = sub.add_parser("build-report", help="write report.md + builds.csv for a build run directory")
+    pr.add_argument("--run-dir", required=True)
+    pr.add_argument("--out-dir", default=None, help="where to write (default: the run directory)")
+    pr.add_argument("--redescribe", action="store_true", help="recompute behaviour descriptors (cells) first")
     args = ap.parse_args(argv)
+
+    if args.cmd == "build":
+        from .builder.runner import Runner
+        r = Runner(args.run_dir, constraints=args.constraint, profiles=args.profile or None, workers=args.workers,
+                   minutes=args.minutes, max_evals=args.max_evals, max_jobs=args.max_jobs, budget=args.budget,
+                   job_timeout=args.job_timeout, seed=args.seed, report_every=args.report_every,
+                   log=(lambda m: print(m, file=sys.stderr, flush=True)) if args.verbose else None).run()
+        a = r["archive"]
+        print(f"run {args.run_dir}: {r['jobs']} jobs ({r['jobs_per_hour']:.0f}/h), {r['failed']} failed,"
+              f" {a['cells_feasible']} feasible cells ({a['cells_verified']} verified), QD-score {a['qd_score']:.1f};"
+              f" stopped: {r['stop_reason']}")
+        print(f"report: {args.run_dir}/report.md  csv: {args.run_dir}/builds.csv")
+        return 0
+    if args.cmd == "build-report":
+        from .builder.report import write_report
+        out = write_report(args.run_dir, out_dir=args.out_dir, redescribe=args.redescribe)
+        print(f"report: {out['md']}  csv: {out['csv']}")
+        return 0
+
     code = _read_code(args)
     log = (lambda *a: print(*a, file=sys.stderr)) if args.verbose else None
 

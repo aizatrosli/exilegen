@@ -1,0 +1,2055 @@
+{
+"classes": {
+"Ranger": [
+"Deadeye",
+"Pathfinder"
+],
+"Huntress": [
+"Amazon",
+"Spirit Walker",
+"Ritualist"
+],
+"Warrior": [
+"Titan",
+"Warbringer",
+"Smith of Kitava"
+],
+"Mercenary": [
+"Tactician",
+"Witchhunter",
+"Gemling Legionnaire"
+],
+"Druid": [
+"Oracle",
+"Shaman"
+],
+"Witch": [
+"Infernalist",
+"Blood Mage",
+"Lich",
+"Abyssal Lich"
+],
+"Sorceress": [
+"Stormweaver",
+"Chronomancer",
+"Disciple of Varashta"
+],
+"Monk": [
+"Martial Artist",
+"Invoker",
+"Acolyte of Chayula"
+]
+},
+"ascendancies": {
+"Deadeye": {
+"name": "Deadeye",
+"class": "Ranger",
+"notables": [
+{
+"name": "Avidity",
+"id": "37336",
+"stats": [
+"50% chance when you gain a Frenzy Charge to gain an additional Frenzy Charge"
+]
+},
+{
+"name": "Bullseye",
+"id": "24226",
+"stats": [
+"Apply 10 Critical Weakness to Enemies when Consuming a Mark on them"
+]
+},
+{
+"name": "Called Shots",
+"id": "59913",
+"stats": [
+"Grants Skill: Called Shots"
+]
+},
+{
+"name": "Endless Munitions",
+"id": "12033",
+"stats": [
+"Skills fire an additional Projectile"
+]
+},
+{
+"name": "Gathering Winds",
+"id": "30",
+"stats": [
+"Gain Tailwind on Skill use",
+"Lose all Tailwind when Hit"
+]
+},
+{
+"name": "Mirage Deadeye",
+"id": "5817",
+"stats": [
+"Grants Skill: Mirage Deadeye"
+]
+},
+{
+"name": "Projectile Proximity Specialisation",
+"id": "42416",
+"stats": []
+},
+{
+"name": "Thrilling Chase",
+"id": "23508",
+"stats": [
+"Benefits from consuming Frenzy Charges for your Skills have 50% chance to be doubled"
+]
+}
+]
+},
+"Pathfinder": {
+"name": "Pathfinder",
+"class": "Ranger",
+"notables": [
+{
+"name": "Brew Concoction",
+"id": "57141",
+"stats": []
+},
+{
+"name": "Enduring Elixirs",
+"id": "41619",
+"stats": [
+"Life Flask Effects are not removed when Unreserved Life is Filled",
+"Life Flask Effects do not Queue"
+]
+},
+{
+"name": "Overwhelming Toxicity",
+"id": "29074",
+"stats": [
+"Double the number of your Poisons that targets can be affected by at the same time",
+"50% less Poison Duration"
+]
+},
+{
+"name": "Path Seeker",
+"id": "16433",
+"stats": []
+},
+{
+"name": "Relentless Pursuit",
+"id": "24868",
+"stats": [
+"Your speed is unaffected by Slows"
+]
+},
+{
+"name": "Running Assault",
+"id": "61991",
+"stats": [
+"Cannot be Heavy Stunned while Sprinting",
+"30% less Movement Speed Penalty from using Skills while moving"
+]
+},
+{
+"name": "Sustainable Practices",
+"id": "40",
+"stats": [
+"50% of Evasion Rating also grants Elemental Damage reduction"
+]
+},
+{
+"name": "Traveller's Wisdom",
+"id": "46454",
+"stats": [
+"Attribute Passive Skills can instead grant 5% increased Damage",
+"Attribute Passive Skills can instead grant 5% increased Armour, Evasion and Energy Shield",
+"Attribute Passive Skills can instead grant 5% increased Cost Efficiency"
+]
+}
+]
+},
+"Amazon": {
+"name": "Amazon",
+"class": "Huntress",
+"notables": [
+{
+"name": "Azmeri Brew",
+"id": "47312",
+"stats": [
+"Life Flasks also recover Mana",
+"Mana Flasks also recover Life"
+]
+},
+{
+"name": "Critical Strike",
+"id": "9294",
+"stats": [
+"Chance to Hit with Attacks can exceed 100%",
+"Gain additional Critical Hit Chance equal to 25% of excess chance to Hit with Attacks"
+]
+},
+{
+"name": "Elemental Surge",
+"id": "7979",
+"stats": [
+"When you Consume a Charge, Trigger Elemental Surge to gain 3 Lightning Surges",
+"Grants Skill: Elemental Surge"
+]
+},
+{
+"name": "In for the Kill",
+"id": "35187",
+"stats": [
+"20% increased Movement Speed while an enemy with an Open Weakness is in your Presence",
+"40% increased Skill Speed while an enemy with an Open Weakness is in your Presence"
+]
+},
+{
+"name": "Mystic Harvest",
+"id": "3065",
+"stats": [
+"Life Leech recovers based on your Elemental damage as well as Physical damage"
+]
+},
+{
+"name": "Penetrate",
+"id": "41008",
+"stats": [
+"Attacks using your Weapons have Added Physical Damage equal",
+"to 25% of the Accuracy Rating on the Weapon"
+]
+},
+{
+"name": "Predatory Instinct",
+"id": "55796",
+"stats": [
+"Reveal Weaknesses against Rare and Unique enemies",
+"50% more damage against enemies with an Open Weakness"
+]
+},
+{
+"name": "Stalking Panther",
+"id": "63254",
+"stats": [
+"Evasion Rating from Equipped Helmet, Gloves and Boots is doubled",
+"Evasion Rating from Equipped Body Armour is halved"
+]
+},
+{
+"name": "Surging Avatar",
+"id": "42441",
+"stats": [
+"When you Consume a Charge, Trigger Elemental Surge to gain 2 Fire Surges",
+"When you Consume a Charge, Trigger Elemental Surge to gain 2 Cold Surges",
+"Gain 1 fewer Lightning Surge from Triggering Elemental Surge"
+]
+}
+]
+},
+"Spirit Walker": {
+"name": "Spirit Walker",
+"class": "Huntress",
+"notables": [
+{
+"name": "Idolatry",
+"id": "56489",
+"stats": [
+"Companions deal 10% increased damage per Idol in your Equipment",
+"2% increased Reservation Efficiency of Skills per Idol in your Equipment",
+"-4% to all Elemental Resistances per non-Idol Augment in your Equipment"
+]
+},
+{
+"name": "Primal Bounty",
+"id": "46070",
+"stats": [
+"Gain a Primal Owl Feather every 4 seconds, up to a maximum of 3",
+"Expend an Owl Feather when you Dodge to trigger Primal Bounty",
+"Grants Skill: Primal Bounty"
+]
+},
+{
+"name": "Sacred Unity",
+"id": "28254",
+"stats": [
+"Bear Spirit gains Embrace of the Wild",
+"Vivid Stags leap towards enemies",
+"Central Projectile of Owl Feather-Empowered Skills leaves a trail of Soaring Ground"
+]
+},
+{
+"name": "The Catha's Balance",
+"id": "765",
+"stats": [
+"Companions gain added Attack damage equal to 60% of your main hand Weapon's damage"
+]
+},
+{
+"name": "The Mhacha's Gift",
+"id": "4367",
+"stats": [
+"Dodging can expend up to 2 Owl Feathers, granting Primal Bounty 100% more",
+"Empowerment effect per additional Feather expended",
+"Gain Owl Feathers 50% faster"
+]
+},
+{
+"name": "The M\u00f3rrigan's Guidance",
+"id": "27773",
+"stats": [
+"Gain a Vivid Wisp when Vivid Stampede ends",
+"Stags deal 20% more damage per leap",
+"Stags have 20% more Shock Magnitude per leap"
+]
+},
+{
+"name": "The Natural Order",
+"id": "39887",
+"stats": [
+"Tame Beast can capture Unique Beasts",
+"Can have up to one Unique Tamed Beast summoned",
+"Unique Tamed Beasts have 30% increased movement speed",
+"Unique Tamed Beasts are Possessed by random Azmeri Spirits, changing every 20 seconds"
+]
+},
+{
+"name": "Vivid Stampede",
+"id": "41401",
+"stats": [
+"Gain a Vivid Wisp for every 10 metres you move, up to a maximum of 3",
+"Expend all Vivid Wisps to trigger Vivid Stampede when you Attack",
+"Grants Skill: Vivid Stampede"
+]
+},
+{
+"name": "Wild Protector",
+"id": "62743",
+"stats": [
+"Grants Skill: Wild Protector"
+]
+}
+]
+},
+"Ritualist": {
+"name": "Ritualist",
+"class": "Huntress",
+"notables": [
+{
+"name": "As the Whispers Demand",
+"id": "30233",
+"stats": [
+"Grants Skill: Ritual Sacrifice"
+]
+},
+{
+"name": "Corrupted Lifeforce",
+"id": "37046",
+"stats": [
+"15% more Damage against Enemies affected by Blood Boils",
+"Grants Skill: Blood Boil"
+]
+},
+{
+"name": "Devotion to the King",
+"id": "38813",
+"stats": [
+"Grants Skill: Queen's Procession"
+]
+},
+{
+"name": "Intricate Sigils",
+"id": "4891",
+"stats": [
+"+1 Charm Slot",
+"20% more Charm Charges gained"
+]
+},
+{
+"name": "Mind Phylacteries",
+"id": "18280",
+"stats": [
+"Can instead consume 25% of maximum Mana to trigger Charms with insufficient charges"
+]
+},
+{
+"name": "Mystic Attunement",
+"id": "7068",
+"stats": [
+"25% increased bonuses gained from Equipped Rings and Amulets"
+]
+},
+{
+"name": "Unfurled Finger",
+"id": "34785",
+"stats": [
+"+1 Ring Slot"
+]
+},
+{
+"name": "Wildwood Persistence",
+"id": "62804",
+"stats": [
+"10% increased Life Recovery rate per 5% missing Unreserved Life"
+]
+}
+]
+},
+"Titan": {
+"name": "Titan",
+"class": "Warrior",
+"notables": [
+{
+"name": "Ancestral Empowerment",
+"id": "3762",
+"stats": [
+"Every second Slam Skill you use yourself is Ancestrally Boosted"
+]
+},
+{
+"name": "Colossal Capacity",
+"id": "60634",
+"stats": [
+"Carry a Chest which adds 20 Inventory Slots"
+]
+},
+{
+"name": "Crushing Impacts",
+"id": "59372",
+"stats": [
+"25% more Damage against Heavy Stunned Enemies",
+"Your Hits are Crushing Blows"
+]
+},
+{
+"name": "Earthbreaker",
+"id": "42275",
+"stats": [
+"25% chance for Slam Skills you use yourself to cause an additional Aftershock"
+]
+},
+{
+"name": "Hulking Form",
+"id": "30115",
+"stats": [
+"50% increased effect of Small Passive Skills"
+]
+},
+{
+"name": "Mountain Splitter",
+"id": "59540",
+"stats": [
+"Every Third Slam skill that doesn't create Fissures which you use yourself causes 3 additional Aftershocks ahead and to each side of the initial area"
+]
+},
+{
+"name": "Mysterious Lineage",
+"id": "12000",
+"stats": [
+"15% more Maximum Life"
+]
+},
+{
+"name": "Stone Skin",
+"id": "24807",
+"stats": [
+"50% more Armour from Equipped Body Armour"
+]
+}
+]
+},
+"Warbringer": {
+"name": "Warbringer",
+"class": "Warrior",
+"notables": [
+{
+"name": "Answered Call",
+"id": "39411",
+"stats": [
+"+1 to maximum number of Summoned Totems",
+"Trigger Ancestral Spirits when you Summon a Totem",
+"Grants Skill: Ancestral Spirits"
+]
+},
+{
+"name": "Anvil's Weight",
+"id": "58704",
+"stats": [
+"Break Armour equal to 10% of Hit Damage dealt"
+]
+},
+{
+"name": "Imploding Impacts",
+"id": "36659",
+"stats": [
+"Fully Broken Armour you inflict increases all Damage Taken from Hits instead",
+"You can Break Enemy Armour to below 0"
+]
+},
+{
+"name": "Jade Heritage",
+"id": "6127",
+"stats": [
+"Gain a stack of Jade every second",
+"Grants Skill: Encase in Jade"
+]
+},
+{
+"name": "Renly's Training",
+"id": "23005",
+"stats": [
+"Gain 35% Base Chance to Block from Equipped Shield instead of the Shield's value"
+]
+},
+{
+"name": "Turtle Charm",
+"id": "52068",
+"stats": [
+"You take 20% of damage from Blocked Hits",
+"Maximum Block chance is 75%"
+]
+},
+{
+"name": "Warcaller's Bellow",
+"id": "47097",
+"stats": [
+"Warcries Explode Corpses dealing 25% of their Life as Physical Damage",
+"Ignore Warcry Cooldowns"
+]
+},
+{
+"name": "Wooden Wall",
+"id": "40915",
+"stats": [
+"20% of Damage from Hits is taken from your nearest Totem's Life before you"
+]
+}
+]
+},
+"Smith of Kitava": {
+"name": "Smith of Kitava",
+"class": "Warrior",
+"notables": [
+{
+"name": "Against the Anvil",
+"id": "60298",
+"stats": [
+"Grants Skill: Temper Weapon"
+]
+},
+{
+"name": "Coal Stoker",
+"id": "57959",
+"stats": [
+"Modifiers to Fire Resistance also grant Cold and Lightning Resistance at 50% of their value"
+]
+},
+{
+"name": "Dedication to Kitava",
+"id": "64962",
+"stats": [
+"Body Armour grants +100% of Armour also applies to Chaos Damage"
+]
+},
+{
+"name": "Flowing Metal",
+"id": "13772",
+"stats": [
+"Body Armour grants +50% of Armour also applies to Elemental Damage"
+]
+},
+{
+"name": "Forged in Flame",
+"id": "48537",
+"stats": [
+"Modifiers to Maximum Fire Resistance also grant Maximum Cold and Lightning Resistance"
+]
+},
+{
+"name": "Heat of the Forge",
+"id": "22541",
+"stats": [
+"Grants Skill: Fire Spell on Hit"
+]
+},
+{
+"name": "Heatproofing",
+"id": "25438",
+"stats": [
+"Body Armour grants Unaffected by Damaging Ailments"
+]
+},
+{
+"name": "Internal Layer",
+"id": "110",
+"stats": [
+"Body Armour grants Hits against you have 100% reduced Critical Damage Bonus"
+]
+},
+{
+"name": "Kitavan Engraving",
+"id": "60913",
+"stats": [
+"Body Armour grants 15% increased maximum Life"
+]
+},
+{
+"name": "Kitavan Imprint",
+"id": "16276",
+"stats": [
+"Body Armour grants 60% increased Glory generation"
+]
+},
+{
+"name": "Leather Bindings",
+"id": "8525",
+"stats": [
+"Body Armour grants regenerate 3% of maximum Life per second"
+]
+},
+{
+"name": "Living Weapon",
+"id": "47184",
+"stats": [
+"Grants Skill: Manifest Weapon"
+]
+},
+{
+"name": "Molten Symbol",
+"id": "9997",
+"stats": [
+"Body Armour grants 25% of Physical Damage from Hits taken as Fire Damage"
+]
+},
+{
+"name": "Smith's Masterwork",
+"id": "9988",
+"stats": [
+"Can only use a Normal Body Armour",
+"+200 to Armour for each Connected Notable Passive Skill Allocated"
+]
+},
+{
+"name": "Spiked Plates",
+"id": "20195",
+"stats": [
+"Body Armour grants 100% increased Thorns damage"
+]
+},
+{
+"name": "Support Straps",
+"id": "49340",
+"stats": [
+"Body Armour grants 20% increased Strength"
+]
+},
+{
+"name": "Tantalum Alloy",
+"id": "61039",
+"stats": [
+"Body Armour grants +75% to Fire Resistance"
+]
+},
+{
+"name": "Tribute to Utula",
+"id": "22908",
+"stats": [
+"Body Armour grants 30% increased Spirit"
+]
+}
+]
+},
+"Tactician": {
+"name": "Tactician",
+"class": "Mercenary",
+"notables": [
+{
+"name": "A Solid Plan",
+"id": "15044",
+"stats": [
+"Persistent Buffs have 50% less Reservation"
+]
+},
+{
+"name": "Cannons, Ready!",
+"id": "37523",
+"stats": [
+"+1 to maximum number of Summoned Totems",
+"Skills used by Totems have 30% more Skill Speed",
+"Totems only use Skills when you fire an Attack Projectile"
+]
+},
+{
+"name": "Polish That Gear",
+"id": "44371",
+"stats": [
+"Gain Deflection Rating equal to 20% of Armour",
+"Gain 100% of Evasion Rating as extra Ailment Threshold"
+]
+},
+{
+"name": "Right Where We Want Them",
+"id": "54838",
+"stats": [
+"Projectile Damage builds Pin",
+"Pinned enemies cannot perform actions"
+]
+},
+{
+"name": "Stay Light, Use Cover",
+"id": "32637",
+"stats": [
+"Defend with 200% of Armour",
+"Enemies have an Accuracy Penalty against you based on Distance",
+"Maximum Chance to Evade is 50%",
+"Maximum Physical Damage Reduction is 50%"
+]
+},
+{
+"name": "Strategic Embankments",
+"id": "4086",
+"stats": [
+"Totems you place grant Embankment Auras"
+]
+},
+{
+"name": "Suppressing Fire",
+"id": "44746",
+"stats": [
+"40% more Immobilisation buildup"
+]
+},
+{
+"name": "Unleash Hell!",
+"id": "1988",
+"stats": [
+"Grants Skill: Supporting Fire"
+]
+},
+{
+"name": "Watch How I Do It",
+"id": "16249",
+"stats": [
+"Allies in your Presence gain added Attack Damage equal",
+"to 25% of your main hand Weapon's damage"
+]
+},
+{
+"name": "Whoever Pays Best",
+"id": "10371",
+"stats": [
+"Banners gain 5 Glory per second",
+"There is no Limit on the number of Banners you can place"
+]
+}
+]
+},
+"Witchhunter": {
+"name": "Witchhunter",
+"class": "Mercenary",
+"notables": [
+{
+"name": "Ceremonial Ablution",
+"id": "6935",
+"stats": [
+"Sorcery Ward's Barrier can also take Physical and Chaos Damage from Hits"
+]
+},
+{
+"name": "Judge, Jury, and Executioner",
+"id": "17646",
+"stats": [
+"Decimating Strike"
+]
+},
+{
+"name": "No Mercy",
+"id": "46535",
+"stats": [
+"Deal up to 40% more Damage to Enemies based on their missing Concentration"
+]
+},
+{
+"name": "Obsessive Rituals",
+"id": "38601",
+"stats": [
+"50% less Armour and Evasion Rating",
+"Grants Skill: Sorcery Ward"
+]
+},
+{
+"name": "Pitiless Killer",
+"id": "61973",
+"stats": [
+"Culling Strike"
+]
+},
+{
+"name": "Weapon Master",
+"id": "8272",
+"stats": [
+"100 Passive Skill Points become Weapon Set Skill Points"
+]
+},
+{
+"name": "Witchbane",
+"id": "3704",
+"stats": [
+"Enemies have Maximum Concentration equal to 30% of their Maximum Life",
+"Break enemy Concentration on Hit equal to 100% of Damage Dealt",
+"Enemies regain 10% of Concentration every second if they haven't lost Concentration in the past 5 seconds"
+]
+},
+{
+"name": "Zealous Inquisition",
+"id": "37078",
+"stats": [
+"10% chance for Enemies you Kill to Explode, dealing 100%",
+"of their maximum Life as Physical Damage",
+"Chance is doubled against Undead and Demons"
+]
+}
+]
+},
+"Gemling Legionnaire": {
+"name": "Gemling Legionnaire",
+"class": "Mercenary",
+"notables": [
+{
+"name": "Adaptive Capability",
+"id": "53108",
+"stats": [
+"Attribute Requirements of Gems can be satisified by your highest Attribute"
+]
+},
+{
+"name": "Advanced Thaumaturgy",
+"id": "14429",
+"stats": [
+"Gem Quality grants Socketed Skills an additional effect"
+]
+},
+{
+"name": "Enhanced Effectiveness",
+"id": "58591",
+"stats": [
+"20% less Attributes",
+"Inherent bonuses gained from Attributes are doubled"
+]
+},
+{
+"name": "Essence of Virtue",
+"id": "11641",
+"stats": [
+"Grants Skill: Virtuous Barrier"
+]
+},
+{
+"name": "Gem Studded",
+"id": "30996",
+"stats": [
+"For each colour of Socketed Support Gem that is most numerous, gain:",
+"Red: Hits against you have no Critical Damage Bonus",
+"Blue: Skills have 30% less cost",
+"Green: 40% less Movement Speed Penalty from using Skills while Moving"
+]
+},
+{
+"name": "Implanted Gems",
+"id": "60287",
+"stats": []
+},
+{
+"name": "Integrated Efficiency",
+"id": "57819",
+"stats": [
+"Skills deal 20% increased Damage per Connected Red Support Gem",
+"Skills have 6% increased Skill Speed per Connected Green Support Gem",
+"Skills have 20% increased Critical Hit Chance per Connected Blue Support Gem"
+]
+},
+{
+"name": "Thaumaturgical Infusion",
+"id": "36728",
+"stats": [
+"+1% to Maximum Cold Resistance per 3 Blue Support Gems Socketed",
+"+1% to Maximum Fire Resistance per 3 Red Support Gems Socketed",
+"+1% to Maximum Lightning Resistance per 3 Green Support Gems Socketed"
+]
+}
+]
+},
+"Oracle": {
+"name": "Oracle",
+"class": "Druid",
+"notables": [
+{
+"name": "Converging Paths",
+"id": "4197",
+"stats": [
+"Grants Skill: Moment of Vulnerability"
+]
+},
+{
+"name": "Entwined Realities",
+"id": "32905",
+"stats": [
+"Non-Keystone Passive Skills in Medium Radius of allocated Keystone Passive Skills can be allocated without being connected to your tree"
+]
+},
+{
+"name": "Fateful Vision",
+"id": "37782",
+"stats": [
+"Grants Skill: Align Fate"
+]
+},
+{
+"name": "Forced Outcome",
+"id": "55135",
+"stats": [
+"Inevitable Critical Hits"
+]
+},
+{
+"name": "Harmony Within",
+"id": "30904",
+"stats": [
+"Hit damage is taken from Mana before Life if your current Mana is higher than your current Life",
+"15% less maximum Life",
+"15% less maximum Mana"
+]
+},
+{
+"name": "The Lesser Harm",
+"id": "34313",
+"stats": [
+"Enemy Critical Hit Chance against you is Unlucky",
+"Damage of Enemies Hitting you is Unlucky"
+]
+},
+{
+"name": "The Unseen Path",
+"id": "5571",
+"stats": [
+"Walk the Paths Not Taken"
+]
+},
+{
+"name": "Unnamed Heartwood",
+"id": "52374",
+"stats": [
+"+1 to maximum number of Summoned Totems",
+"Totems die 6 seconds after their Life is reduced to 0"
+]
+}
+]
+},
+"Shaman": {
+"name": "Shaman",
+"class": "Druid",
+"notables": [
+{
+"name": "Avatar of Evolution",
+"id": "61983",
+"stats": [
+"5% of Physical Damage taken as Fire Damage",
+"5% of Physical Damage taken as Lightning Damage",
+"5% of Physical Damage taken as Cold Damage",
+"Adaptations have a duration of 5 seconds",
+"Double Adaptation Effect"
+]
+},
+{
+"name": "Bringer of the Apocalypse",
+"id": "28745",
+"stats": [
+"Grants Skill: Apocalypse"
+]
+},
+{
+"name": "Druidic Champion",
+"id": "56933",
+"stats": [
+"Every 2 Rage also grants 1% more Spell damage"
+]
+},
+{
+"name": "Furious Wellspring",
+"id": "35762",
+"stats": [
+"No Inherent loss of Rage",
+"Regenerate 6% of your maximum Rage per second",
+"Increases and Reductions to Mana Regeneration Rate also apply to Rage Regeneration Rate",
+"Skills have +5 to Rage cost",
+"+7 to Maximum Rage"
+]
+},
+{
+"name": "Reactive Growth",
+"id": "58646",
+"stats": [
+"10% less Elemental Damage taken",
+"Adapt to the highest Elemental Damage Type of each Hit you take",
+"10% less Damage taken of each Elemental Damage Type per matching Adaptation"
+]
+},
+{
+"name": "Sacred Flow",
+"id": "16204",
+"stats": [
+"+40 to Spirit for each of your empty Charm slots"
+]
+},
+{
+"name": "Turning of the Seasons",
+"id": "62523",
+"stats": [
+"Enemies in your Presence have Exposure",
+"Gain 10% of Damage as Extra Damage of a random Element"
+]
+},
+{
+"name": "Wisdom of the Maji",
+"id": "42253",
+"stats": [
+"Gain the benefits of Bonded modifiers on Runes and Idols"
+]
+}
+]
+},
+"Infernalist": {
+"name": "Infernalist",
+"class": "Witch",
+"notables": [
+{
+"name": "Altered Flesh",
+"id": "18348",
+"stats": [
+"20% of Physical Damage taken as Chaos Damage",
+"20% of Lightning Damage taken as Fire Damage",
+"20% of Cold Damage taken as Fire Damage"
+]
+},
+{
+"name": "Beidat's Gaze",
+"id": "36564",
+"stats": [
+"Reserves 25% of Life",
+"+1 to Maximum Mana per 6 Maximum Life"
+]
+},
+{
+"name": "Beidat's Hand",
+"id": "24039",
+"stats": [
+"Reserves 25% of Life",
+"+1 to Maximum Energy Shield per 8 Maximum Life"
+]
+},
+{
+"name": "Beidat's Will",
+"id": "46644",
+"stats": [
+"Reserves 25% of Life",
+"+1 to Maximum Spirit per 25 Maximum Life"
+]
+},
+{
+"name": "Bringer of Flame",
+"id": "18158",
+"stats": [
+"All Damage from you and Allies in your Presence",
+"contributes to Flammability and Ignite Magnitudes"
+]
+},
+{
+"name": "Demonic Possession",
+"id": "25239",
+"stats": [
+"Grants Skill: Demon Form"
+]
+},
+{
+"name": "Grinning Immolation",
+"id": "34419",
+"stats": [
+"Become Ignited when you deal a Critical Hit, taking 15% of your maximum Life and Energy Shield as Fire Damage per second",
+"50% more Critical Damage Bonus"
+]
+},
+{
+"name": "Loyal Hellhound",
+"id": "17754",
+"stats": [
+"Grants Skill: Summon Infernal Hound"
+]
+},
+{
+"name": "Mastered Darkness",
+"id": "61267",
+"stats": [
+"Demonflame has no maximum"
+]
+},
+{
+"name": "Pyromantic Pact",
+"id": "13174",
+"stats": [
+"Maximum Mana is replaced by twice as much Maximum Infernal Flame",
+"Gain Infernal Flame instead of spending Mana for Skill costs",
+"Take maximum Life and Energy Shield as Fire Damage when Infernal Flame reaches maximum",
+"Lose all Infernal Flame on reaching maximum Infernal Flame",
+"25% of Infernal Flame lost per second if none was gained in the past 2 seconds"
+]
+},
+{
+"name": "Seething Body",
+"id": "10694",
+"stats": [
+"Gain Elemental Archon when you cast a Spell while on High Infernal Flame",
+"Elemental Archon does not expire while on High Infernal Flame",
+"Lose Elemental Archon on reaching maximum Infernal Flame"
+]
+}
+]
+},
+"Blood Mage": {
+"name": "Blood Mage",
+"class": "Witch",
+"notables": [
+{
+"name": "Blood Barbs",
+"id": "26282",
+"stats": [
+"Elemental Damage also Contributes to Bleeding Magnitude",
+"Bleeding you inflict on Cursed targets is Aggravated"
+]
+},
+{
+"name": "Crimson Power",
+"id": "31223",
+"stats": [
+"Gain additional maximum Life equal to 100% of the Item Energy Shield on Equipped Body Armour"
+]
+},
+{
+"name": "Gore Spike",
+"id": "52703",
+"stats": [
+"1% increased Critical Damage Bonus per 50 current Life"
+]
+},
+{
+"name": "Grasping Wounds",
+"id": "56162",
+"stats": [
+"25% of Life Loss from Hits is prevented, then that much Life is lost over 4 seconds instead"
+]
+},
+{
+"name": "Sanguimancy",
+"id": "8415",
+"stats": [
+"Skills gain a Base Life Cost equal to Base Mana Cost",
+"Grants Skill: Life Remnants"
+]
+},
+{
+"name": "Sanguine Tides",
+"id": "65518",
+"stats": [
+"Flasks do not recover Life",
+"Gain 1 Life Flask Charge per 2% Life spent",
+"On Hitting an Enemy while a Life Flask is at full Charges, 40% of its Charges are consumed",
+"Gain 1% of damage as Physical damage for 5 seconds per Charge consumed this way"
+]
+},
+{
+"name": "Sunder the Flesh",
+"id": "26383",
+"stats": [
+"Base Critical Hit Chance for Spells is 15%"
+]
+},
+{
+"name": "Vitality Siphon",
+"id": "23416",
+"stats": [
+"20% of Spell Damage Leeched as Life"
+]
+},
+{
+"name": "Whispers of the Flesh",
+"id": "27667",
+"stats": [
+"Targets Cursed by you have 100% reduced Life Regeneration Rate",
+"Targets Cursed by you have at least 15% of Life Reserved"
+]
+}
+]
+},
+"Lich": {
+"name": "Lich",
+"class": "Witch",
+"notables": [
+{
+"name": "Blackened Heart",
+"id": "2877",
+"stats": [
+"4% increased Magnitude of Unholy Might Buffs you grant per 100 maximum Mana"
+]
+},
+{
+"name": "Crystalline Phylactery",
+"id": "17788",
+"stats": [
+"Can Socket a non-Unique Basic Jewel into the Phylactery",
+"100% increased Effect of bonuses gained from Socketed Jewel",
+"50% more Mana Cost of Skills if you have no Energy Shield"
+]
+},
+{
+"name": "Eldritch Empowerment",
+"id": "58932",
+"stats": [
+"Sacrificing Energy Shield does not interrupt Recharge",
+"Sacrifice 5% of maximum Energy Shield when you Cast a Spell",
+"Spells for which this Sacrifice was fully made deal 30% more Damage"
+]
+},
+{
+"name": "Eternal Life",
+"id": "28431",
+"stats": [
+"Your Life cannot change while you have Energy Shield"
+]
+},
+{
+"name": "Incessant Cacophony",
+"id": "59",
+"stats": [
+"Curses you inflict have infinite Duration",
+"You can apply an additional Curse"
+]
+},
+{
+"name": "Necromantic Conduit",
+"id": "26085",
+"stats": [
+"While you are not on Low Mana, you and Allies in your Presence have Unholy Might",
+"Lose 5% of maximum Mana per Second"
+]
+},
+{
+"name": "Price of Power",
+"id": "2516",
+"stats": [
+"Spells consume a Power Charge if able to deal 40% more Damage"
+]
+},
+{
+"name": "Rupture the Soul",
+"id": "23352",
+"stats": [
+"Cursed Enemies killed by you, or by Allies in your Presence, have a 33% chance to explode, dealing a quarter of their maximum Life as Chaos damage"
+]
+},
+{
+"name": "Soulless Form",
+"id": "33570",
+"stats": [
+"10% of Damage taken bypasses Energy Shield",
+"No inherent Mana Regeneration",
+"Regenerate Mana equal to 6% of maximum Life per second"
+]
+}
+]
+},
+"Abyssal Lich": {
+"name": "Abyssal Lich",
+"class": "Witch",
+"notables": []
+},
+"Stormweaver": {
+"name": "Stormweaver",
+"class": "Sorceress",
+"notables": [
+{
+"name": "Constant Gale",
+"id": "8867",
+"stats": [
+"You have Arcane Surge"
+]
+},
+{
+"name": "Force of Will",
+"id": "39204",
+"stats": [
+"20% of Damage is taken from Mana before Life",
+"20% increased Effect of Arcane Surge on you per ten percent missing Mana"
+]
+},
+{
+"name": "Heavy Snows",
+"id": "61985",
+"stats": [
+"Targets can be affected by two of your Chills at the same time",
+"Your Chills can Slow targets by up to a maximum of 35%",
+"25% less Magnitude of Chill you inflict"
+]
+},
+{
+"name": "Multiplying Squalls",
+"id": "38578",
+"stats": [
+"+2 to Limit for Elemental Skills"
+]
+},
+{
+"name": "Refracted Infusion",
+"id": "42522",
+"stats": [
+"When collecting an Elemental Infusion, gain another different Elemental Infusion"
+]
+},
+{
+"name": "Shaper of Storms",
+"id": "39640",
+"stats": [
+"All Damage from Hits Contributes to Shock Chance"
+]
+},
+{
+"name": "Shaper of Winter",
+"id": "18849",
+"stats": [
+"All Damage from Hits Contributes to Chill Magnitude"
+]
+},
+{
+"name": "Storm's Recollection",
+"id": "49189",
+"stats": [
+"Remnants can be collected from 50% further away",
+"Remnants you create reappear once, 3 seconds after being collected"
+]
+},
+{
+"name": "Strike Twice",
+"id": "2857",
+"stats": [
+"Targets can be affected by two of your Shocks at the same time",
+"25% less Magnitude of Shock you inflict"
+]
+},
+{
+"name": "Tempest Caller",
+"id": "12882",
+"stats": [
+"Trigger Elemental Storm on Critical Hit with Spells",
+"Grants Skill: Elemental Storm"
+]
+}
+]
+},
+"Chronomancer": {
+"name": "Chronomancer",
+"class": "Sorceress",
+"notables": [
+{
+"name": "Apex of the Moment",
+"id": "49049",
+"stats": [
+"Enemies in your Presence are Slowed by 20%"
+]
+},
+{
+"name": "Footprints in the Sand",
+"id": "26638",
+"stats": [
+"Grants Skill: Temporal Rift"
+]
+},
+{
+"name": "Inevitability",
+"id": "42035",
+"stats": [
+"Grants Skill: Inevitable Agony"
+]
+},
+{
+"name": "Now and Again",
+"id": "10987",
+"stats": [
+"Cascadable Spells have 20% chance to Echo",
+"Repeatable Spells have 20% chance to Repeat"
+]
+},
+{
+"name": "Phased Form",
+"id": "28153",
+"stats": [
+"Take 30% less Damage",
+"4 seconds after being Damaged by an Enemy Hit, take Damage equal to 30% of that Hit's Damage"
+]
+},
+{
+"name": "Quicksand Hourglass",
+"id": "10731",
+"stats": [
+"Grants Sands of Time"
+]
+},
+{
+"name": "Ultimate Command",
+"id": "58747",
+"stats": [
+"Grants Skill: Time Freeze"
+]
+},
+{
+"name": "Unbound Encore",
+"id": "3605",
+"stats": [
+"Grants Skill: Time Snap"
+]
+}
+]
+},
+"Disciple of Varashta": {
+"name": "Disciple of Varashta",
+"class": "Sorceress",
+"notables": [
+{
+"name": "Barya of Kelari",
+"id": "13289",
+"stats": [
+"Grants Skill: Kelari, the Tainted Sands"
+]
+},
+{
+"name": "Barya of Navira",
+"id": "32705",
+"stats": [
+"Grants Skill: Navira, the Last Mirage"
+]
+},
+{
+"name": "Barya of Ruzhan",
+"id": "34207",
+"stats": [
+"Grants Skill: Ruzhan, the Blazing Sword"
+]
+},
+{
+"name": "Baryanic Leylines",
+"id": "36891",
+"stats": [
+"Non-Unique Time-Lost Jewels have 40% increased radius"
+]
+},
+{
+"name": "Instruments of Power",
+"id": "20701",
+"stats": [
+"You can equip a Focus while wielding a Staff",
+"50% reduced bonuses gained from Equipped Focus"
+]
+},
+{
+"name": "Kelari's Deception",
+"id": "23265",
+"stats": [
+"Grants Skill: Kelari's Deception"
+]
+},
+{
+"name": "Kelari's Judgment",
+"id": "25653",
+"stats": [
+"Grants Skill: Kelari's Judgment"
+]
+},
+{
+"name": "Kelari's Malediction",
+"id": "36109",
+"stats": [
+"Grants Skill: Kelari's Malediction"
+]
+},
+{
+"name": "Navira's Fracturing",
+"id": "10561",
+"stats": [
+"Grants Skill: Navira's Fracturing"
+]
+},
+{
+"name": "Navira's Oasis",
+"id": "45602",
+"stats": [
+"Grants Skill: Navira's Oasis"
+]
+},
+{
+"name": "Navira's Well",
+"id": "43426",
+"stats": [
+"Grants Skill: Navira's Well"
+]
+},
+{
+"name": "Ruzhan's Fury",
+"id": "14131",
+"stats": [
+"Grants Skill: Ruzhan's Fury"
+]
+},
+{
+"name": "Ruzhan's Reckoning",
+"id": "25683",
+"stats": [
+"Grants Skill: Ruzhan's Reckoning"
+]
+},
+{
+"name": "Ruzhan's Trap",
+"id": "64591",
+"stats": [
+"Grants Skill: Ruzhan's Trap"
+]
+},
+{
+"name": "Sacred Rituals",
+"id": "56857",
+"stats": [
+"60% of your current Energy Shield is added to your Armour for",
+"determining your Physical Damage Reduction from Armour"
+]
+},
+{
+"name": "The Fourth Teaching",
+"id": "46091",
+"stats": [
+"-1 second to base Energy Shield Recharge delay",
+"40% more Energy Shield Recharge Rate while on Low Energy Shield"
+]
+},
+{
+"name": "Varashta's Intuition",
+"id": "2810",
+"stats": [
+"100% of Elemental Damage is taken from Mana before Life"
+]
+}
+]
+},
+"Martial Artist": {
+"name": "Martial Artist",
+"class": "Monk",
+"notables": [
+{
+"name": "Hollow Focus Technique",
+"id": "19370",
+"stats": [
+"Grants Skill: Hollow Focus"
+]
+},
+{
+"name": "Hollow Form Technique",
+"id": "1739",
+"stats": [
+"Grants Skill: Hollow Form"
+]
+},
+{
+"name": "Hollow Resonance Technique",
+"id": "17356",
+"stats": [
+"Grants Skill: Hollow Resonance"
+]
+},
+{
+"name": "Martial Adept",
+"id": "41751",
+"stats": [
+"When you gain Combo, gain an additional Combo",
+"-0.2 seconds to current Energy Shield Recharge delay per Combo expended when using Skills"
+]
+},
+{
+"name": "Martial Master",
+"id": "61586",
+"stats": [
+"Skills can build and retain Combo regardless of Weapon Set",
+"Gain Combo from all Attack Hits"
+]
+},
+{
+"name": "Runic Meridians",
+"id": "39552",
+"stats": [
+"Can tattoo Runes onto your body, gaining",
+"additional Rune-only sockets:",
+"1 Helmet socket",
+"2 Body Armour sockets",
+"1 Gloves socket",
+"1 Boots socket"
+]
+},
+{
+"name": "Way of the Mountain",
+"id": "51546",
+"stats": [
+"100% Surpassing chance per enemy Power to gain Mountain's Teachings on Immobilising an enemy, up to a maximum of 30",
+"Lose a Mountain's Teaching when you are Hit, or when you use or Sustain an Attack that benefits from Mountain's Teachings"
+]
+},
+{
+"name": "Way of the Stonefist",
+"id": "39595",
+"stats": [
+"Gloves you equip have their Base Type transformed to Fists of Stone while equipped, and",
+"their Explicit Modifiers are transformed into more powerful related Modifiers",
+"Ignore Attribute Requirements to equip Gloves"
+]
+}
+]
+},
+"Invoker": {
+"name": "Invoker",
+"class": "Monk",
+"notables": [
+{
+"name": "...and I Shall Rage",
+"id": "64031",
+"stats": [
+"Grants Skill: Unbound Avatar"
+]
+},
+{
+"name": "...and Protect me from Harm",
+"id": "65173",
+"stats": [
+"Physical Damage Reduction from Armour is based on your combined Armour and Evasion Rating",
+"35% less Evasion Rating"
+]
+},
+{
+"name": "...and Scatter Them to the Winds",
+"id": "52448",
+"stats": [
+"Trigger Elemental Expression on Melee Critical Hit",
+"Grants Skill: Elemental Expression"
+]
+},
+{
+"name": "Faith is a Choice",
+"id": "12876",
+"stats": [
+"Grants Skill: Meditate"
+]
+},
+{
+"name": "I am the Blizzard...",
+"id": "23587",
+"stats": [
+"Gain 10% of Damage as Extra Cold Damage",
+"On Freezing Enemies create Chilled Ground"
+]
+},
+{
+"name": "I am the Thunder...",
+"id": "7621",
+"stats": [
+"Gain 10% of Damage as Extra Lightning Damage",
+"25% chance on Shocking Enemies to created Shocked Ground"
+]
+},
+{
+"name": "Lead me through Grace...",
+"id": "8143",
+"stats": [
+"+1 to Spirit for every 8 Item Energy Shield on Equipped Body Armour",
+"+1 to Spirit for every 20 Evasion Rating on Equipped Body Armour",
+"Cannot gain Spirit from Equipment"
+]
+},
+{
+"name": "Sunder my Enemies...",
+"id": "63713",
+"stats": [
+"Critical Hits ignore non-negative Enemy Monster Elemental Resistances"
+]
+},
+{
+"name": "The Soul Springs Eternal",
+"id": "63236",
+"stats": [
+"Meta Skills gain 35% more Energy",
+"Meta Skills have 50% increased Reservation Efficiency"
+]
+}
+]
+},
+"Acolyte of Chayula": {
+"name": "Acolyte of Chayula",
+"class": "Monk",
+"notables": [
+{
+"name": "Archon of Chayula",
+"id": "34567",
+"stats": [
+"Grants Skill: Archon of Chayula"
+]
+},
+{
+"name": "Chayula's Gift",
+"id": "59759",
+"stats": [
+"+10% to Maximum Chaos Resistance",
+"Chaos Resistance is doubled"
+]
+},
+{
+"name": "Deepening Shadows",
+"id": "34817",
+"stats": [
+"1% increased maximum Darkness per 1% Chaos Resistance"
+]
+},
+{
+"name": "Embrace the Darkness",
+"id": "41076",
+"stats": [
+"You have no Spirit",
+"Base Maximum Darkness is 100",
+"Damage taken is Reserved from Darkness before being taken from Life or Energy Shield",
+"Darkness Reservation lasts for 5 seconds",
+"+10 to Maximum Darkness per Level"
+]
+},
+{
+"name": "Grasp of the Void",
+"id": "31116",
+"stats": [
+"Grants Skill: Void Illusion"
+]
+},
+{
+"name": "Inner Turmoil",
+"id": "18826",
+"stats": [
+"Gain 1 Volatility on inflicting an Elemental Ailment",
+"Take no Damage from Volatility"
+]
+},
+{
+"name": "Lucid Dreaming",
+"id": "52395",
+"stats": []
+},
+{
+"name": "Sap of Nightmares",
+"id": "25781",
+"stats": [
+"Leech recovers based on Chaos Damage as well as Physical Damage"
+]
+},
+{
+"name": "Unravelling",
+"id": "3781",
+"stats": [
+"Grants Unravelling"
+]
+},
+{
+"name": "Waking Dream",
+"id": "50098",
+"stats": [
+"Grants Skill: Into the Breach"
+]
+}
+]
+}
+},
+"keystones": [
+{
+"name": "Ancestral Bond",
+"id": 45202,
+"stats": [
+"Your Totem Limit is doubled",
+"No Charge requirement for placing Totems",
+"Totems reserve 75 Spirit each"
+]
+},
+{
+"name": "Avatar of Fire",
+"id": 18684,
+"stats": [
+"75% of Damage Converted to Fire Damage",
+"Deal no Non-Fire Damage"
+]
+},
+{
+"name": "Blackflame Covenant",
+"id": 42680,
+"stats": [
+"Fire Spells Convert 100% of Fire Damage to Chaos Damage",
+"Chaos Damage from Fire Spells Contributes to Flammability and Ignite Magnitudes",
+"Ignite inflicted with Fire Spells deals Chaos Damage instead of Fire Damage"
+]
+},
+{
+"name": "Blood Magic",
+"id": 51749,
+"stats": [
+"You have no Mana",
+"Skill Mana Costs Converted to Life Costs"
+]
+},
+{
+"name": "Bulwark",
+"id": 56605,
+"stats": [
+"Dodge Roll cannot Avoid Damage",
+"Take 30% less Damage from Hits while Dodge Rolling"
+]
+},
+{
+"name": "Chaos Inoculation",
+"id": 56349,
+"stats": [
+"Maximum Life is 1",
+"Immune to Chaos Damage and Bleeding"
+]
+},
+{
+"name": "Conduit",
+"id": 33979,
+"stats": [
+"If you would gain a Charge, Allies in your Presence gain that Charge instead"
+]
+},
+{
+"name": "Crimson Assault",
+"id": 9085,
+"stats": [
+"Bleeding you inflict is Aggravated",
+"Base Bleeding Duration is 1 second",
+"50% more Magnitude of Bleeding you inflict"
+]
+},
+{
+"name": "Dance with Death",
+"id": 14226,
+"stats": [
+"25% more Skill Speed while Off Hand is empty and you have",
+"a One-Handed Martial Weapon equipped in your Main Hand"
+]
+},
+{
+"name": "Eldritch Battery",
+"id": 57513,
+"stats": [
+"Convert 100% of maximum Energy Shield to maximum Mana",
+"Mana Costs are Doubled"
+]
+},
+{
+"name": "Elemental Equilibrium",
+"id": 46742,
+"stats": [
+"Create Lightning Infusion Remnants instead of Fire",
+"Create Cold Infusion Remnants instead of Lightning",
+"Create Fire Infusion Remnants instead of Cold"
+]
+},
+{
+"name": "Eternal Youth",
+"id": 33404,
+"stats": [
+"Life Recharges instead of Energy Shield",
+"50% less Life Recovery from Flasks"
+]
+},
+{
+"name": "Giant's Blood",
+"id": 32349,
+"stats": [
+"You can wield Two-Handed Axes, Maces and Swords in one hand",
+"Triple Attribute requirements of Martial Weapons",
+"Inherent Life granted by Strength is halved"
+]
+},
+{
+"name": "Glancing Blows",
+"id": 19288,
+"stats": [
+"Chance to Evade is Unlucky",
+"Chance to Deflect is Lucky"
+]
+},
+{
+"name": "Heartstopper",
+"id": 34497,
+"stats": [
+"Take 50% less Damage over Time if you've started taking Damage over Time in the past second",
+"Take 50% more Damage over Time if you haven't started taking Damage over Time in the past second"
+]
+},
+{
+"name": "Hollow Palm Technique",
+"id": 64601,
+"stats": [
+"Can Attack as though using a Quarterstaff while both of your hand slots are empty",
+"Unarmed Attacks that would use an Equipped Quarterstaff's damage have:",
+"Base Unarmed Physical damage replaced with damage based on their Skill Level",
+"1% more Attack Speed per 75 Item Evasion on Equipped Armour Items",
+"+0.1% to Critical Hit Chance per 10 Item Energy Shield on Equipped Armour Items"
+]
+},
+{
+"name": "Iron Reflexes",
+"id": 28492,
+"stats": [
+"Converts all Evasion Rating to Armour"
+]
+},
+{
+"name": "Lord of the Wilds",
+"id": 61942,
+"stats": [
+"You can equip a non-Unique Sceptre while wielding a Talisman",
+"50% less Spirit",
+"Non-Minion Skills have 50% less Reservation Efficiency"
+]
+},
+{
+"name": "Mind Over Matter",
+"id": 45918,
+"stats": [
+"All Damage is taken from Mana before Life",
+"50% less Mana Recovery Rate"
+]
+},
+{
+"name": "Necromantic Talisman",
+"id": 39935,
+"stats": [
+"All bonuses from Equipped Amulet apply to your Minions instead of you"
+]
+},
+{
+"name": "Oasis",
+"id": 25100,
+"stats": [
+"Cannot use Charms",
+"30% more Recovery from Flasks"
+]
+},
+{
+"name": "Pain Attunement",
+"id": 55048,
+"stats": [
+"30% less Critical Damage Bonus when on Full Life",
+"30% more Critical Damage Bonus when on Low Life"
+]
+},
+{
+"name": "Primal Hunger",
+"id": 37484,
+"stats": [
+"100% more Maximum Rage",
+"Regenerate 1 Rage per second per 4 Rage spent Recently",
+"No Rage effect"
+]
+},
+{
+"name": "Resolute Technique",
+"id": 44017,
+"stats": [
+"Accuracy Rating is Doubled",
+"Never deal Critical Hits"
+]
+},
+{
+"name": "Resonance",
+"id": 25520,
+"stats": [
+"Gain Power Charges instead of Frenzy Charges",
+"Gain Frenzy Charges instead of Endurance Charges",
+"Gain Endurance Charges instead of Power Charges"
+]
+},
+{
+"name": "Ritual Cadence",
+"id": 11230,
+"stats": [
+"Invocation Skills instead Trigger Spells every 2 seconds",
+"Invocation Skills cannot gain Energy while Triggering Spells",
+"Invoked Spells consume 50% less Energy"
+]
+},
+{
+"name": "Scarred Faith",
+"id": 49547,
+"stats": [
+"5% of Physical Damage prevented Recouped as Energy Shield per enemy Power",
+"Energy Shield does not Recharge",
+"You cannot Recover Energy Shield from Regeneration",
+"You cannot Recover Energy Shield to above Armour"
+]
+},
+{
+"name": "Trusted Kinship",
+"id": 41861,
+"stats": [
+"You can have two Companions of different types",
+"30% more Reservation Efficiency of Companion Skills",
+"20% less Reservation Efficiency of non-Companion Skills"
+]
+},
+{
+"name": "Unwavering Stance",
+"id": 14540,
+"stats": [
+"Cannot be Light Stunned",
+"Cannot Dodge Roll or Sprint"
+]
+},
+{
+"name": "Vaal Pact",
+"id": 33369,
+"stats": [
+"50% more amount of Life Leeched",
+"Leech Life 67% less quickly",
+"Cannot Recover Life other than from Leech",
+"Life Leech effects are not removed when Unreserved Life is Filled"
+]
+},
+{
+"name": "Whispers of Doom",
+"id": 47759,
+"stats": [
+"You can apply an additional Curse",
+"Double Activation Delay of Curses"
+]
+},
+{
+"name": "Wildsurge Incantation",
+"id": 49363,
+"stats": [
+"Storm and Plant Spells:",
+"deal 50% more damage",
+"cost 50% less",
+"have 75% less duration"
+]
+},
+{
+"name": "Zealot's Oath",
+"id": 52,
+"stats": [
+"Excess Life Recovery from Regeneration is applied to Energy Shield",
+"Energy Shield does not Recharge"
+]
+}
+]
+}

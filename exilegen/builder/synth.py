@@ -1,0 +1,807 @@
+"""Synthesizer: Skeleton -> complete, legal, scored PoB build from nothing (contracts.Synthesizer).
+
+    from exilegen.builder.synth import synthesize
+    res = synthesize(skeleton, engine, scorer, budget=6000)      # -> contracts.BuildResult
+
+Steps (each logged into BuildResult.notes; an impossible step ends with ok=False + error):
+  1. class   new_build, class + ascendancy, level.
+  2. skills  main group (main gem + forced supports), trigger setup (meta gem + spells, feeder group),
+             extra skills (auras / heralds / persistent / minions) in their own groups; every gem at the
+             level the character allows, quality 20. Item-granted groups that the skeleton does not name
+             are disabled. The main skill is pinned explicitly ({group, skill}), never "auto".
+  3. gear    requested uniques (PoB item DB) in their slots, a weapon for the main skill (hint, else the
+             skill's weapon requirement, else Staff / Sceptre / mace by skill kind) with its off-hand,
+             template rares (builder/data/gear_templates.json, budget tier) in every other slot.
+     -> the build is exported and loaded into the engine with the scorer's first profile and the pinned
+        main skill; from here every judgement goes through the Scorer (honest DPS, floors, constraints).
+  4. sockets empty support sockets of the main / meta / feeder groups (count by level) are filled
+             greedily: every legal support is screened on one profile, the best few are verified with an
+             exact apply on every profile. Extra skills are disabled (last first) while Spirit is over.
+  5. ascend  forced ascendancy notables, then greedy by score gain per point.
+  6. tree    forced keystones are allocated and pinned; TreeStep(mode="scratch") spends the level's points
+             (attribute choices included: attribute requirements are a hard floor).
+  7. gear    bridge optimise_gear (greedy affixes per slot, uniques kept) with weights derived from the
+             scorer's objective; every proposal is equipped, kept only if the Scorer agrees.
+  8. polish  SupportStep -> TriggerStep (if Meta+Triggers groups) -> TreeStep warm -> SupportStep, each
+             rolled back if it ends worse than it started, within the remaining budget.
+  9. final   score (absolute floors: no baseline), export code, stats, skills, evals, seconds.
+
+Budget: engine evaluations (Context.evals), split over sockets / ascendancy / tree / polish.
+Floors: with no baseline every "either" floor is absolute; the default scorer uses DEFAULT_FLOORS (mana
+sustain is relative and therefore not judged without a baseline, as PoB ignores flasks and leech).
+"""
+from __future__ import annotations
+
+import dataclasses
+import math
+import time
+import traceback
+from typing import Any
+
+from exilegen.optimise.base import Context, StepResult, fields_for, has_meta_groups
+from exilegen.scoring import Scorer
+from exilegen.scoring import floors as F
+
+from .contracts import BuildResult, Skeleton
+from .gear import GearPlanner, weapon_spec
+
+DEFAULT_PROFILES = ["pinnacle_v1", "mapping_v1"]
+POLISH = ("supports", "triggers", "tree_warm", "supports")
+# share of the evaluation budget per phase (the rest goes to the polish steps)
+SHARE = {"sockets": 0.15, "ascendancy": 0.04, "tree": 0.36}
+
+
+class SynthError(RuntimeError):
+    pass
+
+
+# ---------------------------------------------------------------------------------------------- helpers
+def support_slots(level: int) -> int:
+    """Support sockets a main skill has at this character level (Jeweller's Orbs by campaign stage)."""
+    if level >= 65:
+        return 5
+    if level >= 45:
+        return 4
+    if level >= 20:
+        return 3
+    return 2
+
+
+def make_scorer(scorer=None, profiles=None, constraints=None, floors=None):
+    """The caller's Scorer wrapped so trigger costs are energy-aware (as the pipeline does); a default
+    two-profile Scorer when none is given."""
+    from exilegen.optimise.pipeline import FilteredScorer
+    from exilegen.optimise.triggers import energy_cost_filter
+    if scorer is None:
+        sc = FilteredScorer(profile=list(profiles or DEFAULT_PROFILES), constraints=list(constraints or []),
+                            floors=floors if floors is not None else list(F.DEFAULT_FLOORS))
+    elif isinstance(scorer, FilteredScorer):
+        sc = scorer
+    else:
+        kw = {f.name: getattr(scorer, f.name) for f in dataclasses.fields(Scorer) if f.init and f.name != "_cache"}
+        sc = FilteredScorer(**kw)
+    if getattr(sc, "stats_filter", None) is None:
+        sc.stats_filter = energy_cost_filter(sc)
+    return sc
+
+
+def _objective_weights(scorer) -> dict:
+    """optimise_gear weights from the Scorer's objective: log DPS vs log EHP (+ max hit); a little pool
+    weight keeps life/ES lines alive when EHP barely moves."""
+    w = getattr(scorer, "weights", None) or {}
+
+    def num(x):
+        if isinstance(x, dict):
+            vals = [v for v in x.values() if isinstance(v, (int, float))]
+            return max(vals) if vals else 0.0
+        return float(x or 0.0)
+    ehp = num(w.get("ehp", 0.3)) + num(w.get("max_hit", 0.1))
+    return {"dps": 1.0, "ehp": round(ehp, 3), "life": round(ehp / 2, 3)}
+
+
+def _short(r: dict | None) -> str:
+    if not r:
+        return "-"
+    v = sorted({str(x.get("entry")) for x in r.get("violations") or []})
+    return (f"obj {r.get('objective', 0):.3f} honest {r.get('dps_honest') or 0:,.0f} ehp {r.get('ehp') or 0:,.0f}"
+            + ("" if r.get("feasible") else f" INFEASIBLE({', '.join(v)})"))
+
+
+class _Synth:
+    def __init__(self, sk: Skeleton, engine, scorer, budget: int, log_fn=None, gear_optimise: bool = True,
+                 polish=POLISH, seed: int = 0):
+        self.sk, self.e, self.budget, self.seed = sk, engine, int(budget), seed
+        self.scorer = make_scorer(scorer, constraints=list(getattr(sk, "constraints", None) or []))
+        self.profiles = list(self.scorer.profile_list)
+        self.log_fn = log_fn
+        self.gear_optimise = gear_optimise
+        self.polish = list(polish or ())
+        self.notes: list[str] = []
+        self.ctx: Context | None = None
+        self.main_ref: dict | None = None      # {group, skill}
+        self.main_group: int | None = None
+        self.meta_group: int | None = None
+        self.feeder_group: int | None = None
+        self.extra_groups: list[int] = []
+        self.n_groups = 0
+        self.timing: dict[str, float] = {}
+        from exilegen.optimise.gems import catalog
+        self.cat = catalog(getattr(engine, "pob_root", None))
+
+    # ------------------------------------------------------------------ logging
+    def note(self, msg: str) -> None:
+        self.notes.append(msg)
+        if self.log_fn:
+            self.log_fn(f"[synth] {msg}")
+
+    def gem(self, ref, what: str):
+        g = self.cat.get(ref)
+        if g is None:
+            # tolerate "Arc" vs "ArcPlayer" and missing "Player" suffixes
+            g = self.cat.get(f"{ref}Player") or next((x for x in self.cat.by_gem.values()
+                                                      if x.name.lower() == str(ref).lower().strip()), None)
+        if g is None:
+            raise SynthError(f"{what} {ref!r}: unknown gem")
+        return g
+
+    # ------------------------------------------------------------------ 1. class
+    def make_class(self):
+        sk = self.sk
+        self.e.raw("new_build", {"name": f"synth {sk.id}"[:60]})
+        classes = self.e.raw("list_classes", {}).get("classes") or []
+        cl = next((c for c in classes if c["name"].lower() == sk.cls.lower()), None)
+        asc = None
+        for c in classes:
+            a = next((a for a in c["ascendancies"] if a["name"].lower() == (sk.ascendancy or "").lower()), None)
+            if a and (cl is None or c is cl):
+                cl, asc = c, a
+                break
+        if cl is None:
+            raise SynthError(f"unknown class {sk.cls!r}")
+        if sk.ascendancy and asc is None:
+            raise SynthError(f"ascendancy {sk.ascendancy!r} does not belong to {cl['name']}")
+        p = {"classId": cl["id"]}
+        if asc:
+            p["ascendClassId"] = asc["id"]
+        self.e.raw("select_class", p)
+        self.e.raw("set_level", {"level": int(sk.level)})
+        self.cls = cl["name"]
+        self.note(f"class {cl['name']} / {asc['name'] if asc else '-'} level {sk.level}")
+
+    # ------------------------------------------------------------------ 2. skills (raw)
+    def _add_group(self, label: str) -> int:
+        r = self.e.raw("add_socket_group", {"label": label})
+        self.n_groups = int(r["groupIndex"])
+        return self.n_groups
+
+    def _add_gem(self, gi: int, info, quality: int = 20) -> None:
+        p = {"groupIndex": gi, "gemId": info.gem_id}
+        if not info.support:
+            p["quality"] = quality
+        self.e.raw("add_gem", p)
+
+    def _granted_ids(self) -> set:
+        """Skill ids the skeleton's uniques grant (catalog `grants`), plus a built-in trigger's spells."""
+        out = set()
+        for u in self.sk.uniques or []:
+            if isinstance(u, dict):
+                out |= {str(x) for x in u.get("grants") or []}
+        trig = self.sk.trigger or {}
+        if trig and not trig.get("meta") and trig.get("source"):
+            out |= {str(x) for x in trig.get("spells") or []}
+        return out
+
+    def _main_names(self) -> set:
+        sk, m = self.sk, self.main_info
+        names = {str(sk.main_skill).lower(), (m.name or "").lower(), (m.skill_id or "").lower()}
+        if (sk.tags or {}).get("main_skill_name"):
+            names.add(str(sk.tags["main_skill_name"]).lower())
+        return {n for n in names if n}
+
+    def make_skills(self):
+        from exilegen.optimise.gems import GemInfo
+        sk = self.sk
+        granted = self._granted_ids()
+        self.granted_main = str(sk.main_skill) in granted
+        try:
+            main = self.gem(sk.main_skill, "main skill")
+        except SynthError:
+            if not self.granted_main:
+                raise
+            name = (sk.tags or {}).get("main_skill_name") or str(sk.main_skill)
+            main = GemInfo(gem_id="", skill_id=str(sk.main_skill), name=name,
+                           types=["Spell"] if (sk.tags or {}).get("spell") else [])
+        self.main_info = main
+        trig = dict(sk.trigger or {})
+        meta = None
+        if trig.get("meta"):
+            try:
+                meta = self.gem(trig["meta"], "meta gem")
+            except SynthError as ex:
+                self.note(f"trigger: {ex}; no meta group")
+        spells = []
+        for x in trig.get("spells") or []:
+            if str(x) in granted:
+                continue                      # item-granted: comes with the unique, cannot be socketed
+            try:
+                spells.append(self.gem(x, "trigger spell"))
+            except SynthError as ex:
+                self.note(f"trigger: {ex}")
+        feeder = None
+        if trig.get("feeder"):
+            try:
+                feeder = self.gem(trig["feeder"], "feeder")
+            except SynthError as ex:
+                self.note(f"trigger: {ex}")
+        if meta is not None and not spells and not self.granted_main and main.gem_id:
+            spells = [main]
+        if meta is not None and not spells:
+            self.note(f"trigger: no socketable spell for {meta.name}; meta group skipped")
+            meta = None
+        main_in_meta = meta is not None and main.skill_id in {s.skill_id for s in spells}
+        forced = [self.gem(x, "support") for x in sk.supports or []]
+        if meta is not None:
+            gi = self._add_group("meta")
+            self._add_gem(gi, meta)
+            for x in spells:
+                self._add_gem(gi, x)
+            for x in [self.gem(y, "meta support") for y in trig.get("supports") or []]:
+                self._add_gem(gi, x)
+            if main_in_meta:
+                for x in forced:
+                    self._add_gem(gi, x)
+                self.main_group = gi
+            self.meta_group = gi
+            self.note(f"trigger group {gi}: {meta.name} + {', '.join(x.name for x in spells)}")
+        if not main_in_meta and not self.granted_main:
+            gi = self._add_group("main")
+            self._add_gem(gi, main)
+            for x in forced:
+                self._add_gem(gi, x)
+            self.main_group = gi
+            self.note(f"main group {gi}: {main.name}" + (f" + {', '.join(x.name for x in forced)}" if forced else ""))
+        elif self.granted_main:
+            self.note(f"main skill {main.name} comes from a unique (no gem)")
+        if feeder is not None and feeder.skill_id != main.skill_id:
+            gi = self._add_group("feeder")
+            self._add_gem(gi, feeder)
+            for x in [self.gem(y, "feeder support") for y in trig.get("feeder_supports") or []]:
+                self._add_gem(gi, x)
+            self.feeder_group = gi
+            self.note(f"feeder group {gi}: {feeder.name}" + (f" ({trig.get('source')})" if trig.get("source") else ""))
+        for x in sk.extra_skills or []:
+            try:
+                info = self.gem(x, "extra skill")
+            except SynthError as ex:
+                self.note(f"skip extra skill: {ex}")
+                continue
+            if info.support:
+                self.note(f"skip extra skill {info.name}: a support")
+                continue
+            gi = self._add_group(info.name)
+            self._add_gem(gi, info)
+            self.extra_groups.append(gi)
+        if self.extra_groups:
+            self.note(f"extra skills: {', '.join(str(g) for g in self.extra_groups)}")
+
+    # ------------------------------------------------------------------ 3. gear (raw)
+    def uniques(self):
+        sk = self.sk
+        self.gp = GearPlanner(self.e, level=sk.level, tier=sk.budget_tier, defence=sk.defence, cls=self.cls,
+                              notes=self.notes)
+        for u in sk.uniques or []:
+            u = {"name": u} if isinstance(u, str) else dict(u)
+            got = self.gp.equip_unique(u["name"], u.get("slot"), u.get("variant"))
+            if got is None:
+                raise SynthError(f"unique {u['name']!r} could not be equipped")
+
+    def make_gear(self):
+        sk = self.sk
+        spec = weapon_spec(sk.weapon) if sk.weapon else None
+        if spec is None:
+            req = self._weapon_requirement()
+            spec = weapon_spec(req) if req else None
+        if spec is None:
+            t = set(self.main_info.types)
+            kind = "minion" if t & {"Minion", "CreatesMinion"} else "spell" if "Spell" in t else "attack"
+            spec = weapon_spec(__import__("exilegen.builder.gear", fromlist=["templates"]).templates()
+                               ["default_weapon"][kind])
+        if sk.weapon and spec is None:
+            self.note(f"weapon hint {sk.weapon!r} unknown; using the skill's requirement")
+        off = self.sk.offhand or (self.sk.trigger or {}).get("offhand")
+        if spec is not None and off:
+            spec = dict(spec, offhand=off)
+            if spec.get("hands") == 2:
+                self.note(f"off-hand {off} wanted but {spec['type']} is two-handed")
+        self.weapon = spec
+        self.gp.equip_weapons(spec)
+        self.gp.fill_templates()
+        taken = ", ".join(f"{s}={v.split(':', 1)[-1]}" for s, v in sorted(self.gp.taken.items()))
+        self.note(f"gear ({sk.budget_tier}, {self.gp.dtype}): {taken}")
+
+    def _weapon_requirement(self) -> str | None:
+        try:
+            rows = self.e.raw("list_gems", {"query": self.main_info.name, "limit": 10, "maxLevel": 0}).get("gems") or []
+        except Exception:
+            return None
+        row = next((r for r in rows if r.get("gemId") == self.main_info.gem_id), None) or \
+            next((r for r in rows if (r.get("name") or "").lower() == self.main_info.name.lower()), None)
+        w = (row or {}).get("weapon")
+        return w if isinstance(w, str) and w else None
+
+    # ------------------------------------------------------------------ main skill pin + load
+    def pin_and_load(self):
+        """Load the raw build, find the main skill's {group, skill} in the engine's skills view (skill ids,
+        item-granted groups included), disable item-granted groups the skeleton does not use, pin."""
+        code = self.e.raw("save_build_code", {})
+        code = code.get("code") if isinstance(code, dict) else code
+        self.e.load(code=code, profile=self.profiles[0], main="pob")
+        view = self.e.skills()
+        main_names = self._main_names()
+        trig = self.sk.trigger or {}
+        wanted = set(main_names) | {str(x).lower() for x in self.sk.extra_skills or []}
+        wanted |= {str(x).lower() for x in [trig.get("feeder"), trig.get("feeder_name")] + list(trig.get("spells") or []) if x}
+
+        def hit(sk_, names):
+            return (sk_.get("id") or "").lower() in names or (sk_.get("name") or "").lower() in names
+        found = None
+        groups = [g for g in view.get("groups") or [] if g.get("grantedBy") not in ("Explode", "Thorns")]
+        order = sorted(groups, key=lambda g: (g.get("index") != self.main_group, bool(g.get("grantedBy"))))
+        for g in order:
+            for sk_ in g.get("skills") or []:
+                if hit(sk_, main_names):
+                    found = (g["index"], sk_["index"], g.get("grantedBy"))
+                    break
+            if found:
+                break
+        if found is None:
+            raise SynthError(f"main skill {self.main_info.name} ({self.sk.main_skill}) has no socket group"
+                             " (granted by a unique that is missing or not equipped?)")
+        off = {}
+        for g in groups:
+            if not g.get("grantedBy") or g["index"] == found[0] or g.get("enabled") is False:
+                continue
+            if not any(hit(x, wanted) for x in g.get("skills") or []):
+                off[str(g["index"])] = False
+        if off:
+            try:
+                self.e.apply(group_enabled=off, fields=False)
+                self.note(f"disabled unused item-granted groups {', '.join(off)}")
+            except Exception as ex:
+                self.note(f"could not disable item-granted groups: {str(ex)[:100]}")
+        self.granted_main = bool(found[2])
+        self.main_group = found[0]
+        self.main_ref = {"group": int(found[0]), "skill": int(found[1])}
+        self.note(f"main skill pinned: group {found[0]} skill {found[1]}"
+                  + (f" (granted by {found[2]})" if found[2] else ""))
+        self.one_button()
+        self.checkpoint(first=True, code=self.e.export())
+
+    def one_button(self):
+        """Under a one_button constraint keep a single manual damaging skill: the feeder when there is one,
+        else the main skill; other enabled manual damaging groups (extra skills, item-granted attacks) are
+        disabled."""
+        cons = [str(c) for c in (getattr(self.scorer, "constraints", None) or [])]
+        if not any(c.startswith("one_button") for c in cons):
+            return
+        keep = self.feeder_group or self.main_ref["group"]
+        off = {}
+        for g in self.e.skills().get("groups") or []:
+            if g.get("enabled") is False or g["index"] in (keep, self.meta_group):
+                continue
+            manual = [x for x in g.get("skills") or [] if x.get("activation") == "manual" and x.get("damaging")
+                      and x.get("enabled", True) is not False]
+            if manual and g["index"] != self.main_ref["group"]:
+                off[str(g["index"])] = False
+        main_g = next((g for g in self.e.skills().get("groups") or [] if g["index"] == self.main_ref["group"]), {})
+        main_manual = any(x.get("activation") == "manual" and x.get("damaging") for x in main_g.get("skills") or []
+                          if x.get("index") == self.main_ref["skill"])
+        if main_manual and self.feeder_group and self.feeder_group != self.main_ref["group"]:
+            self.note("one_button: the main skill and the feeder are both manual; the build will violate it")
+        if off:
+            try:
+                self.e.apply(group_enabled=off, fields=False)
+                self.extra_groups = [g for g in self.extra_groups if str(g) not in off]
+                self.note(f"one_button: disabled manual damaging groups {', '.join(off)}")
+            except Exception as ex:
+                self.note(f"one_button: could not disable {', '.join(off)}: {str(ex)[:100]}")
+
+    def checkpoint(self, first: bool = False, code: str | None = None):
+        """Export the live build and reload it (profile + pinned main): a crash-recovery point that also
+        covers raw item changes, which engine snapshots do not."""
+        if code is None:
+            code = self.e.raw("save_build_code", {})
+            code = code.get("code") if isinstance(code, dict) else code
+        self.e.load(code=code, profile=self.profiles[0], main=dict(self.main_ref))
+        if first:
+            ctx = Context(self.e, self.scorer, budget=self.budget, log_fn=self.log_fn, seed=self.seed)
+            ctx.baseline_stats = None
+            self.ctx = ctx
+        ctx = self.ctx
+        ctx._skills = None
+        ctx.fields = fields_for(ctx.skills())
+        ctx.refresh()
+        main = (next(iter(ctx.current_stats.values())) or {}).get("main") or {}
+        if main.get("group") != self.main_ref["group"]:
+            self.note(f"warning: engine main is {main} not {self.main_ref}")
+
+    # ------------------------------------------------------------------ 4. support sockets
+    def _group_view(self, gi):
+        return next((g for g in self.ctx.skills().get("groups") or [] if g.get("index") == gi), None)
+
+    def fill_supports(self, gi: int, n_supports: int, budget: int, label: str):
+        """Fill empty support sockets of group gi one at a time. A support is kept only if it raises the
+        objective without adding a violation: feasibility-first acceptance would take a support that wrecks
+        DPS to pass a floor (Zarokh's Revolt slowing casts under a life-cost floor), which the later tree /
+        support steps repair far better."""
+        ctx = self.ctx
+
+        def accept(new, old):
+            if old is None:
+                return True
+            nv = len({(v.get("rule"), v.get("entry")) for v in new.get("violations") or []})
+            ov = len({(v.get("rule"), v.get("entry")) for v in old.get("violations") or []})
+            return nv <= ov and (new.get("objective") or -1e18) > (old.get("objective") or -1e18) + 1e-4
+        g = self._group_view(gi)
+        if g is None or g.get("grantedBy"):
+            return
+        have = sum(1 for x in g.get("gems") or [] if x.get("support"))
+        want = max(0, n_supports - have)
+        added = []
+        stop = ctx.evals + budget
+        for _ in range(want):
+            b = (ctx.current or {}).get("binding_profile")
+            p0 = b if b in self.profiles else self.profiles[0]
+            if ctx.evals >= stop:
+                break
+            g = self._group_view(gi)
+            nslot = len(g.get("gems") or []) + 1
+            try:
+                vs = self.e.valid_supports(gi)
+            except Exception as ex:
+                self.note(f"{label}: valid_supports failed: {ex}")
+                break
+            cands = [s for s in vs.get("supports") or [] if not s.get("socketed") and not s.get("conflicts")]
+            if not cands:
+                break
+            changes = [{"gem_changes": [{"group": gi, "slot": nslot, "gem": s["id"]}], "_name": s["name"]}
+                       for s in cands]
+            changes = changes[:max(1, stop - ctx.evals)]
+            scored = ctx.evaluate_many(changes, profiles=[p0])
+            ranked = sorted([(r, c) for r, c in zip(scored, changes) if r is not None],
+                            key=lambda rc: rc[0].get("objective") or -1e18, reverse=True)
+            kept = False
+            for r, c in ranked[:5]:
+                ok, _ = ctx.try_commit({"gem_changes": c["gem_changes"]}, label=f"socket {c['_name']}", accept=accept)
+                if ok:
+                    added.append(c["_name"])
+                    kept = True
+                    break
+            if not kept:
+                top = ranked[0][0] if ranked else None
+                self.note(f"{label}: no support kept (best screened {_short(top)} vs {_short(ctx.current)})")
+                break
+        if added:
+            self.note(f"{label} (group {gi}) supports: {', '.join(added)} -> {_short(ctx.current)}")
+
+    def relaxed(self):
+        """The scorer without the gear/tree-dependent hard floors (resistances, EHP, max hit, attributes):
+        a naked build fails them all, so early choices (supports, ascendancy) are judged on the objective,
+        while cost floors (life/mana sustain, Spirit) and constraints still apply."""
+        drop = ("res.", "ehp", "max_hit", "attr_deficit")
+        fl = [f for f in (self.scorer.floors or []) if f.tier != "hard" or not f.metric.startswith(drop)]
+        return dataclasses.replace(self.scorer, floors=fl, _cache={})
+
+    def sockets(self, final: bool = False):
+        ctx = self.ctx
+        full = ctx.scorer
+        if not final:
+            ctx.scorer = self.relaxed()
+            ctx.refresh()
+        try:
+            self._sockets(final)
+        finally:
+            if ctx.scorer is not full:
+                ctx.scorer = full
+                ctx.refresh()
+
+    def _sockets(self, final: bool):
+        n = support_slots(self.sk.level)
+        b = int(self.budget * SHARE["sockets"])
+        targets = []
+        if self.main_group and not self.granted_main:
+            targets.append((self.main_group, "main"))
+        if self.meta_group and self.meta_group != self.main_group:
+            targets.append((self.meta_group, "meta"))
+        if self.feeder_group:
+            targets.append((self.feeder_group, "feeder"))
+        for i, (gi, lab) in enumerate(targets):
+            self.fill_supports(gi, n, max(50, b // len(targets)) if not final else 10 ** 9, lab)
+        self.spirit()
+
+    def spirit(self):
+        """Disable extra skills (last first) while unreserved Spirit is negative."""
+        ctx = self.ctx
+        for gi in reversed(self.extra_groups):
+            st = next(iter(ctx.current_stats.values())) or {}
+            un = (st.get("spirit") or {}).get("unreserved")
+            if un is None or un >= 0:
+                return
+            g = self._group_view(gi)
+            if g is None or g.get("enabled") is False:
+                continue
+            ctx.commit({"group_enabled": {str(gi): False}}, label=f"spirit: disable {gi}")
+            self.note(f"spirit over ({un}): disabled extra group {gi} ({(g.get('label') or '')})")
+
+    # ------------------------------------------------------------------ 5. ascendancy
+    def ascendancy(self):
+        ctx = self.ctx
+        full = ctx.scorer
+        ctx.scorer = self.relaxed()
+        ctx.refresh()
+        try:
+            self._ascendancy()
+        finally:
+            ctx.scorer = full
+            ctx.refresh()
+
+    def _ascendancy(self):
+        ctx, e = self.ctx, self.e
+        summ = e.summary().get("points") or {}
+        left = int(summ.get("ascMax") or 0) - int(summ.get("ascUsed") or 0)
+        stop = ctx.evals + max(30, int(self.budget * SHARE["ascendancy"]))
+        forced = [x.lower() for x in self.sk.ascendancy_nodes or []]
+        taken = []
+        while left > 0 and ctx.evals < stop:
+            tv = e.tree(frontier=True, max_dist=left)
+            nodes = tv.get("nodes") or {}
+            fr = [f for f in tv.get("frontier") or [] if (nodes.get(str(f["id"])) or {}).get("asc")
+                  and f["dist"] <= left]
+            if not fr:
+                break
+            pick = None
+            for name in list(forced):
+                hit = next((f for f in fr if (nodes[str(f["id"])].get("name") or "").lower() == name), None)
+                if hit:
+                    pick = hit
+                    forced.remove(name)
+                    break
+            if pick is None:
+                cands = [f for f in fr if nodes[str(f["id"])].get("kind") == "ascendancy_notable"] or fr
+                changes = [{"add_nodes": list(f["path"])} for f in cands]
+                scored = ctx.evaluate_many(changes)
+                cur = ctx.current or {}
+
+                def key(rf):
+                    r, f = rf
+                    if r is None:
+                        return (False, -1e18)
+                    d = (r.get("objective") or -1e18) - (cur.get("objective") or 0)
+                    return (bool(r.get("feasible")) or not cur.get("feasible"), d / max(1, f["dist"]))
+                best = max(zip(scored, cands), key=key)
+                pick = best[1]
+            ctx.commit({"add_nodes": list(pick["path"])}, label="ascendancy")
+            taken.append(nodes[str(pick["id"])].get("name"))
+            left -= int(pick["dist"])
+        for name in forced:
+            self.note(f"forced ascendancy node {name!r} not reachable")
+        self.note(f"ascendancy: {', '.join(t for t in taken if t)} -> {_short(ctx.current)}")
+
+    # ------------------------------------------------------------------ 6. tree
+    def tree(self):
+        from exilegen.optimise.tree import TreeStep
+        ctx, e = self.ctx, self.e
+        pins = []
+        if self.sk.keystones:
+            tv = e.tree(frontier=True, max_dist=60)
+            nodes = tv.get("nodes") or {}
+            byname = {}
+            for f in tv.get("frontier") or []:
+                n = nodes.get(str(f["id"])) or {}
+                if n.get("kind") == "keystone":
+                    byname.setdefault((n.get("name") or "").lower(), f)
+            for k in self.sk.keystones:
+                f = byname.get(k.lower())
+                if f is None:
+                    self.note(f"keystone {k!r} not found on the tree")
+                    continue
+                ctx.commit({"add_nodes": list(f["path"])}, label=f"keystone {k}")
+                pins.append(int(f["id"]))
+            if pins:
+                self.note(f"keystones pinned: {', '.join(self.sk.keystones)} -> {_short(ctx.current)}")
+        pts = e.summary().get("points") or {}
+        avail = int(pts.get("available") or 0)
+        alloc = e.tree(frontier=False).get("allocated") or []
+        share = max(300, int(self.budget * SHARE["tree"]))
+        step = TreeStep(mode="scratch", max_evals=share, pins=pins, extra_points=max(0, avail - len(alloc)),
+                        seed=self.seed, verbose=False)
+        r = self._run(step, share)
+        rep = getattr(step, "report", None) or {}
+        cand = rep.get("candidate") or {}
+        if rep.get("fallback") and cand.get("nodes"):
+            # TreeStep compares the applied tree with its start (feasibility first); from scratch the start is
+            # an empty tree, which must never win: commit the grown tree anyway, local search continues later
+            S = {int(v): 0 for v in cand["nodes"]}
+            A = {int(k): int(v) for k, v in (cand.get("attrs") or {}).items()}
+            change = step._diff(S, A)
+            if change:
+                ctx.commit(change, label="tree_scratch(forced)")
+                self.note(f"tree scratch fell back to the empty start tree; committed its tree anyway "
+                          f"({len(S)} nodes)")
+        self.note(f"tree scratch: {avail} points, {r.evals} evals, {r.seconds:.0f}s -> {_short(ctx.current)}"
+                  + (f" [{'; '.join(str(n) for n in r.notes[:2])}]" if r.notes and not r.improved else ""))
+
+    # ------------------------------------------------------------------ 7. gear optimise
+    def gear(self, final: bool = True):
+        """optimise_gear with objective-derived weights; on the final pass also the 'balanced' and 'defence'
+        presets (a build short of the EHP / max-hit floors needs defence-weighted affixes). Each variant
+        starts from the same gear; the best by the Scorer (feasibility first) is kept, or the input gear if
+        none beats it."""
+        ctx = self.ctx
+        code0 = self.e.raw("save_build_code", {})
+        code0 = code0.get("code") if isinstance(code0, dict) else code0
+        best = (ctx.current, code0, "input")
+        variants = [("objective", _objective_weights(self.scorer), None)]
+        if final:
+            variants += [("balanced", None, "balanced"), ("defence", None, "defence")]
+        for i, (name, w, preset) in enumerate(variants):
+            if i:
+                self.e.load(code=code0, profile=self.profiles[0], main=dict(self.main_ref))
+            try:
+                out = self.gp.optimise(weights=w, preset=preset)
+            except Exception as ex:
+                self.note(f"optimise_gear {name} failed: {str(ex)[:160]}")
+                continue
+            ctx._skills = None
+            ctx.refresh()
+            self.note(f"optimise_gear {name}: {len(out['equipped'])} slots -> {_short(ctx.current)}")
+            if Context.better(ctx.current, best[0], 1e-6):
+                c = self.e.raw("save_build_code", {})
+                best = (ctx.current, c.get("code") if isinstance(c, dict) else c, name)
+            if ctx.current.get("feasible") and name == "objective" and best[2] == name:
+                break          # feasible with the scorer's own weighting: no defence pass needed
+        self.e.load(code=best[1], profile=self.profiles[0], main=dict(self.main_ref))
+        self.note(f"gear kept: {best[2]}")
+        self.checkpoint()
+
+    # ------------------------------------------------------------------ 8. polish
+    def _run(self, step, share: int) -> StepResult:
+        """Run one optimiser step with a budget share; roll it back if it ends worse (pipeline guard)."""
+        ctx, e = self.ctx, self.e
+        cap = ctx.budget
+        ctx.budget = min(cap, ctx.evals + max(1, share))
+        ev0, ts = ctx.evals, time.time()
+        before, before_stats, n_hist = ctx.current, ctx.current_stats, len(ctx.history)
+        obj0 = (before or {}).get("objective")
+        tok = e.snapshot()
+        try:
+            r = step.run(ctx)
+        except Exception as ex:          # noqa: BLE001
+            self.note(f"step {getattr(step, 'name', step)} failed: {type(ex).__name__}: {ex}")
+            if self.log_fn:
+                self.log_fn(traceback.format_exc())
+            try:
+                ctx.refresh()
+            except Exception:
+                pass
+            r = StepResult(getattr(step, "name", "?"), False, obj0, (ctx.current or {}).get("objective"),
+                           notes=[f"failed: {ex}"])
+        finally:
+            ctx.budget = cap
+        try:
+            ctx._skills = None
+            ctx.refresh()
+            if Context.better(before, ctx.current, 1e-6):
+                e.restore(tok)
+                ctx.current, ctx.current_stats, ctx._skills = before, before_stats, None
+                del ctx.history[n_hist:]
+                r.notes.append("rolled back: ended worse than it started")
+                r.improved, r.changes = False, []
+        finally:
+            ctx._drop(tok)
+        want = fields_for(ctx.skills())
+        if want != "core" and ctx.fields == "core":
+            ctx.fields = want
+            ctx.refresh()
+        r.evals = r.evals or (ctx.evals - ev0)
+        r.seconds = r.seconds or (time.time() - ts)
+        return r
+
+    def polish_steps(self):
+        from exilegen.optimise.pipeline import make_step
+        ctx = self.ctx
+        todo = [s for s in self.polish if s != "triggers" or has_meta_groups(ctx.skills())]
+        for i, name in enumerate(todo):
+            left = ctx.budget_left()
+            if left <= 50:
+                self.note(f"budget exhausted before {name}")
+                break
+            share = max(50, left // (len(todo) - i))
+            step = make_step(name, self.seed, share if name.startswith("tree") else None, self.notes)
+            if step is None:
+                continue
+            if hasattr(step, "verbose"):
+                step.verbose = False
+            r = self._run(step, share)
+            rb = any("rolled back" in str(n) for n in r.notes)
+            self.note(f"{name}: {'rolled back' if rb else ('improved' if r.improved else 'no gain')}, "
+                      f"{r.evals} evals, {r.seconds:.0f}s -> {_short(ctx.current)}")
+
+    # ------------------------------------------------------------------ run
+    def run(self) -> BuildResult:
+        t0 = time.time()
+        res = BuildResult(skeleton=self.sk, ok=False, notes=self.notes)
+        phases = [("class", self.make_class), ("uniques", self.uniques), ("skills", self.make_skills), ("gear", self.make_gear),
+                  ("load", self.pin_and_load), ("sockets", self.sockets), ("ascendancy", self.ascendancy),
+                  ("tree", self.tree)]
+        if self.gear_optimise:
+            phases.insert(phases.index(("tree", self.tree)), ("gear_pre", lambda: self.gear(final=False)))
+            phases.append(("gear_opt", self.gear))
+        phases.append(("sockets2", lambda: self.sockets(final=True)))
+        phases.append(("polish", self.polish_steps))
+        phase = None
+        try:
+            for phase, fn in phases:
+                ts = time.time()
+                fn()
+                self.timing[phase] = round(time.time() - ts, 1)
+            ctx = self.ctx
+            ctx._skills = None
+            ctx.refresh()
+        except Exception as ex:          # noqa: BLE001 - a failed skeleton is a result, not a crash
+            res.error = f"{phase}: {type(ex).__name__}: {ex}"
+            self.note(f"FAILED in {phase}: {type(ex).__name__}: {ex}")
+            if self.log_fn and not isinstance(ex, SynthError):
+                self.log_fn(traceback.format_exc())
+        ctx = self.ctx
+        if ctx is not None and ctx.current is not None:
+            try:
+                res.score = ctx.current
+                res.stats = ctx.current_stats
+                res.skills = ctx.skills()
+                if res.error:
+                    ctx._skills = None
+                    ctx.refresh()
+                    res.score, res.stats, res.skills = ctx.current, ctx.current_stats, ctx.skills()
+                res.code = self.e.export()
+                res.ok = bool(res.code)          # loadable and scored, even if a later phase failed
+            except Exception as ex:      # noqa: BLE001
+                self.note(f"final export failed: {ex}")
+                res.ok = False
+                res.error = res.error or f"export: {ex}"
+            res.evals = ctx.evals
+        self.note("timing: " + ", ".join(f"{k} {v:.0f}s" for k, v in self.timing.items()))
+        res.seconds = time.time() - t0
+        return res
+
+
+def synthesize(skeleton: Skeleton, engine: Any, scorer: Any = None, budget: int = 6000, log_fn=None,
+               gear_optimise: bool = True, polish=POLISH, seed: int = 0) -> BuildResult:
+    """contracts.Synthesizer: build `skeleton` from nothing in `engine`, judged by `scorer` (default:
+    pinnacle_v1 + mapping_v1, DEFAULT_FLOORS, no constraints). Never raises for a bad skeleton: the result
+    has ok=False and error set. `budget` is in engine evaluations."""
+    return _Synth(skeleton, engine, scorer, budget, log_fn=log_fn, gear_optimise=gear_optimise,
+                  polish=polish, seed=seed).run()
+
+
+def summary_row(res: BuildResult) -> dict:
+    """Flat facts of a result for tables: honest/raw DPS and EHP per profile, feasibility, violations."""
+    s = res.score or {}
+    per = s.get("profiles") or ({s.get("profile"): s} if s else {})
+    row = {"id": res.skeleton.id, "ok": res.ok, "feasible": s.get("feasible"), "objective": s.get("objective"),
+           "dps_honest": s.get("dps_honest"), "ehp": s.get("ehp"), "evals": res.evals,
+           "seconds": round(res.seconds, 1), "error": res.error,
+           "violations": ";".join(sorted({f"{v.get('profile', '')}:{v.get('entry')}" for v in s.get("violations") or []}))}
+    for p, r in per.items():
+        st = (res.stats or {}).get(p) if isinstance(res.stats, dict) else None
+        row[f"{p}.dps_honest"] = r.get("dps_honest")
+        row[f"{p}.dps_raw"] = r.get("dps_raw")
+        row[f"{p}.ehp"] = r.get("ehp")
+        if st:
+            row[f"{p}.main"] = (st.get("mainSkill") or {}).get("name")
+            row[f"{p}.pob_dps"] = (st.get("dps") or {}).get("best")
+    return row
+
+
+def _finite(x):
+    return x if isinstance(x, (int, float)) and math.isfinite(x) else None

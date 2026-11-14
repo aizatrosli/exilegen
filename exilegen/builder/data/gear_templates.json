@@ -1,0 +1,86 @@
+{
+  "format": 1,
+  "doc": "Template rares for the synthesizer (exilegen/builder/gear.py). A wish is a list of regexes matched against the base's affix families (bridge list_affixes groups); the first family that rolls on the base is used. Tiers set the item level (which mod tiers can roll) and the roll within each tier (0 worst .. 1 perfect) for both the templates and optimise_gear.",
+  "tiers": {
+    "low":  {"itemLevel": 68, "range": 0.4, "optimise": true},
+    "mid":  {"itemLevel": 82, "range": 0.6, "optimise": true},
+    "high": {"itemLevel": 82, "range": 0.9, "optimise": true}
+  },
+  "defence_types": {
+    "life": null,
+    "es": "Energy Shield",
+    "ci": "Energy Shield",
+    "mom": "Energy Shield",
+    "hybrid": "Evasion/Energy Shield",
+    "armour": "Armour",
+    "evasion": "Evasion"
+  },
+  "class_defence": {
+    "Warrior": "Armour",
+    "Ranger": "Evasion",
+    "Huntress": "Evasion",
+    "Witch": "Energy Shield",
+    "Sorceress": "Energy Shield",
+    "Mercenary": "Armour/Evasion",
+    "Monk": "Evasion/Energy Shield",
+    "Druid": "Armour/Energy Shield"
+  },
+  "weapon_types": {
+    "Bow": {"type": "Bow", "hands": 2, "offhand": "Quiver"},
+    "Crossbow": {"type": "Crossbow", "hands": 2},
+    "Quarterstaff": {"type": "Staff: Warstaff", "hands": 2},
+    "Warstaff": {"type": "Staff: Warstaff", "hands": 2},
+    "Staff": {"type": "Staff", "hands": 2},
+    "Spear": {"type": "Spear", "hands": 1, "offhand": "Shield"},
+    "Talisman": {"type": "Talisman", "hands": 2},
+    "One Hand Mace": {"type": "One Hand Mace", "hands": 1, "offhand": "Shield"},
+    "Mace": {"type": "One Hand Mace", "hands": 1, "offhand": "Shield"},
+    "Two Hand Mace": {"type": "Two Hand Mace", "hands": 2},
+    "Wand": {"type": "Wand", "hands": 1, "offhand": "Focus"},
+    "Sceptre": {"type": "Sceptre", "hands": 1, "offhand": "Focus"},
+    "Flail": {"type": "Flail", "hands": 1, "offhand": "Shield"},
+    "Dagger": {"type": "Dagger", "hands": 1, "offhand": "Focus"},
+    "Claw": {"type": "Claw", "hands": 1, "offhand": "Shield"},
+    "One Hand Sword": {"type": "One Hand Sword", "hands": 1, "offhand": "Shield"},
+    "Two Hand Sword": {"type": "Two Hand Sword", "hands": 2},
+    "One Hand Axe": {"type": "One Hand Axe", "hands": 1, "offhand": "Shield"},
+    "Two Hand Axe": {"type": "Two Hand Axe", "hands": 2}
+  },
+  "requirement_aliases": {
+    "Any Martial Weapon": "Two Hand Mace",
+    "Any Martial Weapon, Unarmed": "Two Hand Mace",
+    "Any Melee Martial Weapon": "Two Hand Mace",
+    "Any Melee Martial Weapon or Unarmed": "Two Hand Mace",
+    "Any non-Talisman Martial Weapon": "Two Hand Mace",
+    "Any non-Talisman Melee Martial Weapon": "Two Hand Mace",
+    "Unarmed": "Quarterstaff",
+    "Any Shield": "One Hand Mace",
+    "Armoured Shield": "One Hand Mace"
+  },
+  "default_weapon": {"spell": "Staff", "minion": "Sceptre", "attack": "Two Hand Mace"},
+  "weapon_pick": {
+    "Staff": "level",
+    "Sceptre": "spirit",
+    "Wand": "level",
+    "Focus": "defence",
+    "Quiver": "level",
+    "Shield": "defence"
+  },
+  "templates": {
+    "armour": {
+      "life": {"prefixes": [["^IncreasedLife$"], ["^LocalIncreased.*AndLife$", "^LocalIncreased.*AndBase$"]],
+               "suffixes": [["^FireResistance$"], ["^ColdResistance$"], ["^LightningResistance$"]]},
+      "es":   {"prefixes": [["^LocalEnergyShield$", "^LocalBaseEvasionRatingAndEnergyShield$", "^LocalBaseArmourAndEnergyShield$"], ["^LocalEnergyShieldPercent$", "^LocalEvasionAndEnergyShield$", "^LocalArmourAndEnergyShield$"], ["^IncreasedLife$"]],
+               "suffixes": [["^FireResistance$"], ["^ColdResistance$"], ["^LightningResistance$"]]}
+    },
+    "Ring":   {"prefixes": [["^IncreasedLife$"]], "suffixes": [["^FireResistance$"], ["^ColdResistance$"], ["^LightningResistance$"]]},
+    "Amulet": {"prefixes": [["^IncreasedLife$"], ["^MaximumLifeIncreasePercent$"]], "suffixes": [["^AllResistances$"], ["^ChaosResistance$"], ["^GlobalIncreaseSpellSkillGemLevel$"]]},
+    "Belt":   {"prefixes": [["^IncreasedLife$"]], "suffixes": [["^FireResistance$"], ["^ColdResistance$"], ["^LightningResistance$"]]},
+    "Boots":  {"extra_prefix_first": [["^MovementVelocity$"]]},
+    "weapon": {"prefixes": [], "suffixes": []},
+    "Focus":  {"prefixes": [["^WeaponSpellDamage$"], ["^LocalEnergyShield$"]], "suffixes": [["^FireResistance$"], ["^ColdResistance$"], ["^LightningResistance$"]]},
+    "Shield": {"prefixes": [["^IncreasedLife$"]], "suffixes": [["^FireResistance$"], ["^ColdResistance$"], ["^LightningResistance$"]]},
+    "Quiver": {"prefixes": [], "suffixes": []}
+  },
+  "jewellery_bases": {"Ring 1": ["Ruby Ring", "Iron Ring"], "Ring 2": ["Sapphire Ring", "Topaz Ring", "Iron Ring"], "Amulet": ["Stellar Amulet", "Solar Amulet", "Lunar Amulet", "Amber Amulet"], "Belt": ["Heavy Belt", "Plate Belt", "Wide Belt", "Linen Belt"]}
+}
