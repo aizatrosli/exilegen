@@ -4,8 +4,11 @@
                                  "base_dps", "gain", "state_lift", "base_state_lift", "payoff", "gain_credited"}}
 
 gain           chain DPS over its baseline's (same skill, ascendancy, weapon and defence without the chain)
+typical_dps    median DPS of the plain builds on the same main skill (feasible ones when any are), over typical_n builds
+gain_fair      chain DPS over the stronger of its own baseline and typical_dps, so one weak baseline cannot inflate it
+thin           true when fewer than 3 plain builds exist for the skill: gain_fair then rests on little evidence
 state_lift     chain DPS with its own states switched on over the same build with them off
-gain_credited  gain x state_lift: the chain credited for the state it produces (assumes it is always up)
+gain_credited  gain_fair x state_lift: the chain credited for the state it produces (assumes it is always up)
 payoff         state_lift over the baseline's: above 1 means the chain's payoff part uses the state better
 """
 from __future__ import annotations
@@ -20,6 +23,16 @@ def _read(path: str) -> list[dict]:
 
 def measured(out: str) -> dict[str, dict]:
     base = {r["base_key"]: r for r in _read(os.path.join(out, "baselines.jsonl"))}
+    by_skill: dict[str, list[dict]] = {}
+    for b in base.values():
+        if (b.get("dps_honest") or 0) > 0:
+            by_skill.setdefault(b.get("main_name"), []).append(b)
+    typical: dict[str, tuple[float, int]] = {}
+    for k, rows in by_skill.items():
+        rows = [b for b in rows if b.get("feasible")] or rows
+        v = sorted(b["dps_honest"] for b in rows)
+        n = len(v)
+        typical[k] = ((v[n // 2] if n % 2 else (v[n // 2 - 1] * v[n // 2]) ** 0.5), n)
     st = {r["id"]: r for r in _read(os.path.join(out, "states.jsonl")) if not r.get("error")}
     res: dict[str, dict] = {}
     for r in _read(os.path.join(out, "chain_scores.jsonl")):
@@ -32,13 +45,18 @@ def measured(out: str) -> dict[str, dict]:
         if dps > 0 and b and (b.get("dps_honest") or 0) > 0:
             m["base_dps"] = round(b["dps_honest"])
             m["gain"] = round(dps / b["dps_honest"], 3)
+            t, n = typical.get(r.get("main_name"), (b["dps_honest"], 1))
+            m["typical_dps"], m["typical_n"] = round(t), n
+            m["gain_fair"] = round(dps / max(b["dps_honest"], t), 3)
+            if n < 3:
+                m["thin"] = True
             x = st.get(r["id"])
             if x and x.get("chain_off"):
                 m["state_lift"] = round(x["chain_on"] / x["chain_off"], 3)
                 if x.get("base_off") and x.get("base_on"):
                     m["base_state_lift"] = round(x["base_on"] / x["base_off"], 3)
                     m["payoff"] = round(m["state_lift"] / m["base_state_lift"], 3)
-            m["gain_credited"] = round(m["gain"] * m.get("state_lift", 1.0), 3)
+            m["gain_credited"] = round(m["gain_fair"] * m.get("state_lift", 1.0), 3)
         res[r["id"]] = m
     return res
 

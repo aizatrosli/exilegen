@@ -31,6 +31,7 @@ from dataclasses import dataclass, field, asdict
 
 from . import catalog as catmod
 from . import mechgraph
+from . import chainfit
 from . import chainresults
 from . import leveling as levelmod
 from . import tempo as tempomod
@@ -64,7 +65,7 @@ class Requirements:
     spirit: float = tempomod.DEFAULT_BUDGET["spirit"]                     # Spirit available for reservations
     leveling: bool = False        # rank by how early the chain works while leveling and what must be farmed for it
     online_by: int = 0            # drop chains that are not complete by this character level (0 = no limit)
-    rank_by: str = "formula"      # "formula", or "measured": PoB-measured gain first (needs --scores)
+    rank_by: str = "formula"      # "formula", "measured" (PoB gain, needs --scores) or "fitted" (score fitted to PoB runs)
     leveling_config: dict = field(default_factory=dict)   # overrides of leveling.DEFAULT_CONFIG (trial levels, ...)
 
     @classmethod
@@ -187,13 +188,18 @@ def preflight(cat: catmod.Catalog, req: Requirements, unknown_keys: list[str] | 
                           ", ".join(f"{x:g}" for x in lvl_cfg["trial_levels"]), lvl_cfg["boss_level"], lvl_cfg["early_level"],
                           lvl_cfg["late_factor"], lvl_cfg["late_level"],
                           " (changed: " + ", ".join(sorted(req.leveling_config)) + ")" if req.leveling_config else "")))
-    if req.rank_by not in ("formula", "measured"):
-        out.append(_check("req.rank_by", "requirements", "fail", "Ranking", f"{req.rank_by!r} is not 'formula' or 'measured'"))
+    if req.rank_by not in ("formula", "measured", "fitted"):
+        out.append(_check("req.rank_by", "requirements", "fail", "Ranking", f"{req.rank_by!r} is not 'formula', 'measured' or 'fitted'"))
     elif req.rank_by == "measured":
         n = len(scores or {})
         out.append(_check("req.rank_by", "requirements", "ok" if n else "fail", "Ranking",
                           f"by PoB-measured gain ({n} chains measured)" if n else
                           "rank_by 'measured' needs --scores with a chainscore run directory that has results"))
+    elif req.rank_by == "fitted":
+        m = chainfit.load()
+        out.append(_check("req.rank_by", "requirements", "ok" if m else "fail", "Ranking",
+                          f"by the score fitted to {m['n']} PoB-measured chains" if m else
+                          "rank_by 'fitted' needs a fitted model (python3 -m exilegen.builder.chainfit --scores <run dir>)"))
     ok_lvl = isinstance(req.online_by, int) and 0 <= req.online_by <= 100
     out.append(_check("req.leveling", "requirements", "ok" if ok_lvl else "fail", "Leveling",
                       (("ranked for leveling" if req.leveling else "off") +
@@ -273,8 +279,15 @@ def mechanics(cat: catmod.Catalog, req: Requirements, scores: dict | None = None
         pool = [c for c in pool if not (req.leveling and c["leveling"]["unobtainable"])
                 and not (req.online_by and c["leveling"]["online_level"] > req.online_by)]
     pool.sort(key=lambda c: (-c["score"], c["id"]))
+    model = chainfit.load()
     for rank, c in enumerate(pool):
         c["formula_rank"] = rank
+        sk = cat.skills.get(c["main_skill"]) or {}
+        c["main_damage_types"] = list(sk.get("damage_types") or [])
+        c["main_spell"] = "Spell" in (sk.get("types") or [])
+        c["main_minion"] = bool({"CreatesMinion", "Minion"} & set(sk.get("types") or []))
+        if model:
+            c["predicted"] = chainfit.predict(model, c)
         if scores and c["id"] in scores:
             c["measured"] = scores[c["id"]]
     if scores and req.rank_by == "measured":
@@ -285,6 +298,9 @@ def mechanics(cat: catmod.Catalog, req: Requirements, scores: dict | None = None
                 return (0, -m["gain_credited"])
             return (1, -(m or {}).get("dps", 0)) if m and m.get("built") else (2 if not m else 3, -c["score"])
         pool.sort(key=key)
+    elif model and req.rank_by == "fitted":
+        # the score fitted to PoB measurements: expected damage multiple of adding the chain
+        pool.sort(key=lambda c: (-c["predicted"]["score"], c["id"]))
     chains = [c for c in pool if _chain_ok(c, req, cat)][: req.top]
     ents = {k for c in chains for k in c["path"]}
     toks = {t for c in chains for t in c["tokens"]}
@@ -306,15 +322,12 @@ def mechanics(cat: catmod.Catalog, req: Requirements, scores: dict | None = None
         nodes.append({"id": "token:" + t, "kind": "token", "name": t.split(":", 1)[-1], "group": t.split(":", 1)[0],
                       "spec": round(g.spec.get(t, 0), 3)})
     for c in chains:
-        sk = cat.skills.get(c["main_skill"]) or {}
         c["path_tokens"] = ["token:" + t for t in c["tokens"]]
-        c["main_damage_types"] = list(sk.get("damage_types") or [])
-        c["main_spell"] = "Spell" in (sk.get("types") or [])
-        c["main_minion"] = bool({"CreatesMinion", "Minion"} & set(sk.get("types") or []))
     return {"nodes": nodes, "edges": edges, "chains": chains,
             "info": {**g.size(), "raw_chains": g.n_raw_chains, "pool": len(pool), "kept": len(chains),
                      **({"measured": chainresults.summary({k: v for k, v in scores.items() if k in {c["id"] for c in pool}}, len(pool))}
                         if scores else {}),
+                     **({"fitted": {"chains": model["n"], **model.get("held_out", {})}} if model else {}),
                      "by_kind": dict(Counter(c["kind"] for c in chains))}}
 
 
