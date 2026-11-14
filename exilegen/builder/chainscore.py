@@ -67,7 +67,7 @@ def _worker(wid: int, jobs, results, budget: int, seed: int):
                 else:
                     res = synthesize(sk, engine, scorer, budget=budget, seed=seed)
                     row.update(summary_row(res))
-                    row.update(skeleton_id=sk.id, unverified=bool((res.score or {}).get("unverified")),
+                    row.update(skeleton_id=sk.id, unverified=bool((res.score or {}).get("unverified")), code=res.code,
                                uniques=[u["name"] for u in sk.uniques])
             except Exception as e:
                 row.update(ok=False, error=f"{type(e).__name__}: {e}"[:300])
@@ -104,6 +104,94 @@ def _worker(wid: int, jobs, results, budget: int, seed: int):
                 pass
         row["seconds"] = round(time.time() - t0, 1)
         results.put(row)
+
+
+# ---------------------------------------------------------------------------------------------- states
+# The locked profiles turn no conditional state on, so a chain whose point is "X makes the state, Y pays off on it"
+# gets the cost of its parts and none of the payoff. This pass loads each finished build again and reads PoB's DPS
+# with the chain's states switched on: for the chain build (it makes the state) and for its baseline (to see what
+# the state alone is worth to a build without the payoff part). Tokens not listed here (crit, damage types,
+# minions, attributes, mana or life spent) are worked out by PoB itself and need no switch.
+STATE_CONFIG = {
+    "enemy:Frozen": {"conditionEnemyFrozen": True}, "enemy:Chilled": {"conditionEnemyChilled": True},
+    "enemy:Shocked": {"conditionEnemyShocked": True}, "enemy:Electrocuted": {"conditionEnemyElectrocuted": True},
+    "enemy:Ignited": {"conditionEnemyIgnited": True}, "enemy:Bleeding": {"conditionEnemyBleeding": True},
+    "enemy:Poisoned": {"conditionEnemyPoisoned": True}, "enemy:Stunned": {"conditionEnemyStunned": True},
+    "enemy:Cursed": {"conditionEnemyCursed": True}, "enemy:ArmourBroken": {"conditionEnemyArmourBroken": True},
+    "charge:Power": {"usePowerCharges": True}, "charge:Frenzy": {"useFrenzyCharges": True},
+    "charge:Endurance": {"useEnduranceCharges": True}, "rage": {"multiplierRage": 30},
+    "corpse": {"multiplierNearbyCorpse": 1, "conditionConsumedCorpseRecently": True},
+    "block": {"conditionBlockedRecently": True}, "flask": {"conditionUsingFlask": True},
+    "infusion": {"conditionInfusionConsumedRecently": True},
+}
+STATE_PROFILE = "pinnacle_v1"
+_ENGINE = None
+
+
+def state_vars(tokens: list[str]) -> dict:
+    out: dict = {}
+    for t in tokens or []:
+        out.update(STATE_CONFIG.get(t, {}))
+    return out
+
+
+def _set_vars(engine, values: dict) -> None:
+    lit = lambda v: "true" if v is True else "nil" if v is None else repr(v)
+    body = " ".join(f'ct.input["{k}"] = {lit(v)}' for k, v in values.items())
+    engine.lua('local ct = launch.main.modes["BUILD"].configTab ' + body +
+               ' ct:BuildModList() ct:BuildModList() EXG.state.dirty = true return "ok"')
+
+
+def _dps_pair(engine, code: str, values: dict) -> tuple[float, float]:
+    """PoB DPS of a build with the states off and on (raw PoB DPS under the locked pinnacle profile)."""
+    engine.ensure_loaded(code=code, profile=STATE_PROFILE)
+    off = engine.stats(fields=["dps"])["dps"]["best"]
+    _set_vars(engine, values)
+    try:
+        on = engine.stats(fields=["dps"])["dps"]["best"]
+    finally:
+        _set_vars(engine, {k: None for k in values})
+    return off, on
+
+
+def _state_job(job: dict) -> dict:
+    global _ENGINE
+    from exilegen.engine import Engine
+    out = {"id": job["id"], "vars": sorted(job["vars"])}
+    try:
+        if _ENGINE is None:
+            _ENGINE = Engine()
+        out["chain_off"], out["chain_on"] = _dps_pair(_ENGINE, job["code"], job["vars"])
+        if job.get("base_code"):
+            out["base_off"], out["base_on"] = _dps_pair(_ENGINE, job["base_code"], job["vars"])
+    except Exception as e:
+        out["error"] = f"{type(e).__name__}: {e}"[:200]
+        _ENGINE = None
+    return out
+
+
+def states(out: str, workers: int) -> None:
+    """Read PoB's DPS with each chain's states on, for the chain build and its baseline (states.jsonl)."""
+    spath = os.path.join(out, "states.jsonl")
+    done = {r["id"] for r in _read(spath)}
+    base = {r["base_key"]: r for r in _read(os.path.join(out, "baselines.jsonl"))}
+    pool = {c["id"]: c for c in pool_chains()}
+    jobs = []
+    for r in _read(os.path.join(out, "chain_scores.jsonl")):
+        if r["id"] in done or not r.get("code") or r["id"] not in pool:
+            continue
+        v = state_vars(pool[r["id"]]["tokens"])
+        if v:
+            jobs.append({"id": r["id"], "code": r["code"], "vars": v, "base_code": (base.get(r.get("base_key")) or {}).get("code")})
+    print(f"states: {len(jobs)} chains with a switchable state ({len(done)} already done)", flush=True)
+    if not jobs:
+        return
+    with mp.Pool(workers) as p, open(spath, "a") as f:
+        for i, res in enumerate(p.imap_unordered(_state_job, jobs), 1):
+            f.write(json.dumps(res) + "\n")
+            f.flush()
+            if i % 20 == 0:
+                print(f"states {i}/{len(jobs)}", flush=True)
 
 
 def _read(path: str) -> list[dict]:
@@ -243,6 +331,42 @@ def report(out: str) -> dict:
         for k in sorted({r["kind"] for r in gains}):
             gk = sorted(r["gain"] for r in gains if r["kind"] == k)
             rep["gain"]["by_kind"][k] = {"n": len(gk), "median": gk[len(gk) // 2], "better_by_10pct": sum(1 for x in gk if x >= 1.1)}
+        st = {r["id"]: r for r in _read(os.path.join(out, "states.jsonl")) if not r.get("error")}
+        cred, payoff = [], []
+        for r in gains:
+            x = st.get(r["id"])
+            if not x:
+                r["gain_credited"] = r["gain"]          # no switchable state: PoB already works the link out itself
+                continue
+            r["switched"] = True
+            if x.get("chain_off"):
+                r["state_lift"] = round(x["chain_on"] / x["chain_off"], 3)
+                r["gain_credited"] = round(r["gain"] * r["state_lift"], 3)
+                cred.append(r)
+                if x.get("base_off") and x.get("base_on"):
+                    r["base_state_lift"] = round(x["base_on"] / x["base_off"], 3)
+                    r["payoff"] = round(r["state_lift"] / r["base_state_lift"], 3)
+                    payoff.append(r)
+        gc = sorted(r["gain_credited"] for r in gains if r.get("gain_credited") is not None)
+        if gc:
+            rep["gain_credited"] = {
+                "note": "chain DPS with its own states on, over the baseline with them off (assumes the state is always up)",
+                "compared": len(gc), "median": gc[len(gc) // 2], "better_by_10pct": sum(1 for x in gc if x >= 1.1),
+                "worse_by_10pct": sum(1 for x in gc if x <= 0.9),
+                "with_switchable_state": len(cred), "state_changes_dps": sum(1 for r in cred if abs(r["state_lift"] - 1) > 0.01),
+                "payoff_beats_baseline": sum(1 for r in payoff if r["payoff"] >= 1.05), "payoff_compared": len(payoff),
+                "spearman_vs_gain_credited": {k: spearman([r[k] for r in gains if r.get(k) is not None and r.get("gain_credited") is not None],
+                                                          [r["gain_credited"] for r in gains if r.get(k) is not None and r.get("gain_credited") is not None])
+                                              for k in ("score", "score_raw", "fit", "novelty", "tempo")},
+                "by_kind": {}}
+            for k in sorted({r["kind"] for r in gains}):
+                gk = sorted(r["gain_credited"] for r in gains if r["kind"] == k and r.get("gain_credited") is not None)
+                if gk:
+                    rep["gain_credited"]["by_kind"][k] = {"n": len(gk), "median": gk[len(gk) // 2], "better_by_10pct": sum(1 for x in gk if x >= 1.1)}
+            rep["best_gain_credited"] = [{k: r.get(k) for k in ("main_name", "kind", "rank", "score", "gain", "gain_credited", "state_lift",
+                                                                 "base_state_lift", "payoff", "dps_honest", "base_dps", "feasible",
+                                                                 "uniques", "keystones", "asc_nodes", "thesis")}
+                                          for r in sorted((r for r in gains if r.get("gain_credited") is not None), key=lambda r: -r["gain_credited"])[:25]]
         rep["best_gain"] = [{k: r.get(k) for k in ("main_name", "kind", "rank", "score", "gain", "dps_honest", "base_dps", "feasible",
                                                    "uniques", "keystones", "asc_nodes", "thesis")}
                             for r in sorted(gains, key=lambda r: -r["gain"])[:20]]
@@ -265,6 +389,8 @@ def main(argv=None) -> int:
     a = ap.parse_args(argv)
     if not a.report:
         run(a.out, a.sample, a.workers, a.minutes, a.budget, a.seed, a.baseline)
+        if a.baseline:
+            states(a.out, a.workers)
     print(json.dumps(report(a.out), indent=1))
     return 0
 
