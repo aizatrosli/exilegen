@@ -139,7 +139,7 @@ def _set_vars(engine, values: dict) -> None:
     lit = lambda v: "true" if v is True else "nil" if v is None else repr(v)
     body = " ".join(f'ct.input["{k}"] = {lit(v)}' for k, v in values.items())
     engine.lua('local ct = launch.main.modes["BUILD"].configTab ' + body +
-               ' ct:BuildModList() ct:BuildModList() EXG.state.dirty = true return "ok"')
+               ' ct:BuildModList() ct:BuildModList() if EXG then EXG.state.dirty = true end return "ok"')
 
 
 def _dps_pair(engine, code: str, values: dict) -> tuple[float, float]:
