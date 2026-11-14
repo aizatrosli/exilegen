@@ -10,7 +10,7 @@
     python3 -m exilegen build-report --run-dir runs/NAME [--out-dir DIR] [--redescribe]
 
 --file F reads the code from a file: a bare share code, or JSON / JSONL with a "code" field (first line).
-Needs the engine: EXG_ENGINE_BIN (or engine/target) and EXG_POB_ROOT.
+Needs the engine: EXG_POB_ROOT plus pob-redux's pobctl (EXG_POBCTL) or exg-engine (EXG_ENGINE_BIN); see README.
 """
 from __future__ import annotations
 
