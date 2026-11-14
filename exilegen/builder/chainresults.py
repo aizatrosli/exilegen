@@ -6,6 +6,8 @@
 gain           chain DPS over its baseline's (same skill, ascendancy, weapon and defence without the chain)
 typical_dps    median DPS of the plain builds on the same main skill (feasible ones when any are), over typical_n builds
 gain_fair      chain DPS over the stronger of its own baseline and typical_dps, so one weak baseline cannot inflate it
+supports       support gems the search socketed on the main skill in the chain build; base_supports for the plain build
+main_granted   the main skill comes from an item, which the search does not give support gems
 thin           true when fewer than 3 plain builds exist for the skill: gain_fair then rests on little evidence
 state_lift     chain DPS with its own states switched on over the same build with them off
 gain_credited  gain_fair x state_lift: the chain credited for the state it produces (assumes it is always up)
@@ -13,12 +15,31 @@ payoff         state_lift over the baseline's: above 1 means the chain's payoff 
 """
 from __future__ import annotations
 
+import base64
 import json
 import os
+import xml.etree.ElementTree as ET
+import zlib
 
 
 def _read(path: str) -> list[dict]:
     return [json.loads(l) for l in open(path) if l.strip()] if os.path.exists(path) else []
+
+
+def supports(code: str | None, main_name: str | None) -> tuple[list[str], bool] | None:
+    """(support gems on the main skill's group, whether an item grants the skill), read from a PoB build code."""
+    if not code or not main_name:
+        return None
+    try:
+        root = ET.fromstring(zlib.decompress(base64.urlsafe_b64decode(code)))
+    except Exception:
+        return None
+    best = None
+    for sk in root.iter("Skill"):
+        names = [g.get("nameSpec") or "" for g in sk.findall("Gem")]
+        if main_name in names and (best is None or len(names) > len(best[0]) + 1):
+            best = ([n for n in names if n and n != main_name], bool(sk.get("source")))
+    return best
 
 
 def measured(out: str) -> dict[str, dict]:
@@ -42,6 +63,12 @@ def measured(out: str) -> dict[str, dict]:
         if r.get("error"):
             m["error"] = str(r["error"])[:120]
         b = base.get(r.get("base_key"))
+        sup = supports(r.get("code"), r.get("main_name"))
+        if sup:
+            m["supports"], m["main_granted"] = sup
+            bsup = supports(b.get("code"), b.get("main_name")) if b else None
+            if bsup:
+                m["base_supports"] = bsup[0]
         if dps > 0 and b and (b.get("dps_honest") or 0) > 0:
             m["base_dps"] = round(b["dps_honest"])
             m["gain"] = round(dps / b["dps_honest"], 3)
