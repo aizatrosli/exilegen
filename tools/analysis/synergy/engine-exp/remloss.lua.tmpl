@@ -1,0 +1,22 @@
+local dkjson = require("dkjson")
+local build = launch.main.modes["BUILD"]
+local calcs = build.calcsTab.calcs
+local g = build.skillsTab.socketGroupList[__G__]
+local function dps()
+  if wipeGlobalCache then wipeGlobalCache() end
+  local env = calcs.buildOutput(build, "MAIN"); local o = env.player.output
+  return math.max(o.CombinedDPS or 0, (o.Minion or {}).CombinedDPS or 0)
+end
+local base = dps()
+local rows = {}
+for i, gem in ipairs(g.gemList) do
+  local ge = gem.gemData and gem.gemData.grantedEffect
+  if ge and ge.support and gem.enabled ~= false then
+    gem.enabled = false; build.skillsTab:ProcessSocketGroup(g)
+    rows[#rows+1] = { idx = i, name = gem.gemData.name, id = gem.gemData.id, dps_without = dps() }
+    gem.enabled = true; build.skillsTab:ProcessSocketGroup(g)
+  end
+end
+if wipeGlobalCache then wipeGlobalCache() end
+build.calcsTab:BuildOutput()
+return dkjson.encode({ base = base, rows = setmetatable(rows, {__jsontype="array"}) })
