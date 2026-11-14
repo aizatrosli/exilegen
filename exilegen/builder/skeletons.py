@@ -122,6 +122,8 @@ class Generator:
         self.chains = chains if chains is not None else mechgraph.load_chains()
         self.weights = dict(DEFAULT_WEIGHTS, **(weights or {}))
         self.level, self.budget_tier = level, budget_tier
+        self.last_reject: str | None = None          # why the last assemble() returned None
+        self.reject_counts: dict[str, int] = {}
         self.mains = {s["id"]: s for s in self.cat.main_skill_candidates()}
         self.by_name: dict[str, dict] = {}
         for s in sorted(self.mains.values(), key=lambda x: (bool(x["granted_by"]) and not self._gem_ok(x), x["id"])):
@@ -344,16 +346,24 @@ class Generator:
         return opts[0] if rng.random() < 0.5 else opts[rng.randrange(len(opts))]
 
     # ---- assembly --------------------------------------------------------------------------------------------
+    def _reject(self, reason: str) -> None:
+        """Record why assemble() returned None (self.last_reject, self.reject_counts) and return None."""
+        self.last_reject = reason
+        key = reason.split(":")[0]
+        self.reject_counts[key] = self.reject_counts.get(key, 0) + 1
+        return None
+
     def assemble(self, rng: random.Random, main: str | dict, *, source: str, thesis: str, constraints=None,
                  uniques: list | None = None, keystones: list | None = None, asc: str | None = None,
                  asc_nodes: list | None = None, extra_skills: list | None = None, supports: list | None = None,
                  plan: str | None = None, meta: str | None = None, feeder: str | None = None,
                  weapon: str | None = None, defence: str | None = None, parent: str | None = None,
                  extra_tags: dict | None = None, asc_mode: str = "prior") -> Skeleton | None:
+        self.last_reject = None
         s = main if isinstance(main, dict) else (self.mains.get(main) or self.by_name.get(str(main).lower())
                                                  or self.cat.skill(str(main)))
         if not s or s["id"] not in self.mains:
-            return None
+            return self._reject("main skill is not a known main skill")
         cons = _parse_constraints(constraints)
         uniques = list(dict.fromkeys(u["name"] if isinstance(u, dict) else u for u in (uniques or [])))
         roles = {u["name"]: u.get("role", "") for u in (uniques or []) if isinstance(u, dict)}
@@ -367,7 +377,7 @@ class Generator:
             if c.type == "require_unique" and c.arg in self.cat.uniques and c.arg not in uniques:
                 uniques.append(c.arg)
             if c.type == "forbid_unique" and c.arg in uniques:
-                return None
+                return self._reject("a required unique is forbidden")
         if len(uniques) > 3:
             uniques = uniques[:3]
         keystones = sorted(set(keystones or []))
@@ -375,29 +385,29 @@ class Generator:
             if c.type == "require_keystone" and c.arg in self.cat.keystones and c.arg not in keystones:
                 keystones.append(c.arg)
             if c.type == "forbid_keystone" and c.arg in keystones:
-                return None
+                return self._reject("a required keystone is forbidden")
         if any(pair <= set(keystones) for pair in KEYSTONE_CONFLICT):
-            return None
+            return self._reject("conflicting keystones")
         # ascendancy / class
         asc_nodes = list(asc_nodes or [])
         if s.get("asc_granted"):
             ga, gn = s["asc_granted"][0]
             if asc and asc != ga:
-                return None
+                return self._reject("main skill ascendancy differs from the requested one")
             asc = ga
             if gn not in asc_nodes:
                 asc_nodes.append(gn)
         asc = asc or self._pick_asc(rng, s, asc_mode)
         cls = self.cat.class_of(asc)
         if not cls:
-            return None
+            return self._reject("ascendancy has no class")
         valid_nodes = {n["name"] for n in self.cat.ascendancies[asc]["notables"]}
         if any(n not in valid_nodes for n in asc_nodes):
-            return None
+            return self._reject("ascendancy node not in the ascendancy")
         # activation plan
         plans = self._plans(s, cons, uniques)
         if not plans:
-            return None
+            return self._reject("no activation plan fits the constraints")
         if plan not in plans:
             ctypes = {c.type for c in cons}
             if "one_button" in ctypes or "no_cast" in ctypes:
@@ -428,10 +438,10 @@ class Generator:
                                       no_spell_feeder, elemental=meta == "MetaCastOnElementalAilmentPlayer")
                     if fd and "Attack" in fd["types"] and fd["weapon_types"] and not catmod.weapon_ok(fd, weapon):
                         if any(self.cat.uniques[u]["slot"] == "Weapon 1" for u in uniques):
-                            return None
+                            return self._reject("meta feeder needs a weapon the weapon unique forbids")
                         weapon = next((w for w in fd["weapon_types"] if w != "None"), weapon)
                 if fd is None:
-                    return None
+                    return self._reject("no feeder for the meta trigger")
                 trigger["feeder"] = fd["id"]
                 trigger["feeder_name"] = fd["name"]
             elif meta == "MetaCastOnMinionDeathPlayer":
@@ -457,23 +467,23 @@ class Generator:
             fk = info.get("feeder_kind", "hit")
             if fk != "none":
                 if fk == "spell" and no_spell_feeder:
-                    return None
+                    return self._reject("spell feeder needed under no_cast")
                 fd = self._feeder(rng, "spell" if fk == "spell" else ("attack" if no_spell_feeder or fk == "weapon_attack"
                                                                       else "any"), weapon, no_spell_feeder)
                 if fd is None:
-                    return None
+                    return self._reject("no feeder for the inbuilt trigger")
                 if "Attack" in fd["types"] and not catmod.weapon_ok(fd, weapon):
-                    return None
+                    return self._reject("feeder attack cannot use the weapon")
                 trigger["feeder"], trigger["feeder_name"] = fd["id"], fd["name"]
         if len(uniques) > 3:
-            return None
+            return self._reject("more than 3 uniques")
         if not self._uniques_ok(uniques, weapon, s):
-            return None
+            return self._reject("uniques do not fit the weapon or slots")
         if trigger and trigger.get("offhand") == "Shield" and weapon in TWO_HANDED:
-            return None
+            return self._reject("shield trigger with a two-handed weapon")
         defence = defence or self._defence(rng, cls, keystones, uniques)
         if any(defence in DEFENCE_CONFLICT.get(k, set()) for k in keystones):
-            return None
+            return self._reject("defence conflicts with a keystone")
         primary = (s["damage_types"] or ["Physical"])[0] if s["damage_types"] else ("Minion" if "Minion" in s["types"] else "Physical")
         tags = {"activation": plan, "main_skill_name": s["name"], "damage_types": s["damage_types"],
                 "primary_damage": primary, "spell": "Spell" in s["types"], "attack": "Attack" in s["types"],
@@ -486,7 +496,7 @@ class Generator:
                       ascendancy_nodes=sorted(asc_nodes), defence=defence, budget_tier=self.budget_tier,
                       source=source, thesis=thesis, parent=parent, tags=tags)
         if self.violations(sk, constraints):
-            return None
+            return self._reject("static violations: " + "; ".join(self.violations(sk, constraints)))
         sk.tags["cell"] = cell_key(sk)
         sk.id = skeleton_id(sk)
         return sk

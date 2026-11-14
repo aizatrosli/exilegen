@@ -145,3 +145,14 @@ def test_skeleton_roundtrip(gen):
     s = gen.generate(1, seed=0)[0]
     s2 = Skeleton(**s.to_dict())
     assert skeleton_id(s2) == s.id
+
+
+def test_assemble_records_reject_reason(gen):
+    import random
+    assert gen.assemble(random.Random(0), "NotASkillAtAll", source="test", thesis="t") is None
+    assert gen.last_reject == "main skill is not a known main skill"
+    assert gen.reject_counts.get("main skill is not a known main skill", 0) >= 1
+    main = next(iter(gen.mains))
+    sk = gen.assemble(random.Random(0), main, source="test", thesis="t")
+    if sk is not None:
+        assert gen.last_reject is None

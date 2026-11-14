@@ -23,7 +23,8 @@ Steps (each logged into BuildResult.notes; an impossible step ends with ok=False
   7. gear    bridge optimise_gear (greedy affixes per slot, uniques kept) with weights derived from the
              scorer's objective; every proposal is equipped, kept only if the Scorer agrees.
   8. polish  SupportStep -> TriggerStep (if Meta+Triggers groups) -> TreeStep warm -> SupportStep, each
-             rolled back if it ends worse than it started, within the remaining budget.
+             rolled back if it ends worse than it started, within the remaining budget. The cycle repeats
+             (up to POLISH_CYCLES) until one gains < 1%.
   9. final   score (absolute floors: no baseline), export code, stats, skills, evals, seconds.
 
 Budget: engine evaluations (Context.evals), split over sockets / ascendancy / tree / polish.
@@ -47,6 +48,7 @@ from .gear import GearPlanner, weapon_spec
 
 DEFAULT_PROFILES = ["pinnacle_v1", "mapping_v1"]
 POLISH = ("supports", "triggers", "tree_warm", "supports")
+POLISH_CYCLES = 3                # repeat POLISH until a cycle gains < 1% (pipeline.CYCLE_MIN_GAIN)
 # share of the evaluation budget per phase (the rest goes to the polish steps)
 SHARE = {"sockets": 0.15, "ascendancy": 0.04, "tree": 0.36}
 
@@ -109,13 +111,14 @@ def _short(r: dict | None) -> str:
 
 class _Synth:
     def __init__(self, sk: Skeleton, engine, scorer, budget: int, log_fn=None, gear_optimise: bool = True,
-                 polish=POLISH, seed: int = 0):
+                 polish=POLISH, seed: int = 0, polish_cycles: int = POLISH_CYCLES):
         self.sk, self.e, self.budget, self.seed = sk, engine, int(budget), seed
         self.scorer = make_scorer(scorer, constraints=list(getattr(sk, "constraints", None) or []))
         self.profiles = list(self.scorer.profile_list)
         self.log_fn = log_fn
         self.gear_optimise = gear_optimise
         self.polish = list(polish or ())
+        self.polish_cycles = polish_cycles
         self.notes: list[str] = []
         self.ctx: Context | None = None
         self.main_ref: dict | None = None      # {group, skill}
@@ -708,24 +711,39 @@ class _Synth:
         return r
 
     def polish_steps(self):
-        from exilegen.optimise.pipeline import make_step
+        """Repeat the polish steps until a whole cycle gains < CYCLE_MIN_GAIN (as the pipeline does), so
+        a tree change can unlock a better support and vice versa. The first cycle gets about half the
+        polish budget; budget a step does not use carries over to the next cycle."""
+        from exilegen.optimise.pipeline import CYCLE_MIN_GAIN, _gain, make_step
         ctx = self.ctx
-        todo = [s for s in self.polish if s != "triggers" or has_meta_groups(ctx.skills())]
-        for i, name in enumerate(todo):
-            left = ctx.budget_left()
-            if left <= 50:
-                self.note(f"budget exhausted before {name}")
+        for cyc in range(max(1, self.polish_cycles)):
+            if ctx.budget_left() <= 50:
+                if cyc == 0:
+                    self.note("budget exhausted before polish")
                 break
-            share = max(50, left // (len(todo) - i))
-            step = make_step(name, self.seed, share if name.startswith("tree") else None, self.notes)
-            if step is None:
-                continue
-            if hasattr(step, "verbose"):
-                step.verbose = False
-            r = self._run(step, share)
-            rb = any("rolled back" in str(n) for n in r.notes)
-            self.note(f"{name}: {'rolled back' if rb else ('improved' if r.improved else 'no gain')}, "
-                      f"{r.evals} evals, {r.seconds:.0f}s -> {_short(ctx.current)}")
+            c0 = ctx.current
+            todo = [s for s in self.polish if s != "triggers" or has_meta_groups(ctx.skills())]
+            last = cyc == self.polish_cycles - 1
+            planned = len(todo) * (1 if last else 2)          # this cycle's steps + an equal reserve
+            for i, name in enumerate(todo):
+                left = ctx.budget_left()
+                if left <= 50:
+                    self.note(f"budget exhausted before {name}")
+                    break
+                share = max(50, left // max(1, planned - i))
+                step = make_step(name, None if self.seed is None else self.seed + cyc, share if name.startswith("tree") else None, self.notes)
+                if step is None:
+                    continue
+                if hasattr(step, "verbose"):
+                    step.verbose = False
+                r = self._run(step, share)
+                rb = any("rolled back" in str(n) for n in r.notes)
+                self.note(f"{name}: {'rolled back' if rb else ('improved' if r.improved else 'no gain')}, "
+                          f"{r.evals} evals, {r.seconds:.0f}s -> {_short(ctx.current)}")
+            g = _gain(c0, ctx.current)
+            self.note(f"polish cycle {cyc + 1}: gain {g:.2%}")
+            if g < CYCLE_MIN_GAIN:
+                break
 
     # ------------------------------------------------------------------ run
     def run(self) -> BuildResult:
@@ -776,12 +794,13 @@ class _Synth:
 
 
 def synthesize(skeleton: Skeleton, engine: Any, scorer: Any = None, budget: int = 6000, log_fn=None,
-               gear_optimise: bool = True, polish=POLISH, seed: int = 0) -> BuildResult:
+               gear_optimise: bool = True, polish=POLISH, seed: int = 0,
+               polish_cycles: int = POLISH_CYCLES) -> BuildResult:
     """contracts.Synthesizer: build `skeleton` from nothing in `engine`, judged by `scorer` (default:
     pinnacle_v1 + mapping_v1, DEFAULT_FLOORS, no constraints). Never raises for a bad skeleton: the result
     has ok=False and error set. `budget` is in engine evaluations."""
     return _Synth(skeleton, engine, scorer, budget, log_fn=log_fn, gear_optimise=gear_optimise,
-                  polish=polish, seed=seed).run()
+                  polish=polish, seed=seed, polish_cycles=polish_cycles).run()
 
 
 def summary_row(res: BuildResult) -> dict:

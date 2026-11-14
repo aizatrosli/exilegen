@@ -256,7 +256,8 @@ class Runner:
                 "evals": self.counts["evals"], "cells_feasible": a["cells_feasible"],
                 "cells_verified": a["cells_verified"], "qd_score": a["qd_score"], "best": a["best"],
                 "bandit": {k: round(self.bandit.rate(k), 3) for k in self.bandit.arms},
-                "counts": self.counts}
+                "counts": self.counts,
+                "skeleton_rejects": dict(getattr(self.generator, "reject_counts", None) or {})}
         tmp = os.path.join(self.run_dir, "progress.json.tmp")
         with open(tmp, "w") as f:
             json.dump(prog, f, indent=1, default=str)
