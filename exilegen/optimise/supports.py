@@ -88,8 +88,10 @@ class SupportStep:
         view = self.eng.skills()
         self.fields = self._fields(ctx.fields, view)
         cur = self._state(view)
-        self.base_stats = ctx.baseline_stats if ctx.baseline_stats is not None else \
-            {p: {k: v for k, v in d.items() if k != "marginals"} for p, d in cur.stats.items()}
+        # Judge floors exactly as the caller's Context does: its baseline when it has one (relative
+        # floors), otherwise absolute floors. Baselining on this step's own start relaxed EHP/max-hit/res
+        # floors to "no worse than start", so synth's absolute guard rolled most support moves back.
+        self.base_stats = ctx.baseline_stats
         cur = _State(cur.stats, cur.view, self._score(cur.stats, cur.view))
         self.cur = cur
         start = cur.res
@@ -168,7 +170,7 @@ class SupportStep:
         out = []
         for g in cand:
             gg = gs.get(g)
-            if g is None or g in out or not gg or gg.get("enabled") is False or gg.get("grantedBy"):
+            if g is None or g in out or not gg or gg.get("enabled") is False or gg.get("noSupports"):
                 continue
             out.append(g)
         return out

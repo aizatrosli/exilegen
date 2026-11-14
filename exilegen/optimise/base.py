@@ -158,6 +158,19 @@ def _nviol(r: dict) -> int:
     return len({(v.get("rule"), v.get("entry")) for v in r.get("violations") or []})
 
 
+def violation_size(r: dict) -> float:
+    """Total size of a result's violations: each distinct (rule, entry) counts its worst normalised
+    shortfall across profiles (floors carry one; a constraint or a floor without one counts 1.0).
+    A build 5 resistance short is nearly feasible; one with no chaos res and no EHP is not."""
+    worst: dict = {}
+    for v in r.get("violations") or []:
+        k = (v.get("rule"), v.get("entry"))
+        sf = v.get("shortfall")
+        sf = 1.0 if sf is None else max(float(sf), 1e-3)     # a failed floor is never "free"
+        worst[k] = max(worst.get(k, 0.0), sf)
+    return sum(worst.values())
+
+
 @dataclass
 class Context:
     engine: Any                      # exilegen.engine.Engine with the build loaded
@@ -363,7 +376,10 @@ class Context:
         if fa != fb:
             return fa
         if not fa:
-            # both infeasible: fewer violations first (a step must not trade one violation for two)
+            # both infeasible: fewer violations first (a step must not trade one violation for two).
+            # Ranking by violation_size() instead was tried on a 16-skeleton A/B: it made every small
+            # defence gain beat any DPS gain, lowered DPS on infeasible builds and won no extra useful
+            # feasible builds, so size is reported (violation_size) but does not rank.
             va, vb = _nviol(a), _nviol(b)
             if va != vb:
                 return va < vb

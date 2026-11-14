@@ -148,7 +148,7 @@ class Scorer:
                     flags.append(f"unverified:floor_unknown:{r['id']}")
             elif not r["passed"]:
                 if r["tier"] == "hard":
-                    violations.append({"rule": "floor", "entry": r["id"], "detail":
+                    violations.append({"rule": "floor", "entry": r["id"], "shortfall": r.get("shortfall", 1.0), "detail":
                                        f"{r['metric']}={_fmt(r['value'])} vs {r['threshold']}" +
                                        (f" (baseline {_fmt(r['baseline'])})" if r["baseline"] is not None else "")})
                 else:

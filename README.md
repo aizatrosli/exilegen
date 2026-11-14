@@ -41,7 +41,16 @@ Each PoB engine needs about 1 GB of RAM. 4 engines evaluate about 50 builds/min.
 
 `exilegen/` is the optimiser package: `engine.py` (one PoB engine per process, see `engine/API.md`),
 `scoring/` (honest DPS, floors, constraints, see `exilegen/scoring/README.md`) and `optimise/` (steps and
-pipeline). Set `EXG_ENGINE_BIN` (the built `exg-engine`) and `EXG_POB_ROOT` (PoB-PoE2 data).
+pipeline). Set `EXG_POB_ROOT` (PoB-PoE2 data) and one engine backend:
+
+- **pobctl (preferred):** pob-redux's `pobctl serve`, which serves the same ops as `search_*` bridge methods
+  (pob-redux `crates/pob-engine/SEARCH_API.md`). Build it with `cargo build --release -p pob-engine --bin pobctl`
+  in pob-redux. It is found at `$EXG_POBCTL`, `$CARGO_TARGET_DIR/release/pobctl` or
+  `../pob-redux/target/release/pobctl`. It keeps path-free tree nodes (Intuitive Leap-like sources) that
+  `exg-engine` prunes, and its snapshots also undo item changes.
+- **exg:** the older `exg-engine` in `engine/` (`EXG_ENGINE_BIN`), kept as a fallback.
+
+`EXG_BACKEND=pobctl|exg|auto` picks one; `auto` (the default) uses pobctl when it is found.
 
 ```bash
 python3 -m exilegen optimise --code CODE --constraint one_button [--profile pinnacle_v1 --profile mapping_v1] \

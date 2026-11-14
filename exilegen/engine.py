@@ -1,4 +1,8 @@
-"""Python client for exg-engine (one PoB-PoE2 engine over stdin/stdout JSON lines).
+"""Python client for one headless PoB-PoE2 engine over stdin/stdout JSON lines.
+
+Two backends speak the same ops:
+  pobctl   pob-redux's `pobctl serve --workers 1` with its `search_*` bridge methods (preferred)
+  exg      exilegen's own exg-engine (engine/) running lua/exg.lua
 
     from exilegen.engine import Engine, EnginePool
     with Engine() as e:
@@ -9,7 +13,9 @@
 The op contract is documented in engine/API.md.
 
 Locating things (first match wins):
-  binary    Engine(binary=...), $EXG_ENGINE_BIN, $CARGO_TARGET_DIR/release/exg-engine,
+  backend   Engine(backend=...), $EXG_BACKEND ("pobctl" | "exg" | "auto"); auto = pobctl when found
+  pobctl    $EXG_POBCTL, $CARGO_TARGET_DIR/release/pobctl, <repo>/../pob-redux/target/release/pobctl
+  exg       Engine(binary=...), $EXG_ENGINE_BIN, $CARGO_TARGET_DIR/release/exg-engine,
             <repo>/engine/target/release/exg-engine
   PoB data  Engine(pob_root=...), $EXG_POB_ROOT, $POB_ROOT
   state     Engine(state=...), $EXG_STATE, <tmp>/exg-engine   (PoB user dir + compiled Lua cache)
@@ -31,7 +37,8 @@ REPO = os.path.dirname(PKG)
 LUA_PATH = os.path.join(PKG, "lua", "exg.lua")
 PROFILES_PATH = os.path.join(PKG, "data", "profiles.json")
 
-__all__ = ["Engine", "EnginePool", "EngineError", "EngineCrash", "find_binary", "find_pob_root", "code_hash"]
+__all__ = ["Engine", "EnginePool", "EngineError", "EngineCrash", "find_binary", "find_exg", "find_pobctl",
+           "find_pob_root", "code_hash"]
 
 
 class EngineError(RuntimeError):
@@ -47,7 +54,33 @@ def code_hash(code: str) -> str:
     return hashlib.sha256(code.strip().encode()).hexdigest()[:32]
 
 
-def find_binary(explicit: str | None = None) -> str | None:
+def _exe(c: str | None) -> bool:
+    return bool(c) and os.path.isfile(c) and os.access(c, os.X_OK)
+
+
+def find_pobctl(explicit: str | None = None) -> str | None:
+    cands = [explicit, os.environ.get("EXG_POBCTL")]
+    if os.environ.get("CARGO_TARGET_DIR"):
+        cands.append(os.path.join(os.environ["CARGO_TARGET_DIR"], "release", "pobctl"))
+    cands.append(os.path.join(os.path.dirname(REPO), "pob-redux", "target", "release", "pobctl"))
+    return next((c for c in cands if _exe(c)), None)
+
+
+def _backend(explicit: str | None = None) -> str:
+    b = (explicit or os.environ.get("EXG_BACKEND") or "auto").lower()
+    if b not in ("auto", "pobctl", "exg"):
+        raise ValueError(f"unknown engine backend {b!r} (pobctl | exg | auto)")
+    if b == "auto":
+        b = "pobctl" if find_pobctl() else "exg"
+    return b
+
+
+def find_binary(explicit: str | None = None, backend: str | None = None) -> str | None:
+    """The engine binary for the chosen backend (see module doc)."""
+    return find_pobctl(explicit) if _backend(backend) == "pobctl" else find_exg(explicit)
+
+
+def find_exg(explicit: str | None = None) -> str | None:
     cands = [explicit, os.environ.get("EXG_ENGINE_BIN")]
     if os.environ.get("CARGO_TARGET_DIR"):
         cands.append(os.path.join(os.environ["CARGO_TARGET_DIR"], "release", "exg-engine"))
@@ -69,16 +102,40 @@ def find_pob_root(explicit: str | None = None) -> str | None:
 _READ_ONLY = {"stats", "skills", "valid_supports", "tree", "whatif", "whatif_many", "export", "export_xml",
               "summary", "profiles", "ping", "gc"}
 
+# exg ops served by pob-redux bridge methods of another name; the rest become "search_<op>"
+_POBCTL_CTL = {"ping": "ping", "gc": "gc", "quit": "shutdown"}
+
+
+def _pobctl_request(req: dict) -> dict:
+    """exg request -> pobctl serve request (SEARCH_API.md in pob-redux)."""
+    if "m" in req or "ctl" in req or "lua" in req:
+        return req
+    p = json.loads(json.dumps(req))  # deep copy: gem fixes below must not touch the caller's dicts
+    op = p.pop("op")
+    out = {"timeout": p.pop("timeout")} if "timeout" in p else {}
+    if op in _POBCTL_CTL:
+        return dict(out, ctl=_POBCTL_CTL[op])
+    if op == "lua":
+        return dict(out, lua=p["chunk"])
+    for v in [p, *p.get("variants", [])]:
+        for g in v.get("gem_changes") or []:
+            if "gem" in g and g["gem"] is None:  # JSON null reaches Lua as nil
+                g["gem"] = False
+    return dict(out, m="search_" + op, p=p)
+
 
 class Engine:
     """One exg-engine process. Not thread-safe: use one Engine per thread (see EnginePool)."""
 
     def __init__(self, binary: str | None = None, pob_root: str | None = None, state: str | None = None,
                  timeout: float = 120.0, lua: str | None = LUA_PATH, profiles: str | None = PROFILES_PATH,
-                 stderr: str | None = None, start: bool = True):
-        self.binary = find_binary(binary)
+                 stderr: str | None = None, start: bool = True, backend: str | None = None):
+        self.backend = _backend(backend)
+        self.binary = find_binary(binary, self.backend)
         if not self.binary:
-            raise FileNotFoundError("exg-engine binary not found (set EXG_ENGINE_BIN or build engine/)")
+            raise FileNotFoundError(
+                "pobctl not found (set EXG_POBCTL or build pob-redux)" if self.backend == "pobctl"
+                else "exg-engine binary not found (set EXG_ENGINE_BIN or build engine/)")
         self.pob_root = find_pob_root(pob_root)
         if not self.pob_root:
             raise FileNotFoundError("PoB data root not found (set EXG_POB_ROOT)")
@@ -103,16 +160,24 @@ class Engine:
     # ------------------------------------------------------------------ process
     def start(self) -> dict:
         os.makedirs(self.state, exist_ok=True)
-        cmd = [self.binary, "--pob-root", self.pob_root, "--state", self.state, "--timeout", str(self.timeout)]
-        if self.lua_path:
-            cmd += ["--lua", self.lua_path]
-        if self.profiles_path:
-            cmd += ["--profiles", self.profiles_path]
+        if self.backend == "pobctl":
+            # search.lua and its profiles ship inside pob-redux; lua/profiles paths are exg-only
+            cmd = [self.binary, "--pob-root", self.pob_root, "--user-dir", os.path.join(self.state, "user"),
+                   "--cache-dir", os.path.join(self.state, "cache"),
+                   "serve", "--workers", "1", "--timeout", str(int(max(1, self.timeout)))]
+        else:
+            cmd = [self.binary, "--pob-root", self.pob_root, "--state", self.state, "--timeout", str(self.timeout)]
+            if self.lua_path:
+                cmd += ["--lua", self.lua_path]
+            if self.profiles_path:
+                cmd += ["--profiles", self.profiles_path]
         err = open(self.stderr_path, "ab") if self.stderr_path else subprocess.DEVNULL
         self.proc = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=err, bufsize=0)
         self._lines = queue.Queue()
         threading.Thread(target=self._reader, args=(self.proc, self._lines), daemon=True).start()
         r = self._read(self.timeout + 60)
+        if "ready" in r:  # pobctl serve
+            r = {"ok": r["ready"], "err": r.get("err"), "r": dict(r, backend="pobctl")}
         if not r.get("ok"):
             self.kill()
             raise EngineError(f"engine failed to start: {r.get('err')}")
@@ -151,7 +216,7 @@ class Engine:
     def close(self) -> None:
         if self.proc and self.proc.poll() is None:
             try:
-                self.proc.stdin.write(b'{"op":"quit"}\n')
+                self.proc.stdin.write(b'{"ctl":"shutdown"}\n' if self.backend == "pobctl" else b'{"op":"quit"}\n')
                 self.proc.stdin.flush()
                 self.proc.wait(10)
             except Exception:
@@ -174,12 +239,17 @@ class Engine:
         t = timeout or self.timeout
         if timeout:
             req = dict(req, timeout=timeout)
+        if self.backend == "pobctl":
+            req = _pobctl_request(req)
         try:
             self.proc.stdin.write((json.dumps(req) + "\n").encode())
             self.proc.stdin.flush()
         except (BrokenPipeError, OSError) as e:
             return {"ok": False, "err": f"engine pipe closed: {e}", "fatal": True}
-        return self._read(t + 30)
+        r = self._read(t + 30)
+        if r.get("restarted"):  # pobctl killed and restarted the worker: its build is gone
+            r["fatal"] = True
+        return r
 
     def _restart_and_reload(self) -> None:
         self.kill()
