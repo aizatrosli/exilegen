@@ -133,3 +133,17 @@ def test_measured_results_rank_and_attach(cat, tmp_path):
     ranked = graphx.run({"top": 30, "rank_by": "measured"}, cat=cat, scores_dir=str(tmp_path))["mechanics"]["chains"]
     assert [c["id"] for c in ranked[:2]] == [ids[20], ids[3]]
     assert not graphx.run({"rank_by": "measured"}, cat=cat)["passed"]
+
+
+def test_chainfit_bias_is_not_shrunk_and_unseen_columns_do_not_break_the_fit():
+    from exilegen.builder import chainfit
+    chains = [{"id": f"c{i}", "kind": "enabler" if i % 2 else "graft", "main_skill": f"s{i % 7}", "length": 2,
+               "asc_nodes": [["A", "x"]] if i < 5 else [], "fit": 0.5, "novelty": 0.5, "score": 0.3} for i in range(40)]
+    # the first vocabulary entry ("asc:A:x" sorts before "bias") only occurs on chains with no gain
+    measured = {c["id"]: ({"built": False} if i < 5 else {"built": True, "gain_credited": 2.0 if i % 2 else 0.5})
+                for i, c in enumerate(chains)}
+    model = chainfit.fit(chains, measured, lam=1.0)
+    assert model["vocab"][0] != "bias"
+    hi = chainfit.predict(model, chains[7])["gain"]
+    lo = chainfit.predict(model, chains[8])["gain"]
+    assert hi > 1.5 and lo < 0.7

@@ -66,10 +66,10 @@ def _vocab(rows: list[dict[str, float]]) -> list[str]:
     return sorted(k for k, n in seen.items() if k in _DENSE or n >= MIN_SEEN)
 
 
-def _ridge(X, y, lam: float):
+def _ridge(X, y, lam: float, bias: int):
     import numpy as np
     reg = lam * np.eye(X.shape[1])
-    reg[0, 0] = 0.0   # the bias is not shrunk
+    reg[bias, bias] = 0.0   # the bias is not shrunk
     return np.linalg.solve(X.T @ X + reg, X.T @ y)
 
 
@@ -103,9 +103,10 @@ def fit(chains: list[dict], measured: dict[str, dict], lam: float = 3.0) -> dict
     rows = [features(c) for c, _, _ in data]
     vocab = _vocab(rows)
     X = _matrix(rows, vocab)
-    w_works = _ridge(X, np.array([w for _, w, _ in data]), lam)
+    bias = vocab.index("bias")
+    w_works = _ridge(X, np.array([w for _, w, _ in data]), lam, bias)
     has = [i for i, (_, _, g) in enumerate(data) if g is not None]
-    w_gain = _ridge(X[has], np.array([data[i][2] for i in has]), lam)
+    w_gain = _ridge(X[has], np.array([data[i][2] for i in has]), lam, bias)
     return {"version": 1, "lam": lam, "n": len(data), "n_gain": len(has), "vocab": vocab,
             "works": [round(float(x), 5) for x in w_works], "gain": [round(float(x), 5) for x in w_gain]}
 
