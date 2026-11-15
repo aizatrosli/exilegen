@@ -97,6 +97,9 @@ def main(argv=None) -> int:
     pb.add_argument("--budget", type=int, default=6000, help="engine evaluations per skeleton (synth budget)")
     pb.add_argument("--job-timeout", type=float, default=600.0, help="seconds per skeleton before the engine is killed")
     pb.add_argument("--seed", type=int, default=0)
+    pb.add_argument("--halving", action="store_true",
+                    help="successive halving: a cheap first pass per skeleton, full budget for the top third (off by "
+                         "default: it lost coverage in a 25-minute A/B, see Runner)")
     pb.add_argument("--report-every", type=float, default=300.0, help="seconds between report rewrites")
     pb.add_argument("-v", "--verbose", action="store_true", help="log each job to stderr")
     pr = sub.add_parser("build-report", help="write report.md + builds.csv for a build run directory")
@@ -110,6 +113,7 @@ def main(argv=None) -> int:
         r = Runner(args.run_dir, constraints=args.constraint, profiles=args.profile or None, workers=args.workers,
                    minutes=args.minutes, max_evals=args.max_evals, max_jobs=args.max_jobs, budget=args.budget,
                    job_timeout=args.job_timeout, seed=args.seed, report_every=args.report_every,
+                   halving=args.halving,
                    log=(lambda m: print(m, file=sys.stderr, flush=True)) if args.verbose else None).run()
         a = r["archive"]
         print(f"run {args.run_dir}: {r['jobs']} jobs ({r['jobs_per_hour']:.0f}/h), {r['failed']} failed,"

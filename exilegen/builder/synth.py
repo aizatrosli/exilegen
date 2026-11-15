@@ -111,7 +111,8 @@ def _short(r: dict | None) -> str:
 
 class _Synth:
     def __init__(self, sk: Skeleton, engine, scorer, budget: int, log_fn=None, gear_optimise: bool = True,
-                 polish=POLISH, seed: int = 0, polish_cycles: int = POLISH_CYCLES, unique_trial: str = "on"):
+                 polish=POLISH, seed: int = 0, polish_cycles: int = POLISH_CYCLES, unique_trial: str = "on",
+                 seed_code: str | None = None):
         self.sk, self.e, self.budget, self.seed = sk, engine, int(budget), seed
         self.scorer = make_scorer(scorer, constraints=list(getattr(sk, "constraints", None) or []))
         self.profiles = list(self.scorer.profile_list)
@@ -120,6 +121,7 @@ class _Synth:
         self.polish = list(polish or ())
         self.polish_cycles = polish_cycles
         self.unique_trial = unique_trial       # "on" | "off"
+        self.seed_code = seed_code             # a related build (a mutation's parent) whose tree seeds ours
         self.trials: list[dict] = []
         self.notes: list[str] = []
         self.ctx: Context | None = None
@@ -665,8 +667,11 @@ class _Synth:
         avail = int(pts.get("available") or 0)
         alloc = e.tree(frontier=False).get("allocated") or []
         share = max(300, int(self.budget * SHARE["tree"]))
+        seed_tree = self._seed_tree()
+        if seed_tree:
+            share = max(300, share // 2)       # repairing a parent's tree needs less than growing one
         step = TreeStep(mode="scratch", max_evals=share, pins=pins, extra_points=max(0, avail - len(alloc)),
-                        seed=self.seed, verbose=False)
+                        seed=self.seed, verbose=False, seed_tree=seed_tree)
         r = self._run(step, share)
         rep = getattr(step, "report", None) or {}
         cand = rep.get("candidate") or {}
@@ -682,6 +687,29 @@ class _Synth:
                           f"({len(S)} nodes)")
         self.note(f"tree scratch: {avail} points, {r.evals} evals, {r.seconds:.0f}s -> {_short(ctx.current)}"
                   + (f" [{'; '.join(str(n) for n in r.notes[:2])}]" if r.notes and not r.improved else ""))
+
+    def _seed_tree(self) -> dict | None:
+        """Main-tree nodes and attribute choices of seed_code (the caller passes one of the same class),
+        read by loading it and then restoring the current build."""
+        if not self.seed_code:
+            return None
+        e, tv = self.e, None
+        c = e.raw("save_build_code", {})
+        cur = c.get("code") if isinstance(c, dict) else c
+        try:
+            e.load(code=self.seed_code, profile=self.profiles[0])
+            tv = e.tree(frontier=False, ascendancy=False)
+        except Exception as ex:          # noqa: BLE001 - no seed: grow from scratch
+            self.note(f"seed tree: could not read the parent build: {str(ex)[:120]}")
+        finally:
+            e.load(code=cur, profile=self.profiles[0], main=dict(self.main_ref))
+            self.ctx._skills = None
+            self.ctx.refresh()
+        nodes = [int(v) for v in (tv or {}).get("allocated") or []]
+        if not nodes:
+            return None
+        self.note(f"seed tree: starting from the parent's {len(nodes)} nodes")
+        return {"nodes": nodes, "attrs": tv.get("attributeChoices") or {}}
 
     # ------------------------------------------------------------------ 7. gear optimise
     def gear(self, final: bool = True):
@@ -929,12 +957,14 @@ class _Synth:
 
 def synthesize(skeleton: Skeleton, engine: Any, scorer: Any = None, budget: int = 6000, log_fn=None,
                gear_optimise: bool = True, polish=POLISH, seed: int = 0,
-               polish_cycles: int = POLISH_CYCLES, unique_trial: str = "on") -> BuildResult:
+               polish_cycles: int = POLISH_CYCLES, unique_trial: str = "on",
+               seed_code: str | None = None) -> BuildResult:
     """contracts.Synthesizer: build `skeleton` from nothing in `engine`, judged by `scorer` (default:
     pinnacle_v1 + mapping_v1, DEFAULT_FLOORS, no constraints). Never raises for a bad skeleton: the result
     has ok=False and error set. `budget` is in engine evaluations."""
     return _Synth(skeleton, engine, scorer, budget, log_fn=log_fn, gear_optimise=gear_optimise,
-                  polish=polish, seed=seed, polish_cycles=polish_cycles, unique_trial=unique_trial).run()
+                  polish=polish, seed=seed, polish_cycles=polish_cycles, unique_trial=unique_trial,
+                  seed_code=seed_code).run()
 
 
 def summary_row(res: BuildResult) -> dict:

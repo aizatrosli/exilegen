@@ -136,7 +136,8 @@ class Runner:
                  job_timeout: float = 600.0, engine_factory: Callable | None = None,
                  scorer_factory: Callable | None = None, seed: int = 0, batch: int | None = None,
                  checkpoint_every: float = 60.0, report_every: float = 300.0, report: bool = True,
-                 log: Callable | None = None, generator_kwargs: dict | None = None):
+                 log: Callable | None = None, generator_kwargs: dict | None = None,
+                 halving: bool = False, rung0_frac: float = 0.25, eta: int = 3, warm_start: bool = True):
         self.run_dir = run_dir
         os.makedirs(run_dir, exist_ok=True)
         self.constraints = list(constraints or [])
@@ -144,6 +145,18 @@ class Runner:
         self.workers = workers or default_workers()
         self.minutes, self.max_evals, self.max_jobs = minutes, max_evals, max_jobs
         self.budget, self.job_timeout = budget, job_timeout
+        # Successive halving (asynchronous, ASHA-style): every skeleton first gets a cheap synth at
+        # rung0_frac of the budget; it is promoted to a full-budget synth only if it ranks in the top
+        # 1/eta of the recent cheap runs. Builds are ranked after tree, gear and supports have adapted,
+        # which a pre-screen score cannot do, and the full budget goes where it pays.
+        # Off by default. In a 25-minute A/B (2 workers, seed 3) it found a stronger best build (391k vs
+        # 152k honest DPS) but covered far less: 27 vs 42 feasible cells, QD score 301 vs 501. A cheap
+        # pass still took ~60% of a full synth's wall time (gear optimisation and trials do not scale
+        # with the eval budget), and only 30% of cheap builds were feasible when archived unpromoted.
+        self.halving, self.rung0_frac, self.eta = halving, rung0_frac, max(2, int(eta))
+        self.warm_start = warm_start           # mutations start from their parent's passive tree
+        self._rung0: list[tuple] = []          # recent cheap-run keys (feasible, objective)
+        self._promo: Any = None                # deque of promoted jobs (created in _main)
         self.engine_factory = engine_factory if engine_factory is not None else default_engine_factory
         self.scorer_factory = scorer_factory or (lambda: make_scorer(self.constraints, self.profiles))
         self.seed = seed
@@ -161,7 +174,7 @@ class Runner:
         self.inflight: set[str] = set()
         self._engines: dict[int, Any] = {}
         self.counts = {"jobs": 0, "failed": 0, "timeouts": 0, "engine_restarts": 0, "duplicates_skipped": 0,
-                       "generated": 0, "evals": 0, "status": {}}
+                       "generated": 0, "evals": 0, "status": {}, "rung0": 0, "promoted": 0}
         self._lockf = None
         self._logf = None
         self.t0 = time.time()
@@ -243,7 +256,8 @@ class Runner:
         return {"bandit": self.bandit.state(), "counts": self.counts, "constraints": self.constraints,
                 "profiles": self.profiles, "workers": self.workers, "budget": self.budget,
                 "seconds_total": self.prev_seconds + self.elapsed(), "session": self.session,
-                "stop_reason": self.stop_reason, "seed": self.seed}
+                "stop_reason": self.stop_reason, "seed": self.seed,
+                "halving": {"on": self.halving, "rung0_frac": self.rung0_frac, "eta": self.eta}}
 
     def checkpoint(self, final: bool = False) -> None:
         st = self.state()
@@ -295,6 +309,16 @@ class Runner:
         out = self.generator.generate(self.batch, constraints=self.constraints, feedback=fb, seed=seed)
         return arm, list(out or []), parent_id
 
+    def _parent_code(self, parent_id: str, child: Skeleton) -> str | None:
+        """The archived build code of a mutation's parent, when it is a built build of the child's
+        class (its passive tree then seeds the child's tree: a warm start instead of from scratch)."""
+        rec = self.archive.records.get(parent_id) if self.archive else None
+        if not rec or not rec.get("ok") or not rec.get("code"):
+            return None
+        if (rec.get("skeleton") or {}).get("cls") != child.cls:
+            return None
+        return rec["code"]
+
     def _skeleton_cell_key(self):
         """The generator module's own coarse cell function (skeletons.cell_key), if it has one."""
         mod = sys.modules.get(type(self.generator).__module__)
@@ -305,7 +329,15 @@ class Runner:
         sk: Skeleton = job["skeleton"]
         t = time.time()
         try:
-            r = self.synthesize(sk, engine, scorer, self.budget)
+            budget = int(job.get("budget") or self.budget)
+            seed_code = job.get("seed_code")
+            if seed_code:
+                try:
+                    r = self.synthesize(sk, engine, scorer, budget, seed_code=seed_code)
+                except TypeError:            # a synthesize without warm starts
+                    r = self.synthesize(sk, engine, scorer, budget)
+            else:
+                r = self.synthesize(sk, engine, scorer, budget)
             if not isinstance(r, BuildResult):
                 raise TypeError(f"synthesize returned {type(r).__name__}, not BuildResult")
         except Exception as ex:  # noqa: BLE001 - crash isolation
@@ -372,12 +404,15 @@ class Runner:
             while True:
                 if self._stop.is_set() and (q.empty() or self._abort.is_set()):
                     return
-                try:
-                    job = await asyncio.wait_for(q.get(), timeout=0.5)
-                except asyncio.TimeoutError:
-                    if self._producer_done and q.empty():
-                        return
-                    continue
+                if self._promo:
+                    job = self._promo.popleft()          # promoted skeletons run before new ones
+                else:
+                    try:
+                        job = await asyncio.wait_for(q.get(), timeout=0.5)
+                    except asyncio.TimeoutError:
+                        if self._producer_done and q.empty() and not self._promo:
+                            return
+                        continue
                 if self._stop.is_set():
                     # stopping: queued (not started) jobs are dropped, not run
                     self.inflight.discard(job["skeleton"].id)
@@ -418,14 +453,51 @@ class Runner:
                 except Exception:  # noqa: BLE001
                     pass
 
+    RUNG0_WINDOW = 60          # recent cheap runs a promotion is ranked against
+
+    @staticmethod
+    def _rank_key(res: BuildResult) -> tuple:
+        sc = res.score or {}
+        if not res.ok or sc.get("objective") is None:
+            return (0, -1e18)
+        return (1 if sc.get("feasible") else 0, float(sc["objective"]))
+
+    def _promote(self, res: BuildResult) -> bool:
+        """Rank a cheap (rung 0) result against the recent cheap runs: promote the top 1/eta. The first
+        eta results are promoted when they built at all, so the bar has something to stand on."""
+        key = self._rank_key(res)
+        hist = self._rung0[-self.RUNG0_WINDOW:]
+        self._rung0.append(key)
+        if key[1] <= -1e17:
+            return False
+        if len(hist) < self.eta:
+            return True
+        better = sum(1 for k in hist if k > key)
+        return better < (len(hist) + 1) / self.eta
+
     def _finish(self, wid: int, job: dict, res: BuildResult) -> None:
         sk = job["skeleton"]
+        if self.halving and job.get("rung", 1) == 0:
+            self.counts["rung0"] += 1
+            self.counts["evals"] += int(res.evals or 0)
+            if self._promote(res):
+                self.counts["promoted"] += 1
+                self._promo.append(dict(job, rung=1, budget=self.budget, rung0_evals=int(res.evals or 0),
+                                        rung0_objective=(res.score or {}).get("objective")))
+                sc = res.score or {}
+                self.log(f"[w{wid}] promoted     {sk.id[:12]} {sk.ascendancy}/{sk.main_skill} "
+                         f"dps={sc.get('dps_honest') or 0:,.0f} feas={sc.get('feasible')} {res.seconds:.0f}s")
+                return
+            res.notes = list(res.notes or []) + [f"halving: not promoted after a {job.get('budget')}-eval run"]
+        else:
+            self.counts["evals"] += int(res.evals or 0)
+        if job.get("rung0_evals"):
+            res.evals = int(res.evals or 0) + int(job["rung0_evals"])     # the skeleton's whole cost
         self.inflight.discard(sk.id)
         bar = self.archive.elite_quantile(0.5)
         status = self.archive.add(res, worker=wid, job={"arm": job["arm"], "parent": job.get("parent"),
-                                                         "batch": job.get("batch")})
+                                                         "batch": job.get("batch"), "rung": job.get("rung")})
         self.counts["jobs"] += 1
-        self.counts["evals"] += int(res.evals or 0)
         self.counts["status"][status] = self.counts["status"].get(status, 0) + 1
         if status == "failed":
             self.counts["failed"] += 1
@@ -470,7 +542,14 @@ class Runner:
                         continue
                     self.inflight.add(sk.id)
                     self.counts["generated"] += 1
-                    await q.put({"skeleton": sk, "arm": arm, "parent": parent, "batch": batch_no})
+                    job = {"skeleton": sk, "arm": arm, "parent": parent, "batch": batch_no}
+                    if self.warm_start and parent:
+                        pc = self._parent_code(parent, sk)
+                        if pc:
+                            job["seed_code"] = pc
+                    if self.halving:
+                        job.update(rung=0, budget=max(300, int(self.budget * self.rung0_frac)))
+                    await q.put(job)
                     new += 1
                 if new == 0:
                     # nothing new: penalise the arm a little so the bandit tries the other one
@@ -500,6 +579,8 @@ class Runner:
     async def _main(self) -> dict:
         self._producer_done = False
         q: asyncio.Queue = asyncio.Queue()
+        import collections
+        self._promo = collections.deque()
         loop = asyncio.get_running_loop()
         installed = []
         if threading.current_thread() is threading.main_thread():

@@ -431,3 +431,27 @@ def test_cli_build_with_stubs(tmp_path, fake_corpus, monkeypatch, capsys):
     assert "jobs" in capsys.readouterr().out
     assert cli.main(["build-report", "--run-dir", d, "--out-dir", str(tmp_path / "rep")]) == 0
     assert os.path.exists(tmp_path / "rep" / "report.md")
+
+
+def test_runner_successive_halving(tmp_path, fake_corpus):
+    calls = []
+
+    def synth(skeleton, engine, scorer, budget=6000):
+        calls.append((skeleton.id, budget))
+        r = fake_synth(skeleton, engine, scorer, budget)
+        r.evals = budget
+        return r
+    r = Runner(str(tmp_path / "run"), generator=FakeGenerator(), synthesize=synth, workers=2, minutes=1,
+               max_jobs=30, engine_factory=lambda: None, scorer_factory=lambda: None, report=False,
+               budget=4000, halving=True, rung0_frac=0.25, eta=3)
+    out = r.run()
+    cheap = [i for i, b in calls if b == 1000]
+    full = [i for i, b in calls if b == 4000]
+    assert cheap and full
+    assert set(full) <= set(cheap)                       # only skeletons that had a cheap run go full
+    assert len(full) < len(cheap) * 0.7                  # most are not promoted
+    assert r.counts["promoted"] == len(full) and r.counts["rung0"] == len(cheap)
+    recs = [json.loads(x) for x in open(os.path.join(str(tmp_path / "run"), "archive.jsonl"))]
+    assert len({x["uid"] for x in recs}) == len(recs)     # one record per skeleton
+    full_recs = [x for x in recs if (x.get("job") or {}).get("rung") == 1 and x.get("ok")]
+    assert all(x["evals"] == 5000 for x in full_recs)    # cheap + full cost
