@@ -154,7 +154,8 @@ def test_cli_writes_both_files(tmp_path, monkeypatch, capsys):
     run.mkdir()
     (run / "chain_scores.jsonl").write_text(json.dumps(
         {"id": "a", "main_name": "Spark", "ok": True, "feasible": True, "dps_honest": 2000.0, "ehp": 5000.0,
-         "base_key": "k", "ascendancy": "Stormweaver", "pinnacle_v1.main": "Spark"}) + "\n")
+         "base_key": "k", "ascendancy": "Stormweaver", "pinnacle_v1.main": "Spark",
+         "pinnacle_v1.dps_honest": 3000.0, "pinnacle_v1.ehp": 6000.0}) + "\n")
     (run / "baselines.jsonl").write_text(json.dumps(
         {"base_key": "k", "main_name": "Spark", "ok": True, "feasible": True, "dps_honest": 1000.0, "ehp": 4000.0}) + "\n")
     ref = tmp_path / "ref.json"
@@ -162,8 +163,9 @@ def test_cli_writes_both_files(tmp_path, monkeypatch, capsys):
     monkeypatch.setattr(chainscore, "pool_chains", lambda top=100000: CHAINS)
     assert lc.main(["--scores", str(run), "--ref", str(ref), "--out", str(tmp_path / "out"), "--top", "5"]) == 0
     out = json.loads(capsys.readouterr().out)
-    assert out["run_chains"] == 1 and out["C_dps_vs_ladder_median"]["median"] == 2.0
+    assert out["run_chains"] == 1 and out["C_dps_vs_ladder_median"]["median"] == 3.0
     doc = json.loads((tmp_path / "out" / "ladder_compare.json").read_text())
     assert doc["chains"]["a"]["ascendancy"] == "Stormweaver" and doc["chains"]["a"]["power"]["base_ehp"] == 4000
+    assert doc["chains"]["a"]["power"]["profile"] == "pinnacle_v1" and doc["chains"]["a"]["power"]["ehp"] == 6000
     assert (tmp_path / "out" / "ladder_compare.md").read_text().startswith("# Graph chains against the ladder")
     assert lc.main(["--scores", str(run), "--ref", str(tmp_path / "missing.json")]) == 2

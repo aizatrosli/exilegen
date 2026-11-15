@@ -93,10 +93,16 @@ class Ref:
         self.has_asc_pairs = "asc_node_skill" in pairs
         builds = _num(self.source.get("builds")) or sum((_num(s.get("n")) or 0) for s in self.skills.values()) or 0
 
+        any_share = any(_num(s.get("share")) is not None for s in self.skills.values())
+
         def weight(name):
+            # a missing share next to known ones means too rare to be listed; the sample size only stands in
+            # for share when the reference has no shares at all
             s = self.skills[name]
             sh = _num(s.get("share"))
-            return sh if sh is not None else ((_num(s.get("n")) or 0) / builds if builds else 0.0)
+            if sh is not None or any_share:
+                return sh or 0.0
+            return (_num(s.get("n")) or 0) / builds if builds else 0.0
         self.share = {k: weight(k) for k in self.skills}
         self.ranked = sorted(self.skills, key=lambda k: (-self.share[k], -(_num(self.skills[k].get("n")) or 0), k))
         self.rank = {k: i + 1 for i, k in enumerate(self.ranked)}
@@ -206,7 +212,8 @@ def per_chain(chains: list[dict], measured: dict[str, dict], ref: dict | Ref | N
 
     in_ref / ladder      is the main skill on the ladder: n, share, rank by share
     parts / cls          each payoff part with how often ladder builds of the skill hold it; the class
-    power                chain (and plain build) DPS and EHP over the ladder's median and p90, skill and skill+ascendancy
+    power                chain (and plain build) DPS and EHP over the ladder's median and p90, skill and skill+ascendancy;
+                         uses measured["pinnacle_dps"/"pinnacle_ehp"] (see load_run) when present, else dps/ehp
     supports             overlap of the build's supports with the ladder's top 5 and top 12 for the skill
     comparable           the chain has a damage figure of its own (feasible, right main skill, DPS above 0)
     """
@@ -241,22 +248,27 @@ def per_chain(chains: list[dict], measured: dict[str, dict], ref: dict | Ref | N
         power = None
         if s and m:
             combo = ref.combo(skill, asc)
-            power = {"dps": m.get("dps") or None, "ehp": m.get("ehp"), "base_dps": m.get("base_dps"),
-                     "base_ehp": m.get("base_ehp"), "base_key": m.get("base_key")}
+            # the run's plain dps/ehp are the binding profile's (pinnacle or mapping); the ladder is pinnacle_v1
+            pin = m.get("pinnacle_dps") is not None
+            dps, ehp = (m.get("pinnacle_dps") if pin else m.get("dps")), (m.get("pinnacle_ehp") if pin else m.get("ehp"))
+            bdps = m.get("base_pinnacle_dps") if m.get("base_pinnacle_dps") is not None else m.get("base_dps")
+            behp = m.get("base_pinnacle_ehp") if m.get("base_pinnacle_ehp") is not None else m.get("base_ehp")
+            power = {"dps": dps or None, "ehp": ehp, "base_dps": bdps, "base_ehp": behp,
+                     "profile": "pinnacle_v1" if pin else "binding", "base_key": m.get("base_key")}
             for label, src in (("skill", s), ("combo", combo)):
                 d, e = (src or {}).get("dps") or {}, (src or {}).get("ehp") or {}
                 usable = rec["comparable"]
                 power[label] = None if src is None else {
                     "n": src.get("n"), "ladder_dps_median": d.get("median"), "ladder_dps_p90": d.get("p90"),
                     "ladder_ehp_median": e.get("median"), "ladder_ehp_p90": e.get("p90"),
-                    "dps_vs_median": _ratio(m.get("dps"), d.get("median")) if usable else None,
-                    "dps_vs_p90": _ratio(m.get("dps"), d.get("p90")) if usable else None,
-                    "ehp_vs_median": _ratio(m.get("ehp"), e.get("median")) if usable else None,
-                    "ehp_vs_p90": _ratio(m.get("ehp"), e.get("p90")) if usable else None,
-                    "base_dps_vs_median": _ratio(m.get("base_dps"), d.get("median")),
-                    "base_dps_vs_p90": _ratio(m.get("base_dps"), d.get("p90")),
-                    "base_ehp_vs_median": _ratio(m.get("base_ehp"), e.get("median")),
-                    "base_ehp_vs_p90": _ratio(m.get("base_ehp"), e.get("p90"))}
+                    "dps_vs_median": _ratio(dps, d.get("median")) if usable else None,
+                    "dps_vs_p90": _ratio(dps, d.get("p90")) if usable else None,
+                    "ehp_vs_median": _ratio(ehp, e.get("median")) if usable else None,
+                    "ehp_vs_p90": _ratio(ehp, e.get("p90")) if usable else None,
+                    "base_dps_vs_median": _ratio(bdps, d.get("median")),
+                    "base_dps_vs_p90": _ratio(bdps, d.get("p90")),
+                    "base_ehp_vs_median": _ratio(behp, e.get("median")),
+                    "base_ehp_vs_p90": _ratio(behp, e.get("p90"))}
         rec["power"] = power
         sup = m.get("supports")
         rec["supports"] = None
@@ -354,6 +366,7 @@ def _realism(pc, top: int) -> dict:
 
 def _power(pc, ref: Ref) -> dict:
     comp = [r for r in pc.values() if r["comparable"] and r["power"]]
+    prof = Counter(r["power"]["profile"] for r in comp)
 
     def block(label):
         rows = [r["power"][label] for r in comp if r["power"].get(label)]
@@ -378,6 +391,7 @@ def _power(pc, ref: Ref) -> dict:
         return {"chains": one(rows, ""), "baselines": one(base, "base_")}
     return {"indicative": not ref.comparable, "dps_metric": ref.source.get("dps_metric"),
             "note": ref.source.get("note"), "compared_chains": len(comp),
+            "chain_profile": dict(prof),
             "comparable_without_ladder_skill": sum(1 for r in pc.values() if r["comparable"] and not r["in_ref"]),
             "same_skill": block("skill"), "same_skill_and_ascendancy": block("combo")}
 
@@ -452,8 +466,8 @@ def _summary_text(doc: dict) -> str:
     t = a["tops"].get("top25") or next(iter(a["tops"].values()), None)
     if t:
         s.append(f"Coverage: {t['with_chain']} of the ladder's {t['skills']} most played skills "
-                 f"({_pct(t['share_covered'])} of characters against {_pct(t['ladder_share'])} for those skills) have at "
-                 f"least one chain; in this run {t['with_feasible_chain']} have one that built feasibly and "
+                 f"({_pct(t['share_covered'] / t['ladder_share'] if t['ladder_share'] else None)} of their combined "
+                 f"play share) have at least one chain; in this run {t['with_feasible_chain']} have one that built feasibly and "
                  f"{t['with_helping_chain']} one that helps (credited gain of 1.0 or more).")
         if a["run_chains"] < a["pool_chains"]:
             s.append(f"The run covers {a['run_chains']} of {a['pool_chains']} chains, so the built and helping counts "
@@ -560,12 +574,14 @@ def markdown(doc: dict, run: str = "") -> str:
           f"{a['ladder_skills']} main skills. Ladder DPS: {src.get('dps_metric') or 'not stated'}."
           + (f" Note from the reference: {src['note']}" if src.get("note") else ""), "",
           "## Summary (E): what this says about the graph", "", doc["summary_text"], "", "## A. Does the graph find the meta?", ""]
-    L += _table(["Ladder skills", "share of characters", "has a chain", "share covered", "chain in this run",
+    L += _table(["Ladder skills", "summed share", "has a chain", "summed share covered", "chain in this run",
                  "built feasibly", "chain helps (gain 1.0+)", "median rank of best chain by gain",
                  "median best rank by formula"],
                 [[k, _pct(t["ladder_share"]), f"{t['with_chain']}/{t['skills']}", _pct(t["share_covered"]),
                   t["with_measured_chain"], t["with_feasible_chain"], t["with_helping_chain"],
                   t["median_best_gain_rank"], t["median_top_score_rank"]] for k, t in a["tops"].items()])
+    L += ["Shares are each skill's share of ladder characters; a character can count towards several skills, so the "
+          "sums can pass 100%.", ""]
     L += [f"Ranks by gain are among the {a['ranked_by_gain']} chains with a measured gain; ranks by formula are among "
           f"all {a['pool_chains']} chains.", ""]
     L += _table(["#", "Ladder skill", "share", "chains", "in run", "feasible", "helping", "best gain", "rank by gain",
@@ -607,6 +623,9 @@ def markdown(doc: dict, run: str = "") -> str:
                 rows.append([who if who == "chains" else "plain builds", name, x["n"], x["q25"], x["median"], x["q75"],
                              _pct(x["share_reaching"])])
         L += [f"{title}:", ""] + _table(["Builds", "ratio", "n", "q25", "median", "q75", "share reaching it"], rows)
+    if c["chain_profile"].get("binding"):
+        L += [f"{c['chain_profile']['binding']} chains have no pinnacle figure in the run and use the run's own DPS, "
+              f"which can be the mapping profile's.", ""]
     L += [f"{c['compared_chains']} chains compared; {c['comparable_without_ladder_skill']} more have damage but no "
           f"ladder skill to compare with.", "", "## D. Do the support gems agree?", "",
           f"{d['compared']} chain builds on {d['skills_compared']} ladder skills have supports to compare "
@@ -634,7 +653,8 @@ def markdown(doc: dict, run: str = "") -> str:
 
 
 def load_run(run_dir: str) -> dict[str, dict]:
-    """chainresults.measured plus each chain's ascendancy and its plain build's EHP, read from the run's files."""
+    """chainresults.measured plus, from the run's files: each chain's ascendancy, its plain build's EHP, and the
+    pinnacle_v1 DPS and EHP of both builds (measured's own dps is the binding profile's, sometimes mapping_v1's)."""
     from . import chainresults
     res = chainresults.measured(run_dir)
     base = {r.get("base_key"): r for r in chainresults._read(os.path.join(run_dir, "baselines.jsonl"))}
@@ -645,10 +665,14 @@ def load_run(run_dir: str) -> dict[str, dict]:
         if r.get("ascendancy"):
             m["ascendancy"] = r["ascendancy"]
         b = base.get(r.get("base_key"))
+        for pre, row in (("", r), ("base_", b)):
+            if row and row.get("pinnacle_v1.dps_honest") is not None:
+                m[pre + "pinnacle_dps"] = round(row["pinnacle_v1.dps_honest"])
+                m[pre + "pinnacle_ehp"] = round(row["pinnacle_v1.ehp"]) if row.get("pinnacle_v1.ehp") else None
         if b:
             m["base_key"] = r["base_key"]
-        if b and b.get("ehp") and m.get("base_dps"):
-            m["base_ehp"] = round(b["ehp"])
+            if b.get("ehp"):
+                m["base_ehp"] = round(b["ehp"])
     return res
 
 
