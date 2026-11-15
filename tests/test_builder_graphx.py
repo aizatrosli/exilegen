@@ -147,3 +147,34 @@ def test_chainfit_bias_is_not_shrunk_and_unseen_columns_do_not_break_the_fit():
     hi = chainfit.predict(model, chains[7])["gain"]
     lo = chainfit.predict(model, chains[8])["gain"]
     assert hi > 1.5 and lo < 0.7
+
+
+def test_exclude_supports_is_checked_and_changes_no_ranking(cat):
+    from exilegen.builder import supportgems
+    base = graphx.run({"top": 30}, cat=cat)
+    assert base["requirements"]["exclude_supports"] == []
+    doc = graphx.run({"top": 30, "exclude_supports": ["Rakiata's Flow", "No Such Gem"]}, cat=cat)
+    chk = {c["id"]: c for c in doc["preflight"]}["req.exclude_supports"]
+    assert doc["passed"] and chk["status"] == "warn" and "No Such Gem" in chk["detail"] and "Rakiata" not in chk["detail"]
+    assert [c["id"] for c in doc["mechanics"]["chains"]] == [c["id"] for c in base["mechanics"]["chains"]]
+    assert {c["id"]: c for c in base["preflight"]}["req.exclude_supports"]["status"] == "ok"
+    for bad in ("Fork", [1, "Fork"], {"Fork": True}):
+        d = graphx.run({"exclude_supports": bad}, cat=cat)
+        assert not d["passed"] and "mechanics" not in d
+        assert {c["id"]: c for c in d["preflight"]}["req.exclude_supports"]["status"] == "fail"
+    info = doc["mechanics"]["info"]
+    assert info["support_names"] == sorted(info["support_names"]) == supportgems.names()
+    assert "Rakiata's Flow" in info["support_names"] and "Fork" in info["support_names"]
+    assert "Rakiata's Flow" in info["lineage_supports"] and "Fork" not in info["lineage_supports"]
+    assert set(info["lineage_supports"]) <= set(info["support_names"])
+
+
+def test_measured_code_only_with_codes(cat, tmp_path):
+    import json
+    cid = graphx.run({"top": 5}, cat=cat)["mechanics"]["chains"][0]["id"]
+    (tmp_path / "chain_scores.jsonl").write_text(json.dumps(
+        {"id": cid, "ok": True, "feasible": True, "dps_honest": 3000.0, "ehp": 20000, "code": "eNabc"}) + "\n")
+    plain = graphx.run({"top": 5}, cat=cat, scores_dir=str(tmp_path))["mechanics"]["chains"][0]
+    coded = graphx.run({"top": 5}, cat=cat, scores_dir=str(tmp_path), codes=True)["mechanics"]["chains"][0]
+    assert plain["measured"]["built"] and "code" not in plain["measured"]
+    assert coded["measured"]["code"] == "eNabc"

@@ -1,6 +1,6 @@
 """Read a chainscore run directory into one record per chain (no engine needed).
 
-    measured(dir) -> {chain id: {"built", "feasible", "unverified", "dps", "ehp", "error",
+    measured(dir, codes=False) -> {chain id: {"built", "feasible", "unverified", "dps", "ehp", "error",
                                  "base_dps", "gain", "state_lift", "base_state_lift", "payoff", "gain_credited"}}
 
 gain           chain DPS over its baseline's (same skill, ascendancy, weapon and defence without the chain)
@@ -13,6 +13,7 @@ thin           true when fewer than 3 plain builds exist for the skill: gain_fai
 state_lift     chain DPS with its own states switched on over the same build with them off
 gain_credited  gain_fair x state_lift: the chain credited for the state it produces (assumes it is always up)
 payoff         state_lift over the baseline's: above 1 means the chain's payoff part uses the state better
+code           the chain build's PoB share code, only with codes=True (it is most of the size of a record)
 """
 from __future__ import annotations
 
@@ -43,7 +44,7 @@ def supports(code: str | None, main_name: str | None) -> tuple[list[str], bool] 
     return best
 
 
-def measured(out: str) -> dict[str, dict]:
+def measured(out: str, codes: bool = False) -> dict[str, dict]:
     base = {r["base_key"]: r for r in _read(os.path.join(out, "baselines.jsonl"))}
     by_skill: dict[str, list[dict]] = {}
     for b in base.values():
@@ -63,6 +64,8 @@ def measured(out: str) -> dict[str, dict]:
              "dps": round(dps) if dps else 0, "ehp": round(r["ehp"]) if r.get("ehp") else None}
         if r.get("error"):
             m["error"] = str(r["error"])[:120]
+        if codes and r.get("code"):
+            m["code"] = r["code"]
         b = base.get(r.get("base_key"))
         sup = supports(r.get("code"), r.get("main_name"))
         if sup:

@@ -13,7 +13,14 @@ The requirements object uses the builder's own names (contracts.Skeleton, scorin
 
   {"constraints": ["one_button"], "profiles": ["pinnacle_v1", "mapping_v1"], "budget_tier": "mid",
    "cls": null, "ascendancy": "Lich", "damage_types": ["Chaos"], "uniques": [{"name": "Liminal Coil"}],
-   "forbid_uniques": [], "keystones": [], "chain_kinds": [], "min_novelty": 0.0, "top": 150}
+   "forbid_uniques": [], "keystones": [], "chain_kinds": [], "min_novelty": 0.0, "top": 150,
+   "exclude_supports": ["Rakiata's Flow"]}
+
+`exclude_supports` are support gems the user does not want socketed. They change no score and drop no chain: a
+chain whose measured build uses one stays in the list (the view marks it and offers a rebuild with
+`python3 -m exilegen.lab chain --exclude-support ...`). `mechanics.info.support_names` lists every support gem
+for a picker and `lineage_supports` the lineage gems among them. `--codes` (with `--scores`) attaches each measured
+chain build's PoB code as `measured.code`.
 
 The exported document ("format": "exilegen-graph", "version": 1) holds the requirements, the check, the
 mechanics graph restricted to the kept chains, the chains, and (with --corpus-dir) the ladder co-occurrence
@@ -34,6 +41,7 @@ from . import mechgraph
 from . import chainfit
 from . import chainresults
 from . import leveling as levelmod
+from . import supportgems
 from . import tempo as tempomod
 
 FORMAT, VERSION = "exilegen-graph", 1
@@ -67,6 +75,7 @@ class Requirements:
     online_by: int = 0            # drop chains that are not complete by this character level (0 = no limit)
     rank_by: str = "formula"      # "formula", "measured" (PoB gain, needs --scores) or "fitted" (score fitted to PoB runs)
     leveling_config: dict = field(default_factory=dict)   # overrides of leveling.DEFAULT_CONFIG (trial levels, ...)
+    exclude_supports: list = field(default_factory=list)  # support gem names not to socket (no effect on scores)
 
     @classmethod
     def from_dict(cls, d: dict) -> tuple["Requirements", list[str]]:
@@ -170,6 +179,18 @@ def preflight(cat: catmod.Catalog, req: Requirements, unknown_keys: list[str] | 
     badk = [k for k in req.keystones if k not in knames]
     out.append(_check("req.keystones", "requirements", "fail" if badk else "ok", "Keystones",
                       ("unknown: " + ", ".join(badk)) if badk else (", ".join(req.keystones) or "any")))
+    ex = req.exclude_supports
+    if not isinstance(ex, list) or not all(isinstance(x, str) for x in ex):
+        out.append(_check("req.exclude_supports", "requirements", "fail", "Excluded support gems",
+                          "exclude_supports must be a list of support gem names"))
+    else:
+        known = supportgems.names()
+        badx = supportgems.unknown(ex) if known else []
+        out.append(_check("req.exclude_supports", "requirements", "warn" if badx or (ex and not known) else "ok",
+                          "Excluded support gems",
+                          ("not a known support gem: " + ", ".join(badx)) if badx else
+                          "no support gem list (python3 -m exilegen.builder.supportgems): names are not checked"
+                          if ex and not known else (", ".join(ex) or "none")))
     badc = [k for k in req.chain_kinds if k not in CHAIN_KINDS]
     has_tempo = bool(tempomod.load())
     ok_budget = float(req.mana_per_second) > 0 and float(req.spirit) >= 0
@@ -328,7 +349,8 @@ def mechanics(cat: catmod.Catalog, req: Requirements, scores: dict | None = None
                      **({"measured": chainresults.summary({k: v for k, v in scores.items() if k in {c["id"] for c in pool}}, len(pool))}
                         if scores else {}),
                      **({"fitted": {"chains": model["n"], **model.get("held_out", {})}} if model else {}),
-                     "by_kind": dict(Counter(c["kind"] for c in chains))}}
+                     "by_kind": dict(Counter(c["kind"] for c in chains)),
+                     "support_names": supportgems.names(), "lineage_supports": supportgems.lineage_names()}}
 
 
 # ---------------------------------------------------------------------------------------------- ladder
@@ -441,10 +463,10 @@ def ladder(corpus_dir: str, max_nodes: int = 260, max_edges: int = 1600, max_gap
 
 # ---------------------------------------------------------------------------------------------- export
 def run(req_dict: dict, corpus_dir: str | None = None, check_only: bool = False, cat: catmod.Catalog | None = None,
-        scores_dir: str | None = None) -> dict:
+        scores_dir: str | None = None, codes: bool = False) -> dict:
     cat = cat or catmod.load()
     req, unknown = Requirements.from_dict(req_dict or {})
-    scores = chainresults.measured(scores_dir) if scores_dir else None
+    scores = chainresults.measured(scores_dir, codes=codes) if scores_dir else None
     checks = preflight(cat, req, unknown, corpus_dir, scores)
     doc = {"format": FORMAT, "version": VERSION, "game": "poe2", "generated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
            "requirements": asdict(req), "preflight": checks, "passed": passed(checks)}
@@ -465,10 +487,11 @@ def main(argv=None) -> int:
     ap.add_argument("--corpus-dir", help="ladder corpus directory (evaluated.jsonl + analysis-synergy/)")
     ap.add_argument("--out", help="write the graph document here")
     ap.add_argument("--scores", help="chainscore run directory: attach PoB-measured results to the chains")
+    ap.add_argument("--codes", action="store_true", help="with --scores: attach each measured build's PoB code (measured.code)")
     ap.add_argument("--check", action="store_true", help="run the requirements check only")
     a = ap.parse_args(argv)
     req = json.load(open(a.requirements)) if a.requirements else {}
-    doc = run(req, a.corpus_dir, a.check, scores_dir=a.scores)
+    doc = run(req, a.corpus_dir, a.check, scores_dir=a.scores, codes=a.codes)
     for c in doc["preflight"]:
         print(f"[{c['status']:4}] {c['label']}: {c['detail']}", file=sys.stderr)
     if a.out:
@@ -477,7 +500,8 @@ def main(argv=None) -> int:
         print("requirements not met: nothing analysed", file=sys.stderr)
         return 2
     if "mechanics" in doc:
-        print(json.dumps({"mechanics": doc["mechanics"]["info"], "ladder": (doc.get("ladder") or {}).get("info")}))
+        info = {k: v for k, v in doc["mechanics"]["info"].items() if k not in ("support_names", "lineage_supports")}
+        print(json.dumps({"mechanics": info, "ladder": (doc.get("ladder") or {}).get("info")}))
     return 0
 
 
