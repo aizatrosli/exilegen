@@ -8,6 +8,7 @@ typical_dps    median DPS of the plain builds on the same main skill (feasible o
 gain_fair      chain DPS over the stronger of its own baseline and typical_dps, so one weak baseline cannot inflate it
 supports       support gems the search socketed on the main skill in the chain build; base_supports for the plain build
 main_granted   the main skill comes from an item, which the search does not give support gems
+wrong_main     the skill PoB measured when it is not the chain's main skill; such a chain gets no gain
 thin           true when fewer than 3 plain builds exist for the skill: gain_fair then rests on little evidence
 state_lift     chain DPS with its own states switched on over the same build with them off
 gain_credited  gain_fair x state_lift: the chain credited for the state it produces (assumes it is always up)
@@ -69,6 +70,12 @@ def measured(out: str) -> dict[str, dict]:
             bsup = supports(b.get("code"), b.get("main_name")) if b else None
             if bsup:
                 m["base_supports"] = bsup[0]
+        got = r.get("pinnacle_v1.main")
+        if dps > 0 and got and r.get("main_name") and not str(got).startswith(r["main_name"]):
+            # the build's damage comes from another skill (a trigger setup replaced the main): not this chain's result
+            m["wrong_main"] = str(got)
+            res[r["id"]] = m
+            continue
         if dps > 0 and b and (b.get("dps_honest") or 0) > 0:
             m["base_dps"] = round(b["dps_honest"])
             m["gain"] = round(dps / b["dps_honest"], 3)
