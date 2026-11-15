@@ -14,7 +14,13 @@ The requirements object uses the builder's own names (contracts.Skeleton, scorin
   {"constraints": ["one_button"], "profiles": ["pinnacle_v1", "mapping_v1"], "budget_tier": "mid",
    "cls": null, "ascendancy": "Lich", "damage_types": ["Chaos"], "uniques": [{"name": "Liminal Coil"}],
    "forbid_uniques": [], "keystones": [], "chain_kinds": [], "min_novelty": 0.0, "top": 150,
-   "exclude_supports": ["Rakiata's Flow"]}
+   "exclude_supports": ["Rakiata's Flow"],
+   "spirit_source": "level", "spirit_level": 33, "spirit_gear": 40, "spirit_gems": true}
+
+Spirit: with `spirit_source` "fixed" (the default) the Spirit budget is `spirit`; with "level" it is the quest Spirit
+held at `spirit_level` (0 = the final level) plus `spirit_gear`, and that budget also replaces `spirit` in the tempo
+factor. Unless `spirit_gems` is false every chain gets `spirit`: the Spirit its own skills reserve, what is free, and
+the Spirit gems picked for it (spiritx). `mechanics.info.spirit` holds the resolved budget and the gear presets.
 
 `exclude_supports` are support gems the user does not want socketed. They change no score and drop no chain: a
 chain whose measured build uses one stays in the list (the view marks it and offers a rebuild with
@@ -41,6 +47,7 @@ from . import mechgraph
 from . import chainfit
 from . import chainresults
 from . import leveling as levelmod
+from . import spiritx
 from . import supportgems
 from . import tempo as tempomod
 
@@ -76,6 +83,10 @@ class Requirements:
     rank_by: str = "formula"      # "formula", "measured" (PoB gain, needs --scores) or "fitted" (score fitted to PoB runs)
     leveling_config: dict = field(default_factory=dict)   # overrides of leveling.DEFAULT_CONFIG (trial levels, ...)
     exclude_supports: list = field(default_factory=list)  # support gem names not to socket (no effect on scores)
+    spirit_source: str = "fixed"  # "fixed": the Spirit budget is `spirit`; "level": quest Spirit at spirit_level + spirit_gear
+    spirit_level: int = 0         # character level for spirit_source "level" (0 = the final level)
+    spirit_gear: float = 0.0      # Spirit from equipment, added when spirit_source is "level"
+    spirit_gems: bool = True      # attach Spirit gem suggestions to the chains
 
     @classmethod
     def from_dict(cls, d: dict) -> tuple["Requirements", list[str]]:
@@ -229,6 +240,15 @@ def preflight(cat: catmod.Catalog, req: Requirements, unknown_keys: list[str] | 
     out.append(_check("req.budget", "requirements", "ok" if ok_budget else "fail", "Resource and Spirit budget",
                       f"{req.mana_per_second:g} mana per second, {req.spirit:g} Spirit" if ok_budget else
                       "mana_per_second must be above 0 and spirit 0 or more"))
+    sp_errors = spiritx.check(req)
+    if sp_errors:
+        out.append(_check("req.spirit", "requirements", "fail", "Spirit budget", "; ".join(sp_errors)))
+    else:
+        sb = spiritx.budget(req, lvl_cfg)
+        out.append(_check("req.spirit", "requirements", "ok", "Spirit budget",
+                          (f"{sb['budget']:g} Spirit: {sb['quest']:g} from quests at level {sb['level']} + {sb['gear']:g} from gear"
+                           if sb["source"] == "level" else f"{sb['budget']:g} Spirit (fixed)") +
+                          ("" if req.spirit_gems else "; no Spirit gem suggestions")))
     ok_num = 0.0 <= float(req.min_novelty) <= 1.0 and 1 <= int(req.top) <= 2000
     out.append(_check("req.scope", "requirements", "fail" if badc or not ok_num else "ok", "Chain kinds, novelty and size",
                       ("unknown kinds: " + ", ".join(badc)) if badc else
@@ -279,9 +299,10 @@ def mechanics(cat: catmod.Catalog, req: Requirements, scores: dict | None = None
     g = mechgraph.MechGraph(cat)
     pool = g.chains(top=max(4 * req.top, 1200), per_token=10 ** 6, per_main=24, per_entity=24)
     tempo = tempomod.load()
-    budget = {"mana_per_second": float(req.mana_per_second), "spirit": float(req.spirit)}
     lvl = levelmod.load()
     lvl_cfg, _ = levelmod.config(req.leveling_config)
+    sp_budget = spiritx.budget(req, lvl_cfg)        # "fixed": req.spirit, so tempo and scores are as before
+    budget = {"mana_per_second": float(req.mana_per_second), "spirit": float(sp_budget["budget"])}
     for c in pool:
         main = cat.skills[c["main_skill"]]
         helpers = [cat.skills[g.entities[k].meta["skill"]] for k in c["path"]
@@ -345,14 +366,19 @@ def mechanics(cat: catmod.Catalog, req: Requirements, scores: dict | None = None
     for t in sorted(toks):
         nodes.append({"id": "token:" + t, "kind": "token", "name": t.split(":", 1)[-1], "group": t.split(":", 1)[0],
                       "spec": round(g.spec.get(t, 0), 3)})
+    sp_gems = spiritx.catalogue(cat, tempo, lvl)
+    sp = spiritx.Scorer(g, cat, sp_gems, tempo) if req.spirit_gems else None
     for c in chains:
         c["path_tokens"] = ["token:" + t for t in c["tokens"]]
+        if sp:
+            c["spirit"] = sp.suggest(c, sp_budget["budget"], sp_budget.get("level"), gear=sp_budget.get("gear", 0.0))
     return {"nodes": nodes, "edges": edges, "chains": chains,
             "info": {**g.size(), "raw_chains": g.n_raw_chains, "pool": len(pool), "kept": len(chains),
                      **({"measured": chainresults.summary({k: v for k, v in scores.items() if k in {c["id"] for c in pool}}, len(pool))}
                         if scores else {}),
                      **({"fitted": {"chains": model["n"], **model.get("held_out", {})}} if model else {}),
                      "by_kind": dict(Counter(c["kind"] for c in chains)),
+                     "spirit": spiritx.info(req, lvl_cfg, sp_gems),
                      "support_names": supportgems.names(), "lineage_supports": supportgems.lineage_names()}}
 
 

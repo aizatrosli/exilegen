@@ -8,7 +8,7 @@ object on stdout; logs go to stderr. Exit status 0 means the object is a result;
     python3 -m exilegen.lab results --run-dir DIR [--top 20] [--tiers 0,1] [--codes]
     python3 -m exilegen.lab status --run-dir DIR
     python3 -m exilegen.lab chain --chain CHAIN_ID [--level N] [--exclude-support NAME ...] [--compare]
-                                  [--budget 6000] [--seed 7]
+                                  [--spirit-gems auto|none|NAME,NAME] [--spirit-gear N] [--budget 6000] [--seed 7]
 
 `chain` builds one mechanics-graph chain (an id from the graph export) from nothing and reports the build:
 code, honest DPS and EHP under the pinnacle profile, the support gems on the main skill, and the chain's
@@ -18,6 +18,18 @@ display names) keeps supports out of every socket; each gets an `alternatives` e
 `replaced_by` and `dps_without_exclusion` are null unless `--compare` also builds the unrestricted build
 (a second engine at the same time: about the same wall time, twice the CPU). `over_level` appears when the
 build still holds a unique above the level: the generator adds the unique that grants an item-only main skill.
+
+`--spirit-gems` adds Spirit gems (heralds, auras, persistent buffs) to the build: `auto` takes the chain's picks
+(builder/spiritx.py) for the Spirit a character of that level has, a comma-separated list takes exactly those gems;
+`none` (the default) changes nothing. The Spirit is the campaign quest Spirit held at `--level` (30 from 11, 60 from
+33, 100 from 55) plus `--spirit-gear N` from equipment; the build's config is set so that PoB counts the same. The
+answer gains `spirit`: `budget`, `reserved` and `unreserved` as PoB reports them for the finished build, `gems`
+(each with `enabled`: false when it was switched off for lack of Spirit, last-named first), `planned` (the budget
+the gems were chosen for), `dps_mapping`, and `states`: PoB's raw DPS as built (`pob_dps`), with the linking states
+switched on in the config, which the locked profiles leave off (`pob_dps_on`), and both again with the gems' groups
+switched off in this same build (`pob_dps_gems_off`, `pob_dps_gems_off_on`). With `--compare` the same chain is also built without the Spirit gems:
+`dps_without`, `dps_without_mapping` and the `states` figures of that build. `--compare` with both exclusions and
+Spirit gems runs a third build after the first two.
 
 Long searches use the ordinary `python3 -m exilegen build --run-dir DIR ...` (stop with a STOP file); `status`
 and `results` read its run directory. The engine comes from the environment as for the CLI (EXG_POBCTL /
@@ -134,7 +146,8 @@ def cmd_chain(a) -> dict:
     from .builder import chainbuild
     try:
         out = chainbuild.build(a.chain, level=a.level, exclude=a.exclude_support, budget=a.budget, seed=a.seed,
-                               compare=a.compare, log_fn=_log if a.verbose else None)
+                               compare=a.compare, log_fn=_log if a.verbose else None, spirit_gems=a.spirit_gems,
+                               spirit_gear=a.spirit_gear)
     except chainbuild.ChainError as ex:
         return {"error": str(ex)}
     return {"lab": LAB_VERSION, **out}
@@ -215,7 +228,11 @@ def parser() -> argparse.ArgumentParser:
     pc.add_argument("--exclude-support", action="append", default=[], metavar="NAME",
                     help="support gem display name that must not be socketed (repeatable)")
     pc.add_argument("--compare", action="store_true",
-                    help="with --exclude-support: also build without the exclusions, to fill the alternatives")
+                    help="also build without the exclusions (fills the alternatives) and without the Spirit gems "
+                         "(fills spirit.dps_without)")
+    pc.add_argument("--spirit-gems", default="none", metavar="auto|none|NAME,NAME",
+                    help="Spirit gems to add: the chain's picks for the level's Spirit, none, or exactly these gems")
+    pc.add_argument("--spirit-gear", type=float, default=0, metavar="N", help="Spirit from equipment to assume")
     pc.add_argument("--budget", type=int, default=6000)
     pc.add_argument("--seed", type=int, default=7)
     pc.add_argument("-v", "--verbose", action="store_true")

@@ -12,7 +12,19 @@ a skeleton the way chainscore does and synthesized. Two things differ from a cha
   exclude   Support gems no search step may socket (supportgems.banned), with "forbid_gem" constraints as a
             backstop, so one that got in anyway shows up as a violation.
 
-The pure parts (parts_at, restricted, alternatives) need no engine and are what the tests cover.
+  spirit    `spirit_gems` puts Spirit gems into the build as extra skill groups: "auto" takes spiritx's picks for
+            the chain as it stands at the level, a list of names takes exactly those gems. The character then has
+            the Spirit of its level and no more: PoB's quest rewards give all 100 Spirit at any level, so the
+            quests the level has not reached are switched off in the build's config (it travels with the code),
+            and `spirit_gear` is added as a custom modifier ("+N to Spirit"). The locked scoring profiles start
+            from a fresh config that keeps quest rewards but not custom modifiers, so SpiritEngine writes the
+            modifier into each profile's config after every load. synth switches extra skill groups off, last
+            first, while unreserved Spirit is negative: the gems are added best first, so the weakest goes first.
+            A gem of an attribute the class and the main skill are not built on goes in at gem level 1 (`gem_level`).
+            The answer's `spirit` block is PoB's own count for the finished build.
+
+The pure parts (parts_at, restricted, alternatives, spirit_request, spirit_report) need no engine and are what the
+tests cover.
 """
 from __future__ import annotations
 
@@ -182,29 +194,262 @@ def drop_forced(sk, exclude: list[str]) -> None:
             sk.trigger[k] = keep(sk.trigger[k])
 
 
-def _synth(sk, exclude, points, budget, seed, log_fn, out: dict, key: str) -> None:
+# ---------------------------------------------------------------------------------------------- Spirit gems
+SPIRIT_PROFILES = ("pinnacle_v1", "mapping_v1")       # synth.DEFAULT_PROFILES: the config sets the Spirit goes into
+
+_QUEST_LUA = """
+local ct = launch.main.modes["BUILD"].configTab
+local qs = {}
+for _, q in ipairs(data.questRewards) do
+  if q.Stat and q.Stat:find("to Spirit") and q.useConfig ~= false then qs[#qs + 1] = q end
+end
+table.sort(qs, function(a, b) return (a.AreaLevel or 0) < (b.AreaLevel or 0) end)
+for i, q in ipairs(qs) do
+  if i > %d then ct.input["quest" .. q.Description .. q.Area .. q.Info] = false end
+end
+"""
+_GEAR_LUA = """
+local ct = launch.main.modes["BUILD"].configTab
+local line = "+%d to Spirit"
+local cur = ct.input.customMods or ""
+if not cur:find(line, 1, true) then ct.input.customMods = (cur ~= "" and (cur .. "\\n") or "") .. line end
+"""
+_REBUILD_LUA = ' ct:BuildModList() ct:BuildModList() if EXG then EXG.state.dirty = true end return "ok"'
+
+
+# The attributes a class starts on. A Spirit gem of another attribute is socketed at gem level 1: at the level the
+# character could use, its attribute requirement makes the gear search trade damage for attributes (seen with
+# Lingering Illusion on a Witch: 32k -> 19k DPS for a gem PoB credits with nothing).
+CLASS_ATTRS = {"Warrior": {"strength"}, "Ranger": {"dexterity"}, "Huntress": {"dexterity"}, "Witch": {"intelligence"},
+               "Sorceress": {"intelligence"}, "Mercenary": {"strength", "dexterity"}, "Monk": {"dexterity", "intelligence"},
+               "Druid": {"strength", "intelligence"}}
+_ATTRS = ("strength", "dexterity", "intelligence")
+
+
+def low_level_gems(gems: list[dict], cls: str | None, main: dict | None, skills: dict) -> dict[str, str]:
+    """{gem id: gem name} of the plan's gems that need an attribute neither the class nor the main skill is built on."""
+    have = set(CLASS_ATTRS.get(cls or "", set())) | {a for a in _ATTRS if a in ((main or {}).get("gem_tags") or [])}
+    out = {}
+    for g in gems:
+        s = skills.get(g.get("skill") or "") or {}
+        need = {a for a in _ATTRS if a in (s.get("gem_tags") or [])}
+        if have and need - have and s.get("gem_id") and not g.get("skip"):
+            out[s["gem_id"]] = g["name"]
+    return out
+
+
+def spirit_engine(quests: int | None, gear: float, low: dict | None = None):
+    """An Engine whose builds hold the Spirit of `quests` campaign rewards plus `gear` from equipment, and whose
+    `low` gems (gem ids) arrive at gem level 1."""
+    from exilegen.engine import Engine
+    low = low or {}
+
+    class SpiritEngine(Engine):
+        def raw(self, method, params=None):
+            if method == "add_gem" and (params or {}).get("gemId") in low and "level" not in params:
+                params = dict(params, level=1)
+            r = super().raw(method, params)
+            if method == "new_build":
+                body = (_QUEST_LUA % quests if quests is not None else "") + (_GEAR_LUA % gear if gear > 0 else "")
+                if body:
+                    self.lua(body + _REBUILD_LUA)
+            return r
+
+        def load(self, code=None, xml=None, profile=None, main=None, timeout=None, gc=None):
+            r = super().load(code=code, xml=xml, profile=profile, main=main, timeout=timeout, gc=gc)
+            if gear > 0:
+                names = [p for p in SPIRIT_PROFILES if p != profile] + ([profile] if profile in SPIRIT_PROFILES else [])
+                for p in names:                 # the loaded profile last, so it is the active one again
+                    self.op("set_profile", name=p)
+                    self.op("lua", chunk=_GEAR_LUA % gear + _REBUILD_LUA)
+                if profile not in SPIRIT_PROFILES and names:
+                    self.op("set_profile", name=profile or "as_exported")
+            return r
+
+    return SpiritEngine()
+
+
+def quests_at(level: int, cfg: dict | None = None) -> int:
+    """How many of the campaign's Spirit rewards a character of `level` holds (leveling config `quest_spirit`)."""
+    table = (cfg or levelmod.DEFAULT_CONFIG)["quest_spirit"]
+    return sum(1 for at in table if int(at) <= level)
+
+
+def included_path(chain: dict, parts: list[dict], entities: dict) -> list[str]:
+    """The chain's path entities whose part is included at the level (entities: mechgraph's, key -> Entity)."""
+    gone = {(p["kind"], p["name"]) for p in parts if not p["included"]}
+    kind_of = {"unique": "unique", "keystone": "keystone", "asc": "asc", "skill": "skill", "util": "skill"}
+    out = []
+    for key in chain.get("path") or []:
+        e = entities.get(key)
+        if e is None or (kind_of.get(e.kind), e.name) not in gone:
+            out.append(key)
+    return out
+
+
+def spirit_request(spirit_gems, spirit_gear=0) -> tuple[str | list[str], float]:
+    """-> ("none" | "auto" | [names], gear). Raises ChainError for a bad value."""
+    gear = spirit_gear or 0
+    if isinstance(gear, bool) or not isinstance(gear, (int, float)) or gear < 0:
+        raise ChainError(f"spirit gear must be a number, 0 or more, not {spirit_gear!r}")
+    if spirit_gems is None or spirit_gems == [] or str(spirit_gems).strip().lower() in ("", "none"):
+        return "none", float(gear)
+    if isinstance(spirit_gems, str) and spirit_gems.strip().lower() == "auto":
+        return "auto", float(gear)
+    names = clean_names(spirit_gems.split(",") if isinstance(spirit_gems, str) else spirit_gems)
+    if not names:
+        return "none", float(gear)
+    return names, float(gear)
+
+
+def spirit_plan(original: dict, chain: dict, parts: list[dict], level: int, mode, gear: float, cat) -> dict:
+    """What goes into the build: {"budget", "quest", "gear", "quests", "gems": [catalogue pick or named gem], ...}."""
+    from . import mechgraph, spiritx
+    sc = spiritx.Scorer(mechgraph.MechGraph(cat), cat)
+    quest = spiritx.quest_spirit(level)
+    plan = {"quest": quest, "gear": gear, "quests": quests_at(level), "budget": quest + gear, "mode": "auto" if mode == "auto" else "named"}
+    path = included_path(original, parts, sc.g.entities)
+    sug = sc.suggest(dict(original, tokens=chain["tokens"]), quest + gear, level, path=path, gear=gear)
+    plan.update(budget=sug["budget"], own=sug["own"], free=sug["free"], notes=sug.get("notes") or [])
+    if mode == "auto":
+        plan["gems"] = sug["picks"]
+        plan["more"] = sug["more"]
+        return plan
+    by = {c["name"].lower(): c for c in sc.candidates(original, path)}
+    gems = []
+    for n in mode:
+        g = sc.find(n)
+        if g is None:
+            gems.append({"name": n, "skill": None, "spirit": None, "level": None, "skip": "unknown"})
+            continue
+        c = by.get(g["name"].lower())
+        d = {"name": g["name"], "skill": g["skill"], "spirit": g["spirit"], "level": g["level"]}
+        if c:
+            d.update({k: c[k] for k in ("role", "token", "why", "score") if k in c})
+        if g["flags"]:
+            d["flags"] = list(g["flags"])
+        if g["level"] is not None and g["level"] > level:
+            d["skip"] = "level"           # the character cannot use the gem yet: it stays out of the build
+        gems.append(d)
+    left = float(plan["free"])
+    for d in gems:                        # in the order given: a gem that does not fit what is left stays out
+        if d.get("skip"):
+            continue
+        if d["spirit"] > left:
+            d["skip"] = "spirit"
+        else:
+            left -= d["spirit"]
+    plan["gems"] = gems
+    return plan
+
+
+def _group_of(skills_view, gem: dict) -> dict | None:
+    """The gem's socket group in the engine's skills view (synth labels an extra group with the gem's name)."""
+    groups = (skills_view or {}).get("groups") or []
+    low = gem["name"].lower()
+    for g in groups:
+        if str(g.get("label") or "").lower() == low and not g.get("grantedBy"):
+            return g
+    for g in groups:
+        if any((x.get("id") or "") == gem["skill"] or str(x.get("name") or "").lower() == low for x in g.get("skills") or []):
+            return g
+    return None
+
+
+def spirit_report(plan: dict, stats: dict | None, skills_view) -> dict:
+    """The answer's `spirit` block: PoB's Spirit for the finished build, and which gems are enabled."""
+    sp = (stats or {}).get("spirit") or {}
+    gems = []
+    for g in plan["gems"]:
+        grp = None if g.get("skip") else _group_of(skills_view, g)
+        d = {"name": g["name"], "spirit": g["spirit"], "enabled": bool(grp is not None and grp.get("enabled") is not False)}
+        for k in ("role", "token", "why"):
+            if g.get(k):
+                d[k] = g[k]
+        if not d["enabled"]:              # "level": unlocks later; "spirit": switched off, the Spirit ran out
+            d["reason"] = g.get("skip") or ("spirit" if grp is not None else "unknown")
+        if g.get("skip") == "level":
+            d["note"] = f"needs character level {g['level']}"
+        elif g.get("skip") == "spirit":
+            d["note"] = "left out: it does not fit the Spirit that is free"
+        elif g.get("skip") == "unknown":
+            d["note"] = "not a Spirit gem this version knows"
+        elif grp is None:
+            d["note"] = "not in the build: the engine has no such gem"
+        elif g.get("flags"):
+            d["note"] = "; ".join(g["flags"])
+        if d["enabled"] and g["name"] in (plan.get("low") or {}).values():
+            d["gem_level"] = 1            # off-attribute for this character: socketed at the cheapest requirement
+        gems.append(d)
+    out = {"budget": sp.get("total"), "reserved": sp.get("reserved"), "unreserved": sp.get("unreserved"), "gems": gems,
+           "planned": {"budget": plan["budget"], "quest": plan["quest"], "gear": plan["gear"], "own": plan.get("own"),
+                       "free": plan.get("free")}}
+    if sp.get("total") is not None and sp["total"] != plan["budget"]:
+        out["planned"]["note"] = (f"PoB counts {sp['total']:g} Spirit, the plan {plan['budget']:g}: the difference comes from "
+                                  "the build's own equipment, passives or ascendancy")
+    if plan.get("notes"):
+        out["notes"] = plan["notes"]
+    return out
+
+
+def _states(eng, code: str, tokens: list[str], skills_view=None, gems: list[dict] | None = None) -> dict | None:
+    """PoB's DPS of a finished build with and without the states of `tokens` switched on in the config
+    (chainscore's state pass: the locked profile turns no conditional state on). With `gems`, the same four
+    figures again with those gems' groups switched off in this very build: what the gems alone are worth,
+    free of the difference between two searches."""
+    from . import chainscore
+    vars_ = chainscore.state_vars(tokens)
+    read = lambda: eng.stats(fields=["dps"])["dps"]["best"]
+    eng.ensure_loaded(code=code, profile=chainscore.STATE_PROFILE)
+    out = {"vars": sorted(vars_), "pob_dps": read()}
+    off = {str(g["index"]): False for g in (_group_of(skills_view, x) for x in gems or []) if g and g.get("enabled") is not False}
+    if vars_:
+        chainscore._set_vars(eng, vars_)
+        out["pob_dps_on"] = read()
+    if off:
+        eng.apply(group_enabled=off, fields=False)
+        if vars_:
+            out["pob_dps_gems_off_on"] = read()
+            chainscore._set_vars(eng, {k: None for k in vars_})
+        out["pob_dps_gems_off"] = read()
+    return out
+
+
+def _synth(sk, exclude, points, budget, seed, log_fn, out: dict, key: str, engine=None, state_tokens=None,
+           state_gems=None) -> None:
     from exilegen.engine import Engine
     from .synth import make_scorer, summary_row, synthesize
     try:
         sk = copy.deepcopy(sk)
         sk.constraints = [f"forbid_gem:{x}" for x in exclude]
         drop_forced(sk, exclude)
-        with Engine() as eng:
+        with (engine() if engine else Engine()) as eng:
             res = synthesize(sk, eng, make_scorer(constraints=list(sk.constraints)), budget=budget, seed=seed,
                              log_fn=log_fn, exclude_supports=exclude, asc_points=points)
+            if state_tokens is not None and res.ok and res.code:
+                try:
+                    res.descriptor["states"] = _states(eng, res.code, state_tokens, res.skills, state_gems)
+                except Exception as ex:  # noqa: BLE001 - the build stands without the state figures
+                    res.notes.append(f"state pass failed: {ex}")
         out[key] = (res, summary_row(res))
     except Exception as ex:  # noqa: BLE001 - reported by the caller
         out[key] = ex
 
 
+def _dps(row: dict, profile: str = "pinnacle_v1"):
+    return row.get(f"{profile}.dps_honest", row.get("dps_honest") if profile == "pinnacle_v1" else None)
+
+
 def build(chain_id: str, level: int | None = None, exclude=None, budget: int = 6000, seed: int = 7,
-          compare: bool = False, log_fn=None, chains: list[dict] | None = None) -> dict:
+          compare: bool = False, log_fn=None, chains: list[dict] | None = None, spirit_gems=None,
+          spirit_gear: float = 0) -> dict:
     from . import catalog as catmod
     from . import chainresults
     from .skeletons import Generator
     t0 = time.time()
     level = check_level(level)
     exclude = clean_names(exclude)
+    mode, gear = spirit_request(spirit_gems, spirit_gear)
     original = find_chain(chain_id, chains)
     parts = parts_at(original, level)
     cat = catmod.load()
@@ -214,17 +459,37 @@ def build(chain_id: str, level: int | None = None, exclude=None, budget: int = 6
     if sk is None:
         raise ChainError(f"no skeleton for this chain at level {level}: {gen.last_reject or 'rejected'}")
     points = asc_points(level)
+    plan = engine = None
+    plain_sk = sk
+    if mode != "none":
+        plan = spirit_plan(original, chain, parts, level, mode, gear, cat)
+        plan["low"] = low_level_gems(plan["gems"], sk.cls, cat.skills.get(original["main_skill"]), cat.skills)
+        engine = lambda: spirit_engine(plan["quests"], plan["budget"] - plan["quest"], plan["low"])
+        sk = copy.deepcopy(sk)
+        have = {str(x).lower() for x in sk.extra_skills or []}
+        sk.extra_skills = list(sk.extra_skills or []) + [g["skill"] for g in plan["gems"] if not g.get("skip") and g["skill"].lower() not in have]
+        if log_fn:
+            log_fn(f"spirit: budget {plan['budget']:g} ({plan['quest']:g} quests + {plan['gear']:g} gear), chain reserves "
+                   f"{plan.get('own')}, gems {[g['name'] for g in plan['gems']] or 'none'}")
+    tokens = sorted({g["token"] for g in (plan or {}).get("gems", []) if g.get("token") and not g.get("skip")} | set(chain.get("tokens") or [])) if plan else None
     if log_fn:
         log_fn(f"chain {chain_id} {original['main_name']} level {level}, {points} ascendancy points, "
                f"left out: {[p['name'] for p in parts if not p['included']] or 'nothing'}, excluded: {exclude or 'nothing'}")
     got: dict = {}
     both = bool(compare and exclude)
-    side = threading.Thread(target=_synth, args=(sk, [], points, budget, seed, None, got, "base"), daemon=True) if both else None
+    bare = bool(compare and plan and any(not g.get("skip") for g in plan["gems"]))        # the same build without the Spirit gems
+    # one build runs beside the main one: the one without Spirit gems when there are any, else the unrestricted one
+    side_args = (plain_sk, exclude, points, budget, seed, None, got, "bare", engine, tokens) if bare else \
+        (sk, [], points, budget, seed, None, got, "base", engine)
+    side = threading.Thread(target=_synth, args=side_args, daemon=True) if both or bare else None
     if side:
         side.start()
-    _synth(sk, exclude, points, budget, seed, log_fn, got, "main")
+    _synth(sk, exclude, points, budget, seed, log_fn, got, "main", engine, tokens,
+           [g for g in plan["gems"] if not g.get("skip")] if plan else None)
     if side:
         side.join()
+    if both and bare:                                     # a third build, after the two: never three engines at once
+        _synth(sk, [], points, budget, seed, None, got, "base", engine)
     if isinstance(got["main"], Exception):
         raise got["main"]
     res, row = got["main"]
@@ -249,6 +514,29 @@ def build(chain_id: str, level: int | None = None, exclude=None, budget: int = 6
         slipped = sorted(supportgems.norm(exclude) & supportgems.norm(sup))
         if slipped:
             out["excluded_present"] = [s for s in sup if s.lower() in slipped]
+    if plan:
+        sp = spirit_report(plan, (res.stats or {}).get("pinnacle_v1") if isinstance(res.stats, dict) else None, res.skills)
+        sp["dps_mapping"] = _dps(row, "mapping_v1")
+        if (res.descriptor or {}).get("states"):
+            sp["states"] = dict(res.descriptor["states"])
+        if plan.get("more"):
+            sp["more"] = plan["more"]
+        if compare:
+            sp["dps_without"] = None
+            if not bare:
+                sp["dps_without"] = out["dps"]            # nothing was added: the build is the comparison
+            elif not isinstance(got.get("bare"), Exception):
+                wres, wrow = got["bare"]
+                if wres.ok and wres.code:
+                    sp["dps_without"] = _dps(wrow)
+                    sp["dps_without_mapping"] = _dps(wrow, "mapping_v1")
+                    ws = (wres.descriptor or {}).get("states")
+                    if ws and "states" in sp:
+                        sp["states"].update(pob_dps_without=ws["pob_dps"], pob_dps_without_on=ws.get("pob_dps_on"))
+            elif log_fn:
+                log_fn(f"the build without Spirit gems failed: {got.get('bare')}")
+        out["spirit"] = sp
+        out.setdefault("alternatives", [])
     over = over_level(sk, level)
     if over:
         out["over_level"] = over
