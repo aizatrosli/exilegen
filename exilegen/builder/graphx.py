@@ -48,6 +48,7 @@ from . import chainfit
 from . import chainresults
 from . import leveling as levelmod
 from . import spiritx
+from . import states as statesmod
 from . import supportgems
 from . import tempo as tempomod
 
@@ -376,8 +377,13 @@ def mechanics(cat: catmod.Catalog, req: Requirements, scores: dict | None = None
                                   "type": side, "w": round(l.weight if side == "produces" else max(l.payoff, 0.2), 2),
                                   "line": l.line[:200]})
     for t in sorted(toks):
+        reg = statesmod.for_token(t)
+        prim = reg["states"][0] if reg["states"] else {}
+        # additive: who holds the state, its family, whether PoB calculates it and whether scoring can switch it on
+        state = {"owner": prim["key"].split("|")[0], "family": prim.get("family")} if prim.get("key") else {}
         nodes.append({"id": "token:" + t, "kind": "token", "name": t.split(":", 1)[-1], "group": t.split(":", 1)[0],
-                      "spec": round(g.spec.get(t, 0), 3)})
+                      "spec": round(g.spec.get(t, 0), 3), **state, "verified": reg["verified"],
+                      "switchable": bool(reg.get("switch")), **({"cap": reg["cap"]} if reg.get("cap") else {})})
     sp_gems = spiritx.catalogue(cat, tempo, lvl)
     sp = spiritx.Scorer(g, cat, sp_gems, tempo) if req.spirit_gems else None
     for c in chains:

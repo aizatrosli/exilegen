@@ -26,6 +26,7 @@ import time
 
 from . import catalog as catmod
 from . import graphx
+from . import states as statesmod
 
 
 def pool_chains(top: int = 100000) -> list[dict]:
@@ -110,29 +111,18 @@ def _worker(wid: int, jobs, results, budget: int, seed: int):
 # The locked profiles turn no conditional state on, so a chain whose point is "X makes the state, Y pays off on it"
 # gets the cost of its parts and none of the payoff. This pass loads each finished build again and reads PoB's DPS
 # with the chain's states switched on: for the chain build (it makes the state) and for its baseline (to see what
-# the state alone is worth to a build without the payoff part). Tokens not listed here (crit, damage types,
-# minions, attributes, mana or life spent) are worked out by PoB itself and need no switch.
-STATE_CONFIG = {
-    "enemy:Frozen": {"conditionEnemyFrozen": True}, "enemy:Chilled": {"conditionEnemyChilled": True},
-    "enemy:Shocked": {"conditionEnemyShocked": True}, "enemy:Electrocuted": {"conditionEnemyElectrocuted": True},
-    "enemy:Ignited": {"conditionEnemyIgnited": True}, "enemy:Bleeding": {"conditionEnemyBleeding": True},
-    "enemy:Poisoned": {"conditionEnemyPoisoned": True}, "enemy:Stunned": {"conditionEnemyStunned": True},
-    "enemy:Cursed": {"conditionEnemyCursed": True}, "enemy:ArmourBroken": {"conditionEnemyArmourBroken": True},
-    "charge:Power": {"usePowerCharges": True}, "charge:Frenzy": {"useFrenzyCharges": True},
-    "charge:Endurance": {"useEnduranceCharges": True}, "rage": {"multiplierRage": 30},
-    "corpse": {"multiplierNearbyCorpse": 1, "conditionConsumedCorpseRecently": True},
-    "block": {"conditionBlockedRecently": True}, "flask": {"conditionUsingFlask": True},
-    "infusion": {"conditionInfusionConsumedRecently": True},
-}
+# the state alone is worth to a build without the payoff part). Which config values a token switches comes from
+# the state registry (states.TOKENS); tokens without a switch there (damage types, minions, attributes) are
+# worked out by PoB itself.
 STATE_PROFILE = "pinnacle_v1"
 _ENGINE = None
 
 
-def state_vars(tokens: list[str]) -> dict:
-    out: dict = {}
-    for t in tokens or []:
-        out.update(STATE_CONFIG.get(t, {}))
-    return out
+def state_vars(tokens: list[str], chain: dict | None = None) -> dict:
+    """PoB config values that switch a chain's states on (states.TOKENS). The locked profile is a boss fight, so
+    kill-gated states stay off; "spent Recently" counts come from the chain's own cost per second when known."""
+    spent = ((chain or {}).get("tempo") or {}).get("cost_per_second")
+    return statesmod.switch_for(tokens, clearing=False, spent_per_second=spent)
 
 
 def _set_vars(engine, values: dict) -> None:
@@ -180,7 +170,7 @@ def states(out: str, workers: int) -> None:
     for r in _read(os.path.join(out, "chain_scores.jsonl")):
         if r["id"] in done or not r.get("code") or r["id"] not in pool:
             continue
-        v = state_vars(pool[r["id"]]["tokens"])
+        v = state_vars(pool[r["id"]]["tokens"], pool[r["id"]])
         if v:
             jobs.append({"id": r["id"], "code": r["code"], "vars": v, "base_code": (base.get(r.get("base_key")) or {}).get("code")})
     print(f"states: {len(jobs)} chains with a switchable state ({len(done)} already done)", flush=True)
