@@ -111,9 +111,10 @@ def _short(r: dict | None) -> str:
 
 class _Synth:
     def __init__(self, sk: Skeleton, engine, scorer, budget: int, log_fn=None, gear_optimise: bool = True,
-                 polish=POLISH, seed: int = 0, polish_cycles: int = POLISH_CYCLES):
+                 polish=POLISH, seed: int = 0, polish_cycles: int = POLISH_CYCLES, asc_points: int | None = None):
         self.sk, self.e, self.budget, self.seed = sk, engine, int(budget), seed
         self.scorer = make_scorer(scorer, constraints=list(getattr(sk, "constraints", None) or []))
+        self.asc_points = asc_points           # cap on ascendancy points spent (None = all the engine gives)
         self.profiles = list(self.scorer.profile_list)
         self.log_fn = log_fn
         self.gear_optimise = gear_optimise
@@ -599,6 +600,8 @@ class _Synth:
         ctx, e = self.ctx, self.e
         summ = e.summary().get("points") or {}
         left = int(summ.get("ascMax") or 0) - int(summ.get("ascUsed") or 0)
+        if self.asc_points is not None:
+            left = min(left, int(self.asc_points) - int(summ.get("ascUsed") or 0))
         stop = ctx.evals + max(30, int(self.budget * SHARE["ascendancy"]))
         forced = [x.lower() for x in self.sk.ascendancy_nodes or []]
         taken = []
@@ -842,12 +845,17 @@ class _Synth:
 
 def synthesize(skeleton: Skeleton, engine: Any, scorer: Any = None, budget: int = 6000, log_fn=None,
                gear_optimise: bool = True, polish=POLISH, seed: int = 0,
-               polish_cycles: int = POLISH_CYCLES) -> BuildResult:
+               polish_cycles: int = POLISH_CYCLES, exclude_supports=None,
+               asc_points: int | None = None) -> BuildResult:
     """contracts.Synthesizer: build `skeleton` from nothing in `engine`, judged by `scorer` (default:
     pinnacle_v1 + mapping_v1, DEFAULT_FLOORS, no constraints). Never raises for a bad skeleton: the result
-    has ok=False and error set. `budget` is in engine evaluations."""
-    return _Synth(skeleton, engine, scorer, budget, log_fn=log_fn, gear_optimise=gear_optimise,
-                  polish=polish, seed=seed, polish_cycles=polish_cycles).run()
+    has ok=False and error set. `budget` is in engine evaluations. `exclude_supports` are support gem display
+    names no search step may socket (supportgems.banned); `asc_points` caps the ascendancy points spent, for
+    a character below the last trial. Both default to no restriction."""
+    from .supportgems import banned
+    with banned(engine, exclude_supports):
+        return _Synth(skeleton, engine, scorer, budget, log_fn=log_fn, gear_optimise=gear_optimise,
+                      polish=polish, seed=seed, polish_cycles=polish_cycles, asc_points=asc_points).run()
 
 
 def summary_row(res: BuildResult) -> dict:
