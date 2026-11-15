@@ -145,6 +145,8 @@ def correct(groups: list[EnergyGroup] | None, power: float, unmodelled_factor: f
             gflags.append(f"unverified:energy_unmodelled:{g.meta_name or g.meta_id}")
         elif rate is None:
             gflags.append(f"unverified:energy_inputs_missing:{g.meta_name or g.meta_id}")
+        if meta is not None and rate == 0:      # the feeder makes none of the gem's events: the reaction never fires
+            gflags.append(f"unverified:energy_no_events:{g.meta_name or g.meta_id}")
         if rate is not None and rate > 1.0 / SERVER_TICK:
             rate = 1.0 / SERVER_TICK
             gflags.append(f"energy:server_tick_cap:{g.group}")

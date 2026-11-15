@@ -461,7 +461,7 @@ def build(chain_id: str, level: int | None = None, exclude=None, budget: int = 6
     parts = parts_at(original, level)
     cat = catmod.load()
     chain = restricted(original, parts, level, {sid: s.get("name") for sid, s in cat.skills.items()})
-    rx, rx_note = original.get("reaction"), None
+    rx, rx_note, rx_ban = original.get("reaction"), None, []
     if rx:
         from . import reactions
         gone = {p["name"] for p in parts if not p["included"]}
@@ -470,6 +470,8 @@ def build(chain_id: str, level: int | None = None, exclude=None, budget: int = 6
             rx_note = f"{rx['meta_name']} or its spell is not available at level {level}: built without the reaction"
         elif reactions.buildable(chain):
             raise ChainError(reactions.buildable(chain))
+        else:                                 # supports that would switch the reaction's own event off stay out
+            rx_ban = [k for k in reactions.event_killers(chain) if k.lower() not in supportgems.norm(exclude)]
     gen = Generator(cat)
     sk = skeleton(gen, chain, original, level, seed)
     if sk is None:
@@ -495,17 +497,17 @@ def build(chain_id: str, level: int | None = None, exclude=None, budget: int = 6
     both = bool(compare and exclude)
     bare = bool(compare and plan and any(not g.get("skip") for g in plan["gems"]))        # the same build without the Spirit gems
     # one build runs beside the main one: the one without Spirit gems when there are any, else the unrestricted one
-    side_args = (plain_sk, exclude, points, budget, seed, None, got, "bare", engine, tokens) if bare else \
-        (sk, [], points, budget, seed, None, got, "base", engine)
+    side_args = (plain_sk, exclude + rx_ban, points, budget, seed, None, got, "bare", engine, tokens) if bare else \
+        (sk, rx_ban, points, budget, seed, None, got, "base", engine)
     side = threading.Thread(target=_synth, args=side_args, daemon=True) if both or bare else None
     if side:
         side.start()
-    _synth(sk, exclude, points, budget, seed, log_fn, got, "main", engine, tokens,
+    _synth(sk, exclude + rx_ban, points, budget, seed, log_fn, got, "main", engine, tokens,
            [g for g in plan["gems"] if not g.get("skip")] if plan else None)
     if side:
         side.join()
     if both and bare:                                     # a third build, after the two: never three engines at once
-        _synth(sk, [], points, budget, seed, None, got, "base", engine)
+        _synth(sk, rx_ban, points, budget, seed, None, got, "base", engine)
     if isinstance(got["main"], Exception):
         raise got["main"]
     res, row = got["main"]
@@ -562,6 +564,7 @@ def build(chain_id: str, level: int | None = None, exclude=None, budget: int = 6
         group = next((n for n in res.notes or [] if str(n).startswith("trigger group")), None)
         out["reaction"] = {"meta_gem": rx["meta_name"], "casts": rx["spell_names"], "fed_by": rx["event_label"],
                            "built": bool(group) and not rx_note, "modelled": rx["modelled"], "energy": rx["energy"],
+                           "kept_out": rx_ban,
                            "note": rx_note or (None if rx["modelled"] else
                                                f"the scorer has no Energy model for {rx['meta_name']}: the triggered "
                                                f"spell's damage is counted as if it always fired")}

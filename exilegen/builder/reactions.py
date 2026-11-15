@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 from collections import Counter
 
 from . import catalog as catmod
@@ -85,11 +86,46 @@ def hosts(m: dict, cat: catmod.Catalog) -> list[dict]:
     return sorted((s for s in cat.skills.values() if hostable(m, s)), key=lambda s: s["id"])
 
 
+NOT_USED_BY_HAND = {"Persistent", "OngoingSkill", "NoAttackOrCastTime", "Buff", "Aura", "HasReservation", "Meta"}
+NO_DAMAGE_RX = re.compile(r"(doesn't|does not|do not|don't) deal damage", re.I)
+# game stat ids of a support that stops its skill from making the event (data/stat_ids.json)
+EVENT_KILLERS = {
+    "crit": ("global_cannot_crit",),
+    "enemy:Shocked": ("never_shock", "cannot_inflict_elemental_ailments", "active_skill_never_freeze_shock_ignite", "deal_no_elemental_damage"),
+    "enemy:Frozen": ("never_freeze", "cannot_inflict_elemental_ailments", "active_skill_never_freeze_shock_ignite", "deal_no_elemental_damage"),
+    "enemy:Ignited": ("never_ignite", "cannot_inflict_elemental_ailments", "active_skill_never_freeze_shock_ignite", "deal_no_elemental_damage"),
+}
+
+
+def feeds_by_hand(s: dict) -> bool:
+    """A main skill the player uses and that deals damage of its own: a buff that reserves Spirit (Fulmination,
+    Herald of Ash) or a skill whose text says it deals none (Frostflame Nova) makes no event for a meta gem."""
+    t = set(s.get("types") or [])
+    if s.get("name") in ((load().get("rules") or {}).get("no_damage_mains") or {}).get("skills", []):
+        return False
+    if {"CreatesMinion", "Persistent"} <= t:
+        return True                          # a persistent minion: judged by its own event (minion deaths)
+    return not (t & NOT_USED_BY_HAND or NO_DAMAGE_RX.search(s.get("description") or ""))
+
+
+def event_killers(chain: dict) -> list[str]:
+    """Support gems that must stay off a reaction build: they stop the main skill from making the event that
+    feeds the meta gem (Controlled Destruction: no Critical Hits, so Cast on Critical never fires)."""
+    from . import edges
+    want = EVENT_KILLERS.get((chain.get("reaction") or {}).get("event"), ())
+    if not want:
+        return []
+    return sorted(k.split(":", 1)[1] for k, v in edges.load_ids().items()
+                  if k.startswith("support:") and set(v.get("ids") or []) & set(want))
+
+
 def makes_event(ev: dict, s: dict, ent: Entity | None) -> float:
     """How well a main skill makes the event (0 = it does not)."""
     t = set(s.get("types") or [])
     minion = bool({"CreatesMinion", "Minion"} & t)
     need = ev["needs"]
+    if not feeds_by_hand(s):
+        return 0.0
     if need == "minion":
         return 1.0 if {"CreatesMinion", "Persistent"} <= t else 0.0     # only persistent minions give Energy
     if minion and need != "any":

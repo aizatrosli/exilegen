@@ -104,7 +104,8 @@ def _worker(wid: int, jobs, results, budget: int, seed: int):
                 # a chain build keeps the chain's uniques: the unique trial would swap them for a tuned rare
                 # whenever that scores higher, and the build would then measure the skill without the chain
                 res = synthesize(sk, engine, scorer, budget=budget, seed=seed, unique_trial="off",
-                                 **({"polish": rxmod.POLISH} if ch.get("reaction") else {}))
+                                 **({"polish": rxmod.POLISH, "exclude_supports": rxmod.event_killers(ch)}
+                                    if ch.get("reaction") else {}))
                 s = res.score or {}
                 row.update(summary_row(res))
                 row.update(id=ch["id"], skeleton_id=sk.id, ascendancy=sk.ascendancy, main_skill=ch["main_skill"],

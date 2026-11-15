@@ -111,3 +111,31 @@ def test_lab_shows_the_reaction(pool):
     v = lab._chain_view(c, {})
     assert v["kind"] == "reaction" and v["reaction"]["meta_gem"] == c["reaction"]["meta_name"]
     assert v["reaction"]["reliability"]["boss"] == c["reaction"]["boss"]
+
+
+def test_only_skills_used_by_hand_feed_a_meta_gem(cat, pool):
+    by = {s["name"]: s for s in cat.skills.values()}
+    assert not reactions.feeds_by_hand(by["Fulmination"]) and not reactions.feeds_by_hand(by["Herald of Ash"])
+    assert not reactions.feeds_by_hand(by["Frostflame Nova"])            # its text says it deals no damage
+    assert reactions.feeds_by_hand(by["Spark"]) and reactions.feeds_by_hand(by["Ember Fusillade"])
+    mains = {c["main_name"] for c in _rx(pool)}
+    assert not mains & {"Fulmination", "Herald of Ash", "Frostflame Nova", "Briarpatch", "Mist Raven", "Volatile Dead"}
+
+
+def test_supports_that_switch_the_event_off_stay_out(pool):
+    crit = next(c for c in _rx(pool) if c["reaction"]["event"] == "crit")
+    assert "Controlled Destruction" in reactions.event_killers(crit)
+    shock = next(c for c in _rx(pool) if c["reaction"]["event"] == "enemy:Shocked")
+    ks = reactions.event_killers(shock)
+    assert "Elemental Focus" in ks and "Stormchain" in ks and "Controlled Destruction" not in ks
+    assert reactions.event_killers({"reaction": {"event": "dodge"}}) == []
+
+
+def test_a_meta_gem_that_never_fires_is_flagged():
+    from exilegen.scoring import energy
+    from exilegen.scoring.adapter import normalise_energy_group
+    g = normalise_energy_group({"group": 1, "meta": "MetaCastOnCritPlayer", "metaName": "Cast on Critical",
+                                "feeder": {"hits_per_sec": 4.6, "crit": 0.0},
+                                "spells": [{"name": "Snap", "dps": 1000.0, "pobRate": 0.25, "castTime": 0.5}]})
+    r = energy.correct([g], 20.0)
+    assert r.dps_corrected == 0 and any("energy_no_events" in f for f in r.flags)
