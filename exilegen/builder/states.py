@@ -29,7 +29,9 @@ from . import catalog as catmod
 
 PATH = os.path.join(catmod.DATA_DIR, "states.json")
 MANA_WINDOW = 4.0          # "Recently" is the past 4 seconds
-DEFAULT_MANA_RECENT = 800  # mana spent recently when the chain's cost is unknown
+SUPPORTED_COST = 2.5       # a socketed skill costs about this much more than the bare gem (cost multipliers of supports)
+DEFAULT_MANA_RECENT = 800  # mana spent recently when the chain's cost is unknown, and the least a spender is credited:
+                           # payoffs count in steps of 200, and a bare gem's cost over 4 seconds is often under one step
 
 # token -> states it stands for (first is the primary), the config that credits it, and how far to trust that.
 #   needs   "kills": only true while clearing, so the boss profile does not credit it
@@ -42,8 +44,9 @@ TOKENS: dict[str, dict] = {
     "enemy:Chilled": {"states": ["enemy|condition|Chilled"], "switch": {"conditionEnemyChilled": True}},
     "enemy:Ignited": {"states": ["enemy|condition|Ignited", "enemy|condition|Burning"],
                       "switch": {"conditionEnemyIgnited": True, "conditionEnemyBurning": True}},
+    # no stack count: PoB works out the average number of Poisons itself, and a fixed count lowers it (measured)
     "enemy:Poisoned": {"states": ["enemy|condition|Poisoned", "enemy|count|PoisonStacks"],
-                       "switch": {"conditionEnemyPoisoned": True, "multiplierPoisonOnEnemy": 1}, "cap": {"default": 1}},
+                       "switch": {"conditionEnemyPoisoned": True}, "cap": {"default": 1}},
     "enemy:Bleeding": {"states": ["enemy|condition|Bleeding"], "switch": {"conditionEnemyBleeding": True}},
     "enemy:Electrocuted": {"states": ["enemy|condition|Electrocuted", "enemy|condition|Immobilised"],
                            "switch": {"conditionEnemyElectrocuted": True}},
@@ -70,7 +73,11 @@ TOKENS: dict[str, dict] = {
     "corpse": {"states": ["self|count|NearbyCorpse", "self|condition|ConsumedCorpseRecently"],
                "switch": {"multiplierNearbyCorpse": 1, "conditionConsumedCorpseRecently": True}},
     # two states under one token: the per-hit crit pass (automatic) and "if you've Crit Recently" (19 lines, a switch)
-    "crit": {"states": ["self|condition|CritRecently", "self|condition|CriticalStrike"], "switch": {"conditionCritRecently": True}},
+    # No switch: measured on 262 chains, conditionCritRecently moved the baseline as often as the chain (and down
+    # as often as up), because it also feeds "haven't Crit Recently" lines. It is credited once the payoff edge
+    # itself says "Recently".
+    "crit": {"states": ["self|condition|CritRecently", "self|condition|CriticalStrike"],
+             "note": "Crit Recently is not switched: it moves builds that have no payoff for it"},
     "life:low": {"states": ["self|condition|LowLife"], "switch": {"conditionLowLife": True}},
     "life:full": {"states": ["self|condition|FullLife"], "switch": {"conditionFullLife": True}},
     "mana:low": {"states": ["self|condition|LowMana"], "switch": {"conditionLowMana": True}},
@@ -137,7 +144,7 @@ def switch_for(tokens: list[str], clearing: bool = False, spent_per_second: floa
         sw = dict(t["switch"])
         if t.get("spent") and spent_per_second:
             for k in sw:
-                sw[k] = max(1, round(spent_per_second * MANA_WINDOW))
+                sw[k] = max(DEFAULT_MANA_RECENT, round(spent_per_second * SUPPORTED_COST * MANA_WINDOW))
         out.update(sw)
     return out
 

@@ -26,9 +26,12 @@ def test_switches():
     # kill-gated states are not credited in a boss fight
     assert states.switch_for(["kill"]) == {} and states.switch_for(["kill"], clearing=True) == {"conditionKilledRecently": True}
     # mana spent Recently is the chain's own cost over the 4 second window
-    assert states.switch_for(["mana_spent"], spent_per_second=120.0) == {"multiplierManaSpentRecently": 480}
+    # mana spent Recently is the chain's own supported cost over the 4 second window, never under the floor
+    assert states.switch_for(["mana_spent"], spent_per_second=120.0) == {"multiplierManaSpentRecently": 1200}
     assert states.switch_for(["mana_spent"]) == {"multiplierManaSpentRecently": states.DEFAULT_MANA_RECENT}
-    assert chainscore.state_vars(["mana_spent"], {"tempo": {"cost_per_second": 50}}) == {"multiplierManaSpentRecently": 200}
+    assert chainscore.state_vars(["mana_spent"], {"tempo": {"cost_per_second": 50}}) == {"multiplierManaSpentRecently": 800}
+    # switches that measured as generic or harmful stay off
+    assert states.switch_for(["crit"]) == {} and states.switch_for(["enemy:Poisoned"]) == {"conditionEnemyPoisoned": True}
 
 
 def test_token_view():
