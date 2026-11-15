@@ -334,3 +334,18 @@ def test_chains_with_a_misread_link_are_marked_and_ranked_last(scorer, pool, cat
     doc = graphx.run({"top": 1200}, cat=cat)["mechanics"]
     flags = [bool(c.get("doubts")) for c in doc["chains"]]
     assert flags == sorted(flags) and any(flags) and doc["info"]["doubted"] == sum(flags)
+
+
+def test_parts_that_change_the_spirit_budget(scorer, pool, cat):
+    r = spiritx._spirit_rule
+    assert r("+(30-40) to Spirit") == ("add", 40.0) and r("50% less Spirit") == ("scale", 0.5) and r("8% increased Spirit") == ("scale", 1.08)
+    assert r("You have no Spirit")[0] == "none" and r("Persistent Buffs have 50% less Reservation") == ("cheaper", 0.5)
+    assert r("Totems reserve 75 Spirit each")[0] == "note" and r("(10-15)% increased Spell Damage per 100 Spirit") is None
+    giver = next(u for u, d in cat.uniques.items() if any(spiritx.FLAT_RX.match(x) for x in d["lines"]))
+    add = max(float(m.group(2) or m.group(1)) for m in (spiritx.FLAT_RX.match(x) for x in cat.uniques[giver]["lines"]) if m)
+    ch = {"main_skill": "ArcPlayer", "main_name": "Arc", "path": ["skill:ArcPlayer"], "tokens": [], "uniques": [giver], "asc_nodes": []}
+    sug = scorer.suggest(ch, 100)
+    assert sug["budget"] == 100 + add and any(giver in t for t in sug["notes"])
+    ch["keystones"] = ["Lord of the Wilds"]
+    if "Lord of the Wilds" in cat.keystones:
+        assert scorer.suggest(ch, 100)["budget"] == round((100 + add) * 0.5)

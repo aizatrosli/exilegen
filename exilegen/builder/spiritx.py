@@ -82,10 +82,6 @@ GEAR_PRESETS = [
      "note": "amulet base implicit +(10-15) to Spirit (Data/Bases/amulet.lua)"},
 ]
 
-# Ascendancy notables that change how much Spirit there is (catalogue text, checked in notes()).
-ASC_RULES = (("you have no spirit", "none", "{} ({}) leaves the character with no Spirit at all"),
-             ("cannot gain spirit from equipment", "no_gear", "{} ({}) stops Spirit from equipment"))
-
 STATE_TOKEN = re.compile(r"^(enemy:|charge:)|^(rage|corpse|remnant|infusion|minion|glory|crit|block|onslaught)$")
 # words mechgraph's vocabulary does not have, as they appear in Spirit gem descriptions
 EXTRA_RX = {
@@ -352,19 +348,56 @@ def budget(req, cfg: dict | None = None) -> dict:
     return {"budget": quest + gear, "source": "level", "level": level, "quest": quest, "gear": gear}
 
 
+FLAT_RX = re.compile(r"^\+\(?(\d+)(?:-(\d+))?\)? to Spirit$", re.I)
+PCT_RX = re.compile(r"^\(?(\d+)(?:-(\d+))?\)?% (increased|reduced|more|less) Spirit$", re.I)
+CHEAPER_RX = re.compile(r"Persistent Buffs have (\d+)% less Reservation|Skills reserve (\d+)% less Spirit", re.I)
+
+
+def _spirit_rule(st: str) -> tuple | None:
+    """(rule, value) for a stat line that changes how much Spirit there is or what gems cost."""
+    low = st.lower()
+    if "you have no spirit" in low:
+        return "none", 0.0
+    if "cannot gain spirit from equipment" in low:
+        return "no_gear", 0.0
+    m = FLAT_RX.match(st.strip())
+    if m:
+        return "add", float(m.group(2) or m.group(1))
+    m = PCT_RX.match(st.strip())
+    if m:
+        v = float(m.group(2) or m.group(1)) / 100.0
+        return "scale", (1.0 + v) if m.group(3).lower() in ("increased", "more") else (1.0 - v)
+    m = CHEAPER_RX.search(st)
+    if m:
+        return "cheaper", 1.0 - float(m.group(1) or m.group(2)) / 100.0
+    if re.search(r"reserve \d+ spirit each|reservation efficiency", low):
+        return "note", 0.0
+    return None
+
+
 def notes(chain: dict, cat: catmod.Catalog) -> list[dict]:
-    """Ascendancy notables that change the chain's Spirit: [{"rule": "none"|"no_gear", "taken": bool, "text"}].
-    `taken` is true when the notable is a part of the chain, false when it is only on the chain's ascendancy."""
+    """Parts that change the chain's Spirit: [{"rule", "value", "taken", "text"}]. Rules: "none" (no Spirit at
+    all), "no_gear" (none from equipment), "add" (+N Spirit), "scale" (x factor), "cheaper" (gems reserve
+    x factor), "note" (a reservation rule that is only reported). `taken` is true for the chain's own uniques,
+    keystones and ascendancy notables, false for a notable that is only on the chain's ascendancy."""
     main = cat.skills.get(chain.get("main_skill")) or {}
     ascs = [a for a, _ in chain.get("asc_nodes") or []] + [a for a, _ in main.get("asc_granted") or []]
     taken = {n for _, n in chain.get("asc_nodes") or []}
     out = []
+
+    def scan(name, where, stats, is_taken):
+        for st in stats or []:
+            r = _spirit_rule(st)
+            if r and (is_taken or r[0] in ("none", "no_gear")):
+                out.append({"rule": r[0], "value": r[1], "taken": is_taken, "text": f"{name} ({where}): {st}"})
+
     for a in dict.fromkeys(ascs):
         for nd in (cat.ascendancies.get(a) or {}).get("notables") or []:
-            for st in nd.get("stats") or []:
-                for needle, rule, text in ASC_RULES:
-                    if needle in st.lower():
-                        out.append({"rule": rule, "taken": nd["name"] in taken, "text": text.format(nd["name"], a)})
+            scan(nd["name"], a, nd.get("stats"), nd["name"] in taken)
+    for k in chain.get("keystones") or []:
+        scan(k, "keystone", (cat.keystones.get(k) or {}).get("stats"), True)
+    for u in chain.get("uniques") or []:
+        scan(u, "unique", (cat.uniques.get(u) or {}).get("lines"), True)
     return out
 
 
@@ -749,11 +782,25 @@ class Scorer:
         """chain.spirit of the graph document. `level` (None = no level limit) blocks gems that unlock later;
         `gear` is the part of `limit` that comes from equipment (an ascendancy can void it)."""
         ns = notes(chain, self.cat)
-        for n in ns:
-            if n["taken"]:
-                limit = 0.0 if n["rule"] == "none" else max(0.0, limit - gear)
+        on = [n for n in ns if n["taken"]]
+        cheaper = 1.0
+        if any(n["rule"] == "no_gear" for n in on):
+            limit = max(0.0, limit - gear)
+        limit += sum(n["value"] for n in on if n["rule"] == "add")      # the chain's own uniques that give Spirit
+        for n in on:
+            if n["rule"] == "scale":
+                limit *= n["value"]
+            elif n["rule"] == "cheaper":
+                cheaper *= n["value"]
+        if any(n["rule"] == "none" for n in on):
+            limit = 0.0
+        limit = float(round(limit))
         own = self.own(chain, path, level)
-        out = pick(self.candidates(chain, path, level), limit - own, level)
+        cands = self.candidates(chain, path, level)
+        if cheaper != 1.0:
+            for c in cands:
+                c["spirit"] = float(round(c["spirit"] * cheaper))
+        out = pick(cands, limit - own, level)
         out = {"budget": _n(limit), "own": _n(own), "free": _n(limit - own), **out}
         texts = [n["text"] + ("" if n["taken"] else " (only if that notable is taken)") for n in ns]
         at = (levelmod.load().get("skills") or {}).get(chain.get("main_skill"))
