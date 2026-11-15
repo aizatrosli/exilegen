@@ -731,8 +731,6 @@ class Scorer:
     def own(self, chain: dict, path: list[str] | None = None, level: int | None = None) -> float:
         """Spirit the chain's own skills reserve (the main skill and the helper skills on its path), at the gem
         level a character of `level` can use."""
-        if path is None and level is None and "tempo" in chain:
-            return float(chain["tempo"].get("spirit_total", 0.0))
         by = {g["skill"]: g["spirit_by_level"] for g in self.gems}
         total, seen = 0.0, set()
         for key in ["skill:" + chain["main_skill"]] + list(chain["path"] if path is None else path):
@@ -740,6 +738,9 @@ class Scorer:
             sid = e.meta.get("skill") if e is not None and e.kind in ("skill", "util") else None
             if sid and sid not in seen:
                 seen.add(sid)
+                sk = self.cat.skills.get(sid) or {}
+                if set(sk.get("granted_by") or []) & set(chain.get("uniques") or []) or sk.get("asc_granted"):
+                    continue             # a persistent skill granted by an item or an ascendancy node reserves no Spirit
                 total += cost_at(float((self.tempo.get(sid) or {}).get("spirit", 0.0)), by.get(sid), level)
         return total
 
