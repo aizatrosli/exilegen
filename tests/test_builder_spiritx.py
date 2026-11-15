@@ -194,6 +194,9 @@ def test_links_are_read_again_before_a_gem_hangs_on_them(scorer, pool, cat):
     assert not rm("enemy:Shocked", "Lightning Damage from Hits Contributes to Freeze Buildup instead of Shock Chance")
     assert rm("charge:Power", "Gain a Power Charge on Critical Hit") and rm("enemy:Shocked", "Storm Lance hits with Lightning damage")
     assert spiritx.DRAWBACK_RX.search("Fireflower: Take 100 Fire Damage when you Ignite an Enemy")
+    assert spiritx.DRAWBACK_RX.search("All Damage from Hits with this Weapon Contributes to Chill Magnitude")
+    assert not spiritx.DRAWBACK_RX.search("All Damage from Hits against Poisoned targets Contributes to Chill Magnitude")
+    assert rm("charge:Frenzy", "+1 to Maximum Frenzy Charges", caps_ok=True) and not rm("charge:Frenzy", "+1 to Maximum Frenzy Charges")
     # Sunder releases a shockwave: it does not Shock, so Herald of Thunder has nothing to wait for
     for name in ("Sunder", "Wing Blast"):
         for ch in [c for c in pool if c["main_name"] == name and not c.get("uniques")][:3]:

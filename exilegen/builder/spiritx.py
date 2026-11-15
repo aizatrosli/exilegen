@@ -380,7 +380,7 @@ ON_YOU_RX = re.compile(r"\b(?:shock|ignite|freeze|chill|poison|stun|blind)s you\
                        r"\bwhile (?:you are |you're )?(?:" + AILMENTS + r")\b", re.I)
 MAGNITUDE_RX = re.compile(r"contributes? to [^.]*magnitude", re.I)
 NEEDS_CHANCE = {"enemy:Bleeding", "enemy:Poisoned"}                    # a magnitude with no chance to apply makes nothing
-DRAWBACK_RX = re.compile(r"(?:^|: )take \d|\byou take\b|contributes? to\b", re.I)
+DRAWBACK_RX = re.compile(r"(?:^|: )take \d|\byou take\b|^(?!.*\bagainst \w+ (?:targets|enemies)).*contributes? to\b", re.I)
 WORD_NOT = {"enemy:Shocked": re.compile(r"shockwave|aftershock", re.I)}
 NATURAL = {"Fire": ("enemy:Ignited",), "Cold": ("enemy:Frozen", "enemy:Chilled"), "Lightning": ("enemy:Shocked",)}
 SWAP_RX = re.compile(r"(fire|cold|lightning) damage from hits contributes to ([^.]*?) instead of ([^.]*)", re.I)
@@ -393,7 +393,7 @@ PHRASE = {"charge:Power": "Power Charges", "charge:Frenzy": "Frenzy Charges", "c
           "crit": "Critical Hits", "onslaught": "Onslaught", "mana_spent": "Mana spent"}
 
 
-def really_makes(tok: str, line: str) -> bool:
+def really_makes(tok: str, line: str, caps_ok: bool = False) -> bool:
     """Does the sentence say the state is made on the enemy (or the resource gained)? False for "shockwave", for a
     state on you ("Shocks you", "chance to be Poisoned"), for a spender ("expending an Endurance Charge"), a
     maximum, an "instead of" swap, or a magnitude with no chance to apply. A line that does not name the state at
@@ -409,8 +409,8 @@ def really_makes(tok: str, line: str) -> bool:
             near, pre = sent[max(0, m.start() - 45): m.end() + 25], sent[: m.start()]
             if (tok in WORD_NOT and WORD_NOT[tok].search(word)) or NOT_MADE_RX.search(near) or LOST_RX.search(pre):
                 continue
-            if MAXIMUM_RX.search(pre) and not GAIN_RX.search(sent):
-                continue
+            if MAXIMUM_RX.search(pre) and not GAIN_RX.search(sent) and not caps_ok:
+                continue                 # (caps_ok: a higher maximum amplifies a source the build already has)
             if tok in NEEDS_CHANCE and MAGNITUDE_RX.search(sent) and not re.search(r"chance|inflict", sent, re.I):
                 continue
             if ON_YOU_RX.search(sent) and not re.search(r"\benem", sent, re.I):
@@ -531,7 +531,7 @@ class Scorer:
                 continue
             prods = [(e, e.produces[tok]) for e in ents if tok in e.produces]
             cons = [(e, e.consumes[tok]) for e in ents if tok in e.consumes and e.consumes[tok].payoff > 0]
-            if prods and not any(really_makes(tok, self._text(e, l)) for e, l in prods):
+            if prods and not any(really_makes(tok, self._text(e, l), caps_ok=True) for e, l in prods):
                 e, l = prods[0]
                 out.append(f"{e.name} is read as the source of {_say(tok)}, but its text does not make it: \"{_quote(self._text(e, l), tok)}\"")
             if cons and all(DRAWBACK_RX.search(l.line or "") for _, l in cons):

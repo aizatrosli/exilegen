@@ -348,13 +348,15 @@ def mechanics(cat: catmod.Catalog, req: Requirements, scores: dict | None = None
         # the score fitted to PoB measurements: expected damage multiple of adding the chain
         pool.sort(key=lambda c: (-c["predicted"]["score"], c["id"]))
     # chains whose own links do not hold up when their sentences are read again (spiritx.Scorer.doubts) go last
-    # in the formula and fitted rankings; a measured ranking keeps PoB's order and only shows the doubt
+    # in the formula ranking, which is built on those links. The measured and fitted rankings keep their order
+    # and only show the doubt: in the full2 run doubted chains measured as well as the rest (median 0.69 both),
+    # because their gain comes from the part's other stats, not from the link the graph named.
     checker = spiritx.Scorer(g, cat, [], tempo)
     for c in pool:
         d = checker.doubts(c)
         if d:
             c["doubts"] = d
-    if not (scores and req.rank_by == "measured"):
+    if req.rank_by == "formula":
         pool.sort(key=lambda c: bool(c.get("doubts")))
     chains = [c for c in pool if _chain_ok(c, req, cat)][: req.top]
     ents = {k for c in chains for k in c["path"]}
