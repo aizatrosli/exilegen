@@ -114,6 +114,11 @@ def test_compare_answers_each_question():
     assert real["top"]["off-meta skill"]["n"] == 1 and real["top"]["meta"]["n"] == 1
     assert real["compared"]["n"] == 3 and real["compared"]["known skill, new pairing"]["n"] == 1
     pw = doc["power"]
+    assert pw["same_skill"]["chains_left_out_thin_ladder"] == 0
+    thin = json.loads(json.dumps(REF))
+    thin["skills"]["Spark"]["n"] = 4
+    tp = lc.compare(CHAINS, MEASURED, thin)["power"]["same_skill"]
+    assert tp["chains"]["dps_vs_median"]["n"] == 0 and tp["chains_left_out_thin_ladder"] == 2
     assert pw["indicative"] is False and pw["compared_chains"] == 2
     d = pw["same_skill"]["chains"]["dps_vs_median"]
     assert d["n"] == 2 and d["median"] == 1.25 and d["share_reaching"] == 0.5

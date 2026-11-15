@@ -34,6 +34,7 @@ KNOWN_SHARE = 0.005     # a skill at or above this share of ladder characters is
 KNOWN_MIN_N = 3         # ... and it needs this many sampled builds to say anything about it
 PAIRED_FRAC = 0.05      # a part held by this fraction of the skill's builds is commonly paired with it
 PAIRED_MIN = 2          # ... in at least this many sampled builds
+POWER_MIN_N = 5         # ladder DPS and EHP quantiles over fewer sampled builds are left out of the power figures
 STAPLE_FRAC = 0.4       # a support on this fraction of a skill's ladder builds is a staple there
 RARE_FRAC = 0.05        # a support below this fraction is one ladder players rarely use on the skill
 TOPS = (10, 25, 50)
@@ -259,7 +260,7 @@ def per_chain(chains: list[dict], measured: dict[str, dict], ref: dict | Ref | N
                 d, e = (src or {}).get("dps") or {}, (src or {}).get("ehp") or {}
                 usable = rec["comparable"]
                 power[label] = None if src is None else {
-                    "n": src.get("n"), "ladder_dps_median": d.get("median"), "ladder_dps_p90": d.get("p90"),
+                    "n": src.get("n"), "thin": (_num(src.get("n")) or 0) < POWER_MIN_N, "ladder_dps_median": d.get("median"), "ladder_dps_p90": d.get("p90"),
                     "ladder_ehp_median": e.get("median"), "ladder_ehp_p90": e.get("p90"),
                     "dps_vs_median": _ratio(dps, d.get("median")) if usable else None,
                     "dps_vs_p90": _ratio(dps, d.get("p90")) if usable else None,
@@ -369,14 +370,15 @@ def _power(pc, ref: Ref) -> dict:
     prof = Counter(r["power"]["profile"] for r in comp)
 
     def block(label):
-        rows = [r["power"][label] for r in comp if r["power"].get(label)]
+        rows = [r["power"][label] for r in comp if r["power"].get(label) and not r["power"][label]["thin"]]
+        thin = sum(1 for r in comp if r["power"].get(label) and r["power"][label]["thin"])
         # one plain build serves several chains: count each once
         seen, base = set(), []
         for r in pc.values():
             p = (r["power"] or {}).get(label)
             pw = r["power"] or {}
             k = pw.get("base_key") or (r["main_name"], r["ascendancy"], pw.get("base_dps"))
-            if p and pw.get("base_dps") and k not in seen:
+            if p and not p["thin"] and pw.get("base_dps") and k not in seen:
                 seen.add(k)
                 base.append(p)
 
@@ -388,9 +390,9 @@ def _power(pc, ref: Ref) -> dict:
                     d[f"{stat}_vs_{mark}"] = {"n": x["n"], "q25": x["q25"], "median": x["median"], "q75": x["q75"],
                                               "share_reaching": x["share_ge_1"]}
             return d
-        return {"chains": one(rows, ""), "baselines": one(base, "base_")}
+        return {"chains": one(rows, ""), "baselines": one(base, "base_"), "chains_left_out_thin_ladder": thin}
     return {"indicative": not ref.comparable, "dps_metric": ref.source.get("dps_metric"),
-            "note": ref.source.get("note"), "compared_chains": len(comp),
+            "note": ref.source.get("note"), "compared_chains": len(comp), "min_ladder_n": POWER_MIN_N,
             "chain_profile": dict(prof),
             "comparable_without_ladder_skill": sum(1 for r in pc.values() if r["comparable"] and not r["in_ref"]),
             "same_skill": block("skill"), "same_skill_and_ascendancy": block("combo")}
@@ -493,7 +495,7 @@ def _summary_text(doc: dict) -> str:
         e = c["same_skill"]["chains"]["ehp_vs_median"]
         word = "weaker than" if p["median"] < 0.8 else ("stronger than" if p["median"] > 1.25 else "about level with")
         s.append(f"Power{' (indicative only: the ladder DPS is not the same measure as ours)' if c['indicative'] else ''}: "
-                 f"on the {p['n']} chains whose skill is on the ladder, the typical chain deals {_x(p['median'])} the "
+                 f"on the {p['n']} chains whose skill has enough ladder builds to compare, the typical chain deals {_x(p['median'])} the "
                  f"ladder median for its skill and has {_x(e['median'])} its EHP; {_pct(p['share_reaching'])} reach the "
                  f"median and {_pct(c['same_skill']['chains']['dps_vs_p90']['share_reaching'])} the p90, so the chains "
                  f"are {word} what players run.")
@@ -519,7 +521,7 @@ def compare(chains: list[dict], measured: dict[str, dict], ref: dict | None, top
     known_ids = set(pc)
     doc = {"version": 1, "source": r.source, "indicative_power": not r.comparable,
            "thresholds": {"known_share": KNOWN_SHARE, "known_min_n": KNOWN_MIN_N, "paired_frac": PAIRED_FRAC,
-                          "paired_min": PAIRED_MIN, "staple_frac": STAPLE_FRAC, "rare_frac": RARE_FRAC},
+                          "paired_min": PAIRED_MIN, "power_min_n": POWER_MIN_N, "staple_frac": STAPLE_FRAC, "rare_frac": RARE_FRAC},
            "asc_evidence": "notable" if r.has_asc_pairs else "ascendancy",
            "run_chains_not_in_pool": sum(1 for i in measured if i not in known_ids),
            "coverage": _coverage(chains, {i: m for i, m in measured.items() if i in known_ids}, r, pc, predicted),
@@ -622,11 +624,13 @@ def markdown(doc: dict, run: str = "") -> str:
                 x = c[key][who][stat]
                 rows.append([who if who == "chains" else "plain builds", name, x["n"], x["q25"], x["median"], x["q75"],
                              _pct(x["share_reaching"])])
-        L += [f"{title}:", ""] + _table(["Builds", "ratio", "n", "q25", "median", "q75", "share reaching it"], rows)
+        L += [f"{title} ({c[key]['chains_left_out_thin_ladder']} chains left out: fewer than {POWER_MIN_N} ladder "
+              f"builds to compare with):", ""]
+        L += _table(["Builds", "ratio", "n", "q25", "median", "q75", "share reaching it"], rows)
     if c["chain_profile"].get("binding"):
         L += [f"{c['chain_profile']['binding']} chains have no pinnacle figure in the run and use the run's own DPS, "
               f"which can be the mapping profile's.", ""]
-    L += [f"{c['compared_chains']} chains compared; {c['comparable_without_ladder_skill']} more have damage but no "
+    L += [f"{c['compared_chains']} chains are on a ladder skill; {c['comparable_without_ladder_skill']} more have damage but no "
           f"ladder skill to compare with.", "", "## D. Do the support gems agree?", "",
           f"{d['compared']} chain builds on {d['skills_compared']} ladder skills have supports to compare "
           f"(median {d['supports_per_build']} supports each). {d['zero_supports']} of {d['built']} built chains have "
