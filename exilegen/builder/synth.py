@@ -43,11 +43,17 @@ from exilegen.optimise.base import Context, StepResult, fields_for, has_meta_gro
 from exilegen.scoring import Scorer
 from exilegen.scoring import floors as F
 
-from .contracts import BuildResult, Skeleton
+from .contracts import BuildResult, Skeleton, main_skill_matches
 from .gear import GearPlanner, weapon_spec
 
 DEFAULT_PROFILES = ["pinnacle_v1", "mapping_v1"]
 POLISH = ("supports", "triggers", "tree_warm", "supports")
+# Budget weight of each polish step within a cycle (share = remaining budget x weight / remaining weights).
+# Measured on 105 builds (2 runs): tree_warm gains 0.195 objective per 1k evals and improves 99% of the time;
+# the first supports pass 0.335; the closing supports pass (same step again, after tree_warm) only 0.022 while
+# taking as many evals. A step that already ran in the cycle gets REPEAT_WEIGHT.
+STEP_WEIGHTS = {"tree_warm": 2.0}
+REPEAT_WEIGHT = 0.3
 POLISH_CYCLES = 3                # repeat POLISH until a cycle gains < 1% (pipeline.CYCLE_MIN_GAIN)
 # share of the evaluation budget per phase (the rest goes to the polish steps)
 SHARE = {"sockets": 0.15, "ascendancy": 0.04, "tree": 0.36}
@@ -337,6 +343,31 @@ class _Synth:
         return w if isinstance(w, str) and w else None
 
     # ------------------------------------------------------------------ main skill pin + load
+    def main_ok(self, stats=None) -> bool:
+        """Is the skill PoB measures the skeleton's main skill? (current stats by default)"""
+        stats = self.ctx.current_stats if stats is None and self.ctx is not None else stats
+        doc = (next(iter(stats.values()), None) if stats and all(isinstance(v, dict) for v in stats.values())
+               else stats) or {}
+        return main_skill_matches(self._main_names(), doc.get("mainSkill"))
+
+    def _repin(self, code: str) -> bool:
+        """After a reload moved the main skill to another group (item-granted groups come and go with gear),
+        find it again by skill id and re-pin. False when no group holds it any more."""
+        names = self._main_names()
+        for g in self.e.skills().get("groups") or []:
+            if g.get("grantedBy") in ("Explode", "Thorns") or g.get("enabled") is False:
+                continue
+            for sk_ in g.get("skills") or []:
+                if (sk_.get("id") or "").lower() in names or (sk_.get("name") or "").lower() in names:
+                    if (g["index"], sk_["index"]) == (self.main_ref["group"], self.main_ref["skill"]):
+                        return False
+                    self.main_ref = {"group": int(g["index"]), "skill": int(sk_["index"])}
+                    self.main_group = int(g["index"])
+                    self.e.load(code=code, profile=self.profiles[0], main=dict(self.main_ref))
+                    self.note(f"main skill re-pinned: group {g['index']} skill {sk_['index']}")
+                    return True
+        return False
+
     def pin_and_load(self):
         """Load the raw build, find the main skill's {group, skill} in the engine's skills view (skill ids,
         item-granted groups included), disable item-granted groups the skeleton does not use, pin."""
@@ -428,6 +459,10 @@ class _Synth:
         ctx._skills = None
         ctx.fields = fields_for(ctx.skills())
         ctx.refresh()
+        if not self.main_ok() and self._repin(code):
+            ctx._skills = None
+            ctx.fields = fields_for(ctx.skills())
+            ctx.refresh()
         main = (next(iter(ctx.current_stats.values())) or {}).get("main") or {}
         if main.get("group") != self.main_ref["group"]:
             self.note(f"warning: engine main is {main} not {self.main_ref}")
@@ -721,6 +756,7 @@ class _Synth:
         code0 = self.e.raw("save_build_code", {})
         code0 = code0.get("code") if isinstance(code0, dict) else code0
         best = (ctx.current, code0, "input")
+        best_stats = ctx.current_stats
         variants = [("objective", _objective_weights(self.scorer), None)]
         if final:
             variants += [("balanced", None, "balanced"), ("defence", None, "defence")]
@@ -735,6 +771,9 @@ class _Synth:
             ctx._skills = None
             ctx.refresh()
             self.note(f"optimise_gear {name}: {len(out['equipped'])} slots -> {_short(ctx.current)}")
+            if not self.main_ok() and self.main_ok(best_stats):
+                self.note(f"optimise_gear {name}: main skill lost, variant skipped")
+                continue
             if Context.better(ctx.current, best[0], 1e-6):
                 c = self.e.raw("save_build_code", {})
                 best = (ctx.current, c.get("code") if isinstance(c, dict) else c, name)
@@ -813,6 +852,9 @@ class _Synth:
             trial["feasible_unique"] = bool((before or {}).get("feasible"))
             trial["feasible_rare"] = bool((after or {}).get("feasible")) if after else None
             rare_wins = after is not None and Context.better(after, before, 1e-4)
+            if rare_wins and not self.main_ok():
+                rare_wins = False
+                trial["main_lost"] = True        # the unique grants (or enables) the main skill
             if rare_wins and role not in keep_roles:
                 trial["action"] = "replaced"
                 self.note(f"unique trial: {name} ({slot}) replaced by a tuned rare, objective x{trial['gain']}")
@@ -854,11 +896,13 @@ class _Synth:
         try:
             ctx._skills = None
             ctx.refresh()
-            if Context.better(before, ctx.current, 1e-6):
+            lost = self.main_ok(before_stats) and not self.main_ok()
+            if lost or Context.better(before, ctx.current, 1e-6):
                 e.restore(tok)
                 ctx.current, ctx.current_stats, ctx._skills = before, before_stats, None
                 del ctx.history[n_hist:]
-                r.notes.append("rolled back: ended worse than it started")
+                r.notes.append("rolled back: " + ("the damage moved to another skill" if lost
+                                                  else "ended worse than it started"))
                 r.improved, r.changes = False, []
         finally:
             ctx._drop(tok)
@@ -884,13 +928,14 @@ class _Synth:
                 break
             c0 = ctx.current
             todo = [s for s in self.polish if s != "triggers" or has_meta_groups(ctx.skills())]
+            wts = [REPEAT_WEIGHT if s in todo[:j] else STEP_WEIGHTS.get(s, 1.0) for j, s in enumerate(todo)]
             for i, name in enumerate(todo):
                 left = ctx.budget_left()
                 if left <= 50:
                     if cyc == 0:
                         self.note(f"budget exhausted before {name}")
                     break
-                share = max(50, left // max(1, len(todo) - i))
+                share = max(50, int(left * wts[i] / max(1e-9, sum(wts[i:]))))
                 step = make_step(name, None if self.seed is None else self.seed + cyc, share if name.startswith("tree") else None, self.notes)
                 if step is None:
                     continue
