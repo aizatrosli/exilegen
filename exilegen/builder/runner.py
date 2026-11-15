@@ -137,7 +137,8 @@ class Runner:
                  scorer_factory: Callable | None = None, seed: int = 0, batch: int | None = None,
                  checkpoint_every: float = 60.0, report_every: float = 300.0, report: bool = True,
                  log: Callable | None = None, generator_kwargs: dict | None = None,
-                 halving: bool = False, rung0_frac: float = 0.25, eta: int = 3, warm_start: bool = True):
+                 halving: bool = False, rung0_frac: float = 0.25, eta: int = 3, warm_start: bool = True,
+                 axes=None):
         self.run_dir = run_dir
         os.makedirs(run_dir, exist_ok=True)
         self.constraints = list(constraints or [])
@@ -154,6 +155,7 @@ class Runner:
         # pass still took ~60% of a full synth's wall time (gear optimisation and trials do not scale
         # with the eval budget), and only 30% of cheap builds were feasible when archived unpromoted.
         self.halving, self.rung0_frac, self.eta = halving, rung0_frac, max(2, int(eta))
+        self.axes = axes                        # archive cell axes (None: the run's own, else coarse)
         self.warm_start = warm_start           # mutations start from their parent's passive tree
         self._rung0: list[tuple] = []          # recent cheap-run keys (feasible, objective)
         self._promo: Any = None                # deque of promoted jobs (created in _main)
@@ -633,7 +635,7 @@ class Runner:
         self._acquire()
         self._logf = open(os.path.join(self.run_dir, "run.log"), "a")
         try:
-            self.archive = Archive.open(self.run_dir)
+            self.archive = Archive.open(self.run_dir, axes=self.axes)
             prev = (self.archive.meta or {}).get("runner") or {}
             self.bandit.load(prev.get("bandit"))
             self.prev_seconds = float(prev.get("seconds_total") or 0.0)

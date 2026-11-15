@@ -131,6 +131,7 @@ def render(archive: Archive, extra: dict | None = None, top: int = 15, per_group
         ["cells touched", st["cells"]],
         ["cells with a feasible build", st["cells_feasible"]],
         ["cells with a feasible verified build", st["cells_verified"]],
+        ["quarantined (feasible but no honest damage)", st.get("quarantined", 0)],
         ["QD-score (sum of feasible elite objectives)", _f(st["qd_score"], 1)],
         ["QD-score verified only", _f(st["qd_score_verified"], 1)],
         ["axis coverage (distinct values among feasible cells)",
@@ -146,8 +147,8 @@ def render(archive: Archive, extra: dict | None = None, top: int = 15, per_group
                     ["source", "jobs", "ok", "feasible", "verified", "new cells", "improved", "success", "avg time"])
         L.append("")
     # coverage per axis
-    L += ["### Coverage per axis (feasible cells)", ""]
-    for a in AXES:
+    L += ["### Coverage per axis (feasible cells)", "", f"Cells are keyed on: {', '.join(archive.axes)}.", ""]
+    for a in archive.axes:
         cnt: dict[str, int] = {}
         for c in archive.cells.values():
             if c.best_tier() <= 1:
@@ -268,9 +269,9 @@ def write_csv(archive: Archive, path: str) -> str:
 
 
 def write_report(run_dir: str, archive: Archive | None = None, extra: dict | None = None,
-                 out_dir: str | None = None, redescribe: bool = False) -> dict:
+                 out_dir: str | None = None, redescribe: bool = False, axes=None) -> dict:
     """Write report.md + builds.csv (into out_dir, default the run directory). -> {md, csv}."""
-    arch = archive or Archive.open(run_dir, redescribe=redescribe)
+    arch = archive or Archive.open(run_dir, redescribe=redescribe, axes=axes)
     out_dir = out_dir or run_dir
     os.makedirs(out_dir, exist_ok=True)
     md = render(arch, extra)
