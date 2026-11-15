@@ -238,7 +238,8 @@ def preflight(cat: catmod.Catalog, req: Requirements, unknown_keys: list[str] | 
                        (f", complete by level {req.online_by}" if req.online_by else "")) if ok_lvl else
                       "online_by must be a whole level from 0 to 100"))
     out.append(_check("req.budget", "requirements", "ok" if ok_budget else "fail", "Resource and Spirit budget",
-                      f"{req.mana_per_second:g} mana per second, {req.spirit:g} Spirit" if ok_budget else
+                      (f"{req.mana_per_second:g} mana per second, {req.spirit:g} Spirit" +
+                       (" (not used: the Spirit budget follows the level)" if req.spirit_source == "level" else "")) if ok_budget else
                       "mana_per_second must be above 0 and spirit 0 or more"))
     sp_errors = spiritx.check(req)
     if sp_errors:
