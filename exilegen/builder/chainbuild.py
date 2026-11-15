@@ -315,7 +315,7 @@ def spirit_plan(original: dict, chain: dict, parts: list[dict], level: int, mode
         plan["gems"] = sug["picks"]
         plan["more"] = sug["more"]
         return plan
-    by = {c["name"].lower(): c for c in sc.candidates(original, path)}
+    by = {c["name"].lower(): c for c in sc.candidates(original, path, level)}
     gems = []
     for n in mode:
         g = sc.find(n)
@@ -323,7 +323,8 @@ def spirit_plan(original: dict, chain: dict, parts: list[dict], level: int, mode
             gems.append({"name": n, "skill": None, "spirit": None, "level": None, "skip": "unknown"})
             continue
         c = by.get(g["name"].lower())
-        d = {"name": g["name"], "skill": g["skill"], "spirit": g["spirit"], "level": g["level"]}
+        d = {"name": g["name"], "skill": g["skill"], "level": g["level"],
+             "spirit": spiritx.cost_at(g["spirit"], g["spirit_by_level"], level)}
         if c:
             d.update({k: c[k] for k in ("role", "token", "why", "score") if k in c})
         if g["flags"]:
@@ -521,6 +522,11 @@ def build(chain_id: str, level: int | None = None, exclude=None, budget: int = 6
             sp["states"] = dict(res.descriptor["states"])
         if plan.get("more"):
             sp["more"] = plan["more"]
+        st = sp.get("states") or {}
+        if st.get("pob_dps_gems_off"):       # the same build with only the Spirit gems switched off: what they add, nothing else
+            sp["effect"] = round(st["pob_dps"] / st["pob_dps_gems_off"], 3)
+            if st.get("pob_dps_gems_off_on") and st.get("pob_dps_on"):
+                sp["effect_states_on"] = round(st["pob_dps_on"] / st["pob_dps_gems_off_on"], 3)
         if compare:
             sp["dps_without"] = None
             if not bare:
