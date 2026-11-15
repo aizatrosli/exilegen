@@ -46,6 +46,7 @@ from . import catalog as catmod
 from . import mechgraph
 from . import chainfit
 from . import chainresults
+from . import edges as edgesmod
 from . import leveling as levelmod
 from . import spiritx
 from . import states as statesmod
@@ -353,8 +354,9 @@ def mechanics(cat: catmod.Catalog, req: Requirements, scores: dict | None = None
     # and only show the doubt: in the full2 run doubted chains measured as well as the rest (median 0.69 both),
     # because their gain comes from the part's other stats, not from the link the graph named.
     checker = spiritx.Scorer(g, cat, [], tempo)
+    typed = edgesmod.typed(g)          # every link read again against stat ids and PoB tags (edges.py)
     for c in pool:
-        d = checker.doubts(c)
+        d = checker.doubts(c) + edgesmod.chain_doubts(g, typed, c)
         if d:
             c["doubts"] = d
     if req.rank_by == "formula":
@@ -372,10 +374,13 @@ def mechanics(cat: catmod.Catalog, req: Requirements, scores: dict | None = None
         for side, links in (("produces", e.produces), ("consumes", e.consumes)):
             for tok, l in links.items():
                 if tok in toks:
+                    te = typed.get((k, "p" if side == "produces" else "c", tok))
+                    extra = {"relation": te.relation, "owner": te.owner, "verdict": te.verdict,
+                             **({"why": te.why} if te.why else {})} if te else {}
                     edges.append({"s": k if side == "produces" else "token:" + tok,
                                   "t": "token:" + tok if side == "produces" else k,
                                   "type": side, "w": round(l.weight if side == "produces" else max(l.payoff, 0.2), 2),
-                                  "line": l.line[:200]})
+                                  "line": l.line[:200], **extra})
     for t in sorted(toks):
         reg = statesmod.for_token(t)
         prim = reg["states"][0] if reg["states"] else {}
@@ -392,6 +397,7 @@ def mechanics(cat: catmod.Catalog, req: Requirements, scores: dict | None = None
             c["spirit"] = sp.suggest(c, sp_budget["budget"], sp_budget.get("level"), gear=sp_budget.get("gear", 0.0))
     return {"nodes": nodes, "edges": edges, "chains": chains,
             "info": {**g.size(), "raw_chains": g.n_raw_chains, "pool": len(pool), "kept": len(chains), "doubted": sum(1 for c in pool if c.get("doubts")),
+                     "typed_edges": dict(Counter(x.verdict for x in typed.values())),
                      **({"measured": chainresults.summary({k: v for k, v in scores.items() if k in {c["id"] for c in pool}}, len(pool))}
                         if scores else {}),
                      **({"fitted": {"chains": model["n"], **model.get("held_out", {})}} if model else {}),
