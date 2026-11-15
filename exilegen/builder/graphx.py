@@ -347,6 +347,15 @@ def mechanics(cat: catmod.Catalog, req: Requirements, scores: dict | None = None
     elif model and req.rank_by == "fitted":
         # the score fitted to PoB measurements: expected damage multiple of adding the chain
         pool.sort(key=lambda c: (-c["predicted"]["score"], c["id"]))
+    # chains whose own links do not hold up when their sentences are read again (spiritx.Scorer.doubts) go last
+    # in the formula and fitted rankings; a measured ranking keeps PoB's order and only shows the doubt
+    checker = spiritx.Scorer(g, cat, [], tempo)
+    for c in pool:
+        d = checker.doubts(c)
+        if d:
+            c["doubts"] = d
+    if not (scores and req.rank_by == "measured"):
+        pool.sort(key=lambda c: bool(c.get("doubts")))
     chains = [c for c in pool if _chain_ok(c, req, cat)][: req.top]
     ents = {k for c in chains for k in c["path"]}
     toks = {t for c in chains for t in c["tokens"]}
@@ -374,7 +383,7 @@ def mechanics(cat: catmod.Catalog, req: Requirements, scores: dict | None = None
         if sp:
             c["spirit"] = sp.suggest(c, sp_budget["budget"], sp_budget.get("level"), gear=sp_budget.get("gear", 0.0))
     return {"nodes": nodes, "edges": edges, "chains": chains,
-            "info": {**g.size(), "raw_chains": g.n_raw_chains, "pool": len(pool), "kept": len(chains),
+            "info": {**g.size(), "raw_chains": g.n_raw_chains, "pool": len(pool), "kept": len(chains), "doubted": sum(1 for c in pool if c.get("doubts")),
                      **({"measured": chainresults.summary({k: v for k, v in scores.items() if k in {c["id"] for c in pool}}, len(pool))}
                         if scores else {}),
                      **({"fitted": {"chains": model["n"], **model.get("held_out", {})}} if model else {}),

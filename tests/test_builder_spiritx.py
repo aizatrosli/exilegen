@@ -184,10 +184,14 @@ def test_links_are_read_again_before_a_gem_hangs_on_them(scorer, pool, cat):
     assert not rm("enemy:Shocked", "Shocks you when you reach maximum Power Charges")
     assert not rm("enemy:Poisoned", "+25% chance to be Poisoned")
     assert not rm("charge:Endurance", "The cooldown can be bypassed by expending an Endurance Charge.")
-    assert not rm("charge:Power", "+1 to maximum Power Charges") and not rm("charge:Power", "Gain Power Charges instead of Frenzy Charges")
+    assert not rm("charge:Power", "+1 to maximum Power Charges") and not rm("charge:Frenzy", "Gain Power Charges instead of Frenzy Charges")
     assert not rm("enemy:Bleeding", "Elemental Damage also Contributes to Bleeding Magnitude")
     assert not rm("enemy:Frozen", "Build Glory by inflicting Freeze, Shock or Ignite on enemies.")      # a condition, not a source
     assert not rm("enemy:Shocked", "The first two attacks conjure a spirit if they Hit a Shocked enemy and refresh Shock duration.")
+    assert rm("rage", "Regenerate 6% of your maximum Rage per second") and rm("enemy:Cursed", "Curses you inflict have infinite Duration")
+    assert rm("enemy:Chilled", "Physical damage from Hits Contributes to Chill Magnitude and Freeze Buildup")
+    assert rm("enemy:Frozen", "Lightning Damage from Hits Contributes to Freeze Buildup instead of Shock Chance")
+    assert not rm("enemy:Shocked", "Lightning Damage from Hits Contributes to Freeze Buildup instead of Shock Chance")
     assert rm("charge:Power", "Gain a Power Charge on Critical Hit") and rm("enemy:Shocked", "Storm Lance hits with Lightning damage")
     assert spiritx.DRAWBACK_RX.search("Fireflower: Take 100 Fire Damage when you Ignite an Enemy")
     # Sunder releases a shockwave: it does not Shock, so Herald of Thunder has nothing to wait for
@@ -312,3 +316,18 @@ def test_off_attribute_gems_go_in_at_gem_level_one(cat):
     assert list(low.values()) == ["Lingering Illusion"]              # Dex and Int on an Int class; Arctic Armour is Int
     assert all(k.startswith("Metadata/Items/Gems/") for k in low)
     assert not cb.low_level_gems(gems[:2], "Monk", None, cat.skills) and not cb.low_level_gems(gems, None, None, cat.skills)
+
+
+def test_chains_with_a_misread_link_are_marked_and_ranked_last(scorer, pool, cat):
+    sunder = _first(pool, lambda c: c["main_name"] == "Shockchain Arrow" and "enemy:Shocked" in c["tokens"]
+                    and "Redflare Conduit" in (c.get("uniques") or []))
+    assert any("Shocks you" in d for d in scorer.doubts(sunder))
+    ash = _first(pool, lambda c: c["main_name"] == "Herald of Ash")
+    assert any("persistent buff" in d for d in scorer.doubts(ash))
+    clean = _first(pool, lambda c: c["main_name"] == "Glacial Lance" and not c.get("uniques"))
+    assert scorer.doubts(clean) == []
+    n = sum(1 for c in pool if scorer.doubts(c))
+    assert 0.1 * len(pool) < n < 0.5 * len(pool)
+    doc = graphx.run({"top": 1200}, cat=cat)["mechanics"]
+    flags = [bool(c.get("doubts")) for c in doc["chains"]]
+    assert flags == sorted(flags) and any(flags) and doc["info"]["doubted"] == sum(flags)

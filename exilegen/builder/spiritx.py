@@ -370,11 +370,16 @@ def notes(chain: dict, cat: catmod.Catalog) -> list[dict]:
 
 # ---------------------------------------------------------------------------------------------- reading the graph's links again
 # The mechanics graph matches states by word. Before a Spirit gem is hung on a link, the sentence is read again:
-NOT_MADE_RX = re.compile(r"\bconsum|\bexpend|\bspent\b|\bspending\b|\boffer\b|\bmaximum\b|\binstead of\b|\bremov|\bimmun|\bby (?:inflicting|applying)\b|"
+NOT_MADE_RX = re.compile(r"\bconsum|\bexpend|\bspent\b|\bspending\b|\boffer\b|\bremov|\bimmun|\bby (?:inflicting|applying)\b|"
                          r"\bif (?:they|it|you) hit\b|\brefresh", re.I)
-ON_YOU_RX = re.compile(r"\b(?:shock|ignite|freeze|chill|poison|curse|stun|blind)s you\b|\bto be \w+|"
-                       r"\bwhile (?:you are |you're )?(?:shocked|ignited|frozen|chilled|poisoned|bleeding)\b", re.I)
+MAXIMUM_RX = re.compile(r"\bmaximum (?:\w+ )?$", re.I)                  # "+1 to maximum Power Charges": a cap, not a source
+GAIN_RX = re.compile(r"\bgain|\bregenerat|\bgrant|\bgenerat", re.I)
+LOST_RX = re.compile(r"\binstead of\b[^.]*$", re.I)                    # what an "instead of" swap takes away
+AILMENTS = r"shocked|ignited|frozen|chilled|poisoned|bleeding|cursed|stunned|blinded"
+ON_YOU_RX = re.compile(r"\b(?:shock|ignite|freeze|chill|poison|stun|blind)s you\b|\bto be (?:" + AILMENTS + r")\b|inflicted on you|"
+                       r"\bwhile (?:you are |you're )?(?:" + AILMENTS + r")\b", re.I)
 MAGNITUDE_RX = re.compile(r"contributes? to [^.]*magnitude", re.I)
+NEEDS_CHANCE = {"enemy:Bleeding", "enemy:Poisoned"}                    # a magnitude with no chance to apply makes nothing
 DRAWBACK_RX = re.compile(r"(?:^|: )take \d|\byou take\b|contributes? to\b", re.I)
 WORD_NOT = {"enemy:Shocked": re.compile(r"shockwave|aftershock", re.I)}
 NATURAL = {"Fire": ("enemy:Ignited",), "Cold": ("enemy:Frozen", "enemy:Chilled"), "Lightning": ("enemy:Shocked",)}
@@ -401,8 +406,12 @@ def really_makes(tok: str, line: str) -> bool:
         for m in pat.finditer(sent):
             seen = True
             word = sent[m.start(): m.end() + 12].split(" ")[0]
-            near = sent[max(0, m.start() - 45): m.end() + 25]
-            if (tok in WORD_NOT and WORD_NOT[tok].search(word)) or NOT_MADE_RX.search(near) or MAGNITUDE_RX.search(sent):
+            near, pre = sent[max(0, m.start() - 45): m.end() + 25], sent[: m.start()]
+            if (tok in WORD_NOT and WORD_NOT[tok].search(word)) or NOT_MADE_RX.search(near) or LOST_RX.search(pre):
+                continue
+            if MAXIMUM_RX.search(pre) and not GAIN_RX.search(sent):
+                continue
+            if tok in NEEDS_CHANCE and MAGNITUDE_RX.search(sent) and not re.search(r"chance|inflict", sent, re.I):
                 continue
             if ON_YOU_RX.search(sent) and not re.search(r"\benem", sent, re.I):
                 continue
@@ -510,6 +519,39 @@ class Scorer:
                 "cull": "only target enemies in culling range" in desc.lower(),
                 "infusion": inf.group(1).lower() if inf else None,
                 "elements": {d for d in main.get("damage_types") or [] if d in NATURAL}}
+
+    def doubts(self, chain: dict) -> list[str]:
+        """Reasons to doubt the chain itself, one plain sentence each: a link of it that the sentence check does
+        not bear out, a main skill that deals no damage of its own, weapons that cannot be held together."""
+        out = []
+        main = self.cat.skills.get(chain["main_skill"]) or {}
+        ents = [self.g.entities[k] for k in chain["path"] if k in self.g.entities]
+        for tok in chain["tokens"]:
+            if not STATE_TOKEN.search(tok):
+                continue
+            prods = [(e, e.produces[tok]) for e in ents if tok in e.produces]
+            cons = [(e, e.consumes[tok]) for e in ents if tok in e.consumes and e.consumes[tok].payoff > 0]
+            if prods and not any(really_makes(tok, self._text(e, l)) for e, l in prods):
+                e, l = prods[0]
+                out.append(f"{e.name} is read as the source of {_say(tok)}, but its text does not make it: \"{_quote(self._text(e, l), tok)}\"")
+            if cons and all(DRAWBACK_RX.search(l.line or "") for _, l in cons):
+                e, l = cons[0]
+                out.append(f"{e.name} is read as paying off on {_say(tok)}, but the line is a cost or a source, not a payoff: \"{_clip(l.line)}\"")
+            elif cons and all(ON_YOU_RX.search(l.line or "") and not re.search(r"\benem", l.line or "", re.I) for _, l in cons):
+                e, l = cons[0]
+                out.append(f"{e.name} needs {_say(tok)} on you, not on the enemy: \"{_clip(l.line)}\"")
+        for u in chain.get("uniques") or []:
+            for dmg, _, lost, line in _swaps((self.cat.uniques.get(u) or {}).get("lines")):
+                if dmg in (main.get("damage_types") or []) and set(lost) & set(chain["tokens"]):
+                    out.append(f"{u} moves {dmg} damage away from {_say(sorted(set(lost) & set(chain['tokens']))[0])}: \"{_clip(line)}\"")
+        types = set(main.get("types") or [])
+        if {"Persistent", "HasReservation", "Herald"} & types and not {"CreatesMinion", "Minion"} & types:
+            out.append(f"{main.get('name')} is a persistent buff, not a skill you attack or cast with: a build around it may deal no damage of its own")
+        held = {(self.cat.uniques.get(u) or {}).get("weapon_class") for u in chain.get("uniques") or []} - {None}
+        mw = set(main.get("weapon_types") or []) - {"None"}
+        if mw and held and not held & mw and not held <= {"Sceptre"}:
+            out.append(f"{main.get('name')} needs {' or '.join(sorted(mw)[:3])}, and the chain holds a {' and a '.join(sorted(held))}")
+        return list(dict.fromkeys(out))
 
     def usable(self, gem: dict, side: dict) -> str | None:
         """None when the chain can use the gem, else the reason it cannot."""
