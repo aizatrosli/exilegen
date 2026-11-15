@@ -54,6 +54,51 @@ def m_phys_max_hit(bv):
     return bv.num("max_hit.physical", None)
 
 
+def m_max_hit(t):
+    def f(bv):
+        if t == "chaos" and "Chaos Inoculation" in bv.names("keystones"):
+            return float("inf")
+        return bv.num(f"max_hit.{t}", None)
+    return f
+
+
+def m_ele_max_hit(bv):
+    vals = [bv.num(f"max_hit.{t}", None) for t in ELEMENTS]
+    vals = [v for v in vals if v is not None]
+    return min(vals) if vals else None
+
+
+def m_pool(bv):
+    """Life + energy shield (the corpus "Life+ES" pool)."""
+    life, es = bv.num("life", None), bv.num("es", None, record=False)
+    if life is None and es is None:
+        return None
+    return (life or 0.0) + (es or 0.0)
+
+
+def m_stun_ratio(bv):
+    """Stun threshold as a fraction of life (PoE2 stun buildup is hit damage over this threshold)."""
+    st, life = bv.num("stun_threshold", None), bv.num("life", None, record=False)
+    if st is None or not life:
+        return None
+    return st / life
+
+
+# Layer thresholds from analysis-meta.md section 4 (43% of ladder builds reach none of them).
+LAYER_THRESHOLDS = {"evade_chance": 40.0, "deflect_chance": 20.0, "phys_dr": 40.0, "block_chance": 30.0}
+
+
+def m_mitigation_layers(bv):
+    """How many of evade >= 40%, deflect >= 20%, armour PDR >= 40% and block >= 30% the build reaches
+    (Mind over Matter and Eldritch Battery count as one each, as the corpus analysis counted them)."""
+    vals = {k: bv.num(k, None, record=False) for k in LAYER_THRESHOLDS}
+    if all(v is None for v in vals.values()):
+        return None
+    n = sum(1 for k, v in vals.items() if v is not None and v >= LAYER_THRESHOLDS[k])
+    ks = bv.names("keystones")
+    return n + sum(1 for k in ("Mind Over Matter", "Eldritch Battery") if k in ks)
+
+
 def m_spirit(bv):
     return bv.num("spirit_unreserved", None)
 
@@ -93,6 +138,10 @@ METRICS = {
     "res.chaos": m_chaos, "ehp": m_ehp, "max_hit.min": m_min_max_hit, "max_hit.physical": m_phys_max_hit,
     "spirit_unreserved": m_spirit, "mana_sustain": m_mana_sustain, "life_sustain": m_life_sustain,
     "attr_deficit": m_attr_deficit,
+    "max_hit.fire": m_max_hit("fire"), "max_hit.cold": m_max_hit("cold"),
+    "max_hit.lightning": m_max_hit("lightning"), "max_hit.chaos": m_max_hit("chaos"),
+    "max_hit.ele_min": m_ele_max_hit, "pool": m_pool, "stun_threshold_ratio": m_stun_ratio,
+    "mitigation_layers": m_mitigation_layers,
 }
 
 
@@ -126,6 +175,11 @@ DEFAULT_FLOORS: list[Floor] = [
     Floor("max_hit_phys_target", "max_hit.physical", ">=", 4600.0, "target", "absolute", 0.0, "corpus p25 physical"),
     Floor("spirit_target", "spirit_unreserved", ">=", 0.0, "target", "absolute", 0.0, "no over-reserved Spirit"),
     Floor("mana_sustain_target", "mana_sustain", ">=", 1.0, "target", "absolute", 0.0, "mana cost payable for 30 s from regen+leech+pool"),
+    Floor("max_hit_ele_target", "max_hit.ele_min", ">=", 13100.0, "target", "absolute", 0.0, "corpus p25 lowest elemental max hit"),
+    Floor("max_hit_chaos_target", "max_hit.chaos", ">=", 6400.0, "target", "absolute", 0.0, "corpus p25 chaos max hit (non-CI)"),
+    Floor("pool_target", "pool", ">=", 2200.0, "target", "absolute", 0.0, "corpus p25 life+ES"),
+    Floor("mitigation_target", "mitigation_layers", ">=", 1.0, "target", "absolute", 0.0,
+          "reaches one of evade 40 / deflect 20 / PDR 40 / block 30 / MoM / EB (57% of ladder)"),
 ]
 
 # corpus p10 (hard) preset for permissive searches
@@ -141,6 +195,30 @@ LENIENT_FLOORS: list[Floor] = [
 
 def _cmp(op, a, b):
     return a >= b if op == ">=" else a <= b
+
+
+# Scale that turns a floor's raw gap into a "shortfall" comparable across floors (1.0 ~ one bad violation).
+# Additive metrics use a fixed unit; ratio metrics (EHP, max hit, sustain) use the fraction of the threshold.
+SHORTFALL_UNIT = {"res.": 75.0, "attr_deficit": 100.0, "spirit_unreserved": 100.0}
+
+
+def shortfall(fl: Floor, v: float | None, b: float | None = None) -> float:
+    """How far value v misses floor fl, normalised (0 = passes; ~1 = a resistance 75 below cap, 100 missing
+    attribute points or 100% of an EHP/max-hit threshold). With a baseline, the nearer of the absolute and
+    the relative threshold counts, since passing either one passes an "either" floor."""
+    if v is None or v != v:
+        return 1.0
+    sign = 1.0 if fl.op == ">=" else -1.0
+    unit = next((u for k, u in SHORTFALL_UNIT.items() if fl.metric.startswith(k)), None)
+    thresholds = [fl.value]
+    if b is not None and b == b and abs(b) != float("inf") and fl.mode != "absolute":
+        thresholds.append(b)
+    best = float("inf")
+    for t in thresholds:
+        gap = max(0.0, sign * (t - v))
+        scale = unit if unit is not None else max(abs(t), 1e-9)
+        best = min(best, gap / scale)
+    return 0.0 if best == float("inf") else best
 
 
 def check(floors: list[Floor], bv: BuildView, baseline: BuildView | None = None, mode_override: str | None = None) -> list[dict]:
@@ -178,5 +256,6 @@ def check(floors: list[Floor], bv: BuildView, baseline: BuildView | None = None,
         if fl.id == "spirit" and b is not None and mode != "absolute":
             ok = v >= min(0.0, b) - fl.tol
         r["passed"] = bool(ok)
+        r["shortfall"] = 0.0 if ok else shortfall(fl, v, b if mode != "absolute" else None)
         out.append(r)
     return out

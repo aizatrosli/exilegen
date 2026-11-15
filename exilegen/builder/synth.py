@@ -23,7 +23,8 @@ Steps (each logged into BuildResult.notes; an impossible step ends with ok=False
   7. gear    bridge optimise_gear (greedy affixes per slot, uniques kept) with weights derived from the
              scorer's objective; every proposal is equipped, kept only if the Scorer agrees.
   8. polish  SupportStep -> TriggerStep (if Meta+Triggers groups) -> TreeStep warm -> SupportStep, each
-             rolled back if it ends worse than it started, within the remaining budget.
+             rolled back if it ends worse than it started, within the remaining budget. The cycle repeats
+             (up to POLISH_CYCLES) until one gains < 1%.
   9. final   score (absolute floors: no baseline), export code, stats, skills, evals, seconds.
 
 Budget: engine evaluations (Context.evals), split over sockets / ascendancy / tree / polish.
@@ -47,6 +48,7 @@ from .gear import GearPlanner, weapon_spec
 
 DEFAULT_PROFILES = ["pinnacle_v1", "mapping_v1"]
 POLISH = ("supports", "triggers", "tree_warm", "supports")
+POLISH_CYCLES = 3                # repeat POLISH until a cycle gains < 1% (pipeline.CYCLE_MIN_GAIN)
 # share of the evaluation budget per phase (the rest goes to the polish steps)
 SHARE = {"sockets": 0.15, "ascendancy": 0.04, "tree": 0.36}
 
@@ -109,13 +111,14 @@ def _short(r: dict | None) -> str:
 
 class _Synth:
     def __init__(self, sk: Skeleton, engine, scorer, budget: int, log_fn=None, gear_optimise: bool = True,
-                 polish=POLISH, seed: int = 0):
+                 polish=POLISH, seed: int = 0, polish_cycles: int = POLISH_CYCLES):
         self.sk, self.e, self.budget, self.seed = sk, engine, int(budget), seed
         self.scorer = make_scorer(scorer, constraints=list(getattr(sk, "constraints", None) or []))
         self.profiles = list(self.scorer.profile_list)
         self.log_fn = log_fn
         self.gear_optimise = gear_optimise
         self.polish = list(polish or ())
+        self.polish_cycles = polish_cycles
         self.notes: list[str] = []
         self.ctx: Context | None = None
         self.main_ref: dict | None = None      # {group, skill}
@@ -429,60 +432,107 @@ class _Synth:
     def _group_view(self, gi):
         return next((g for g in self.ctx.skills().get("groups") or [] if g.get("index") == gi), None)
 
+    BEAM_WIDTH = 4          # partial support sets kept per depth
+    BEAM_POOL = 16          # single-support screen survivors the beam combines
+
     def fill_supports(self, gi: int, n_supports: int, budget: int, label: str):
-        """Fill empty support sockets of group gi one at a time. A support is kept only if it raises the
-        objective without adding a violation: feasibility-first acceptance would take a support that wrecks
-        DPS to pass a floor (Zarokh's Revolt slowing casts under a life-cost floor), which the later tree /
-        support steps repair far better."""
+        """Fill the empty support sockets of group gi with a beam search over support sets.
+
+        1. Screen every legal support alone in the next socket (one batched what-if per candidate).
+        2. Combine the best BEAM_POOL of them: at each depth extend every kept set by one support, score
+           the whole set with what-if, keep the best BEAM_WIDTH sets. Sets are scored together, so a
+           support that only pays off with another one (more projectiles + a projectile support, a
+           conversion + its damage type) is found, which one-at-a-time greedy filling misses.
+        3. Commit the best set of any size, accepted only if it raises the objective without adding a
+           violation: feasibility-first acceptance would take a support that wrecks DPS to pass a floor
+           (Zarokh's Revolt slowing casts under a life-cost floor), which later steps repair far better.
+        Item-granted groups take supports from slot 2 on unless the grant says noSupports."""
         ctx = self.ctx
+
+        def nviol(r):
+            return len({(v.get("rule"), v.get("entry")) for v in (r or {}).get("violations") or []})
 
         def accept(new, old):
             if old is None:
                 return True
-            nv = len({(v.get("rule"), v.get("entry")) for v in new.get("violations") or []})
-            ov = len({(v.get("rule"), v.get("entry")) for v in old.get("violations") or []})
-            return nv <= ov and (new.get("objective") or -1e18) > (old.get("objective") or -1e18) + 1e-4
+            return nviol(new) <= nviol(old) and (new.get("objective") or -1e18) > (old.get("objective") or -1e18) + 1e-4
         g = self._group_view(gi)
-        if g is None or g.get("grantedBy"):
+        if g is None or g.get("noSupports"):
             return
         have = sum(1 for x in g.get("gems") or [] if x.get("support"))
         want = max(0, n_supports - have)
-        added = []
+        if want <= 0:
+            return
         stop = ctx.evals + budget
-        for _ in range(want):
-            b = (ctx.current or {}).get("binding_profile")
-            p0 = b if b in self.profiles else self.profiles[0]
+        b = (ctx.current or {}).get("binding_profile")
+        p0 = b if b in self.profiles else self.profiles[0]
+        nslot = len(g.get("gems") or []) + 1
+        try:
+            vs = self.e.valid_supports(gi)
+        except Exception as ex:
+            self.note(f"{label}: valid_supports failed: {ex}")
+            return
+        cands = [x for x in vs.get("supports") or [] if not x.get("socketed") and not x.get("conflicts")]
+        if not cands:
+            return
+        names = {x["id"]: x["name"] for x in cands}
+
+        def change(ids):
+            return {"gem_changes": [{"group": gi, "slot": nslot + i, "gem": sid} for i, sid in enumerate(ids)]}
+
+        def obj(r):
+            return (r or {}).get("objective") if r is not None else None
+        base_v = nviol(ctx.current)
+        # 1. single-support screen
+        singles = [(sid,) for sid in names][:max(1, stop - ctx.evals)]
+        scored = ctx.evaluate_many([change(c) for c in singles], profiles=[p0])
+        ranked = sorted(((r, c) for r, c in zip(scored, singles) if r is not None and obj(r) is not None
+                         and nviol(r) <= base_v), key=lambda rc: rc[0]["objective"], reverse=True)
+        if not ranked:
+            self.note(f"{label}: no support screened without a new violation")
+            return
+        pool = [c[0] for _, c in ranked[:self.BEAM_POOL]]
+        beam = [(r, c) for r, c in ranked[:self.BEAM_WIDTH]]
+        best_by_size = {1: ranked[0]}
+        # 2. beam over sets drawn from the pool
+        from exilegen.optimise.supports import _base_name
+        info = {x["id"]: (set(x.get("family") or []), _base_name(x["name"])) for x in cands}
+
+        def clash(c, sid):          # same gem family or the I/II/III lineage of one support
+            f, n = info[sid]
+            return any(info[o][1] == n or info[o][0] & f for o in c)
+        for depth in range(2, want + 1):
             if ctx.evals >= stop:
                 break
-            g = self._group_view(gi)
-            nslot = len(g.get("gems") or []) + 1
-            try:
-                vs = self.e.valid_supports(gi)
-            except Exception as ex:
-                self.note(f"{label}: valid_supports failed: {ex}")
+            seen, exts = set(), []
+            for _, c in beam:
+                for sid in pool:
+                    if sid in c or clash(c, sid):
+                        continue
+                    key = tuple(sorted(c + (sid,)))
+                    if key in seen:
+                        continue
+                    seen.add(key)
+                    exts.append(c + (sid,))
+            exts = exts[:max(0, stop - ctx.evals)]
+            if not exts:
                 break
-            cands = [s for s in vs.get("supports") or [] if not s.get("socketed") and not s.get("conflicts")]
-            if not cands:
+            scored = ctx.evaluate_many([change(c) for c in exts], profiles=[p0])
+            nxt = sorted(((r, c) for r, c in zip(scored, exts) if r is not None and obj(r) is not None
+                          and nviol(r) <= base_v), key=lambda rc: rc[0]["objective"], reverse=True)
+            if not nxt:
                 break
-            changes = [{"gem_changes": [{"group": gi, "slot": nslot, "gem": s["id"]}], "_name": s["name"]}
-                       for s in cands]
-            changes = changes[:max(1, stop - ctx.evals)]
-            scored = ctx.evaluate_many(changes, profiles=[p0])
-            ranked = sorted([(r, c) for r, c in zip(scored, changes) if r is not None],
-                            key=lambda rc: rc[0].get("objective") or -1e18, reverse=True)
-            kept = False
-            for r, c in ranked[:5]:
-                ok, _ = ctx.try_commit({"gem_changes": c["gem_changes"]}, label=f"socket {c['_name']}", accept=accept)
-                if ok:
-                    added.append(c["_name"])
-                    kept = True
-                    break
-            if not kept:
-                top = ranked[0][0] if ranked else None
-                self.note(f"{label}: no support kept (best screened {_short(top)} vs {_short(ctx.current)})")
-                break
-        if added:
-            self.note(f"{label} (group {gi}) supports: {', '.join(added)} -> {_short(ctx.current)}")
+            beam = nxt[:self.BEAM_WIDTH]
+            best_by_size[depth] = nxt[0]
+        # 3. commit the best set (largest on a tie: an empty socket is never better than a neutral support)
+        order = sorted(best_by_size.items(), key=lambda kv: (kv[1][0]["objective"], kv[0]), reverse=True)
+        for size, (r, c) in order[:3]:
+            ok, _ = ctx.try_commit(change(c), label=f"socket {', '.join(names[x] for x in c)}", accept=accept)
+            if ok:
+                self.note(f"{label} (group {gi}) supports: {', '.join(names[x] for x in c)} -> {_short(ctx.current)}")
+                return
+        top = order[0][1][0] if order else None
+        self.note(f"{label}: no support kept (best screened {_short(top)} vs {_short(ctx.current)})")
 
     def relaxed(self):
         """The scorer without the gear/tree-dependent hard floors (resistances, EHP, max hit, attributes):
@@ -509,7 +559,7 @@ class _Synth:
         n = support_slots(self.sk.level)
         b = int(self.budget * SHARE["sockets"])
         targets = []
-        if self.main_group and not self.granted_main:
+        if self.main_group:
             targets.append((self.main_group, "main"))
         if self.meta_group and self.meta_group != self.main_group:
             targets.append((self.meta_group, "meta"))
@@ -708,24 +758,39 @@ class _Synth:
         return r
 
     def polish_steps(self):
-        from exilegen.optimise.pipeline import make_step
+        """Run the polish steps, then repeat them on whatever budget the steps left unused while a cycle
+        still gains >= CYCLE_MIN_GAIN, so a tree change can unlock a better support and vice versa. The
+        first cycle splits the whole polish budget as before: reserving budget for later cycles starved
+        the first one and cost ~25% DPS on a 16-skeleton A/B."""
+        from exilegen.optimise.pipeline import CYCLE_MIN_GAIN, _gain, make_step
         ctx = self.ctx
-        todo = [s for s in self.polish if s != "triggers" or has_meta_groups(ctx.skills())]
-        for i, name in enumerate(todo):
-            left = ctx.budget_left()
-            if left <= 50:
-                self.note(f"budget exhausted before {name}")
+        for cyc in range(max(1, self.polish_cycles)):
+            if ctx.budget_left() <= 50:
+                if cyc == 0:
+                    self.note("budget exhausted before polish")
                 break
-            share = max(50, left // (len(todo) - i))
-            step = make_step(name, self.seed, share if name.startswith("tree") else None, self.notes)
-            if step is None:
-                continue
-            if hasattr(step, "verbose"):
-                step.verbose = False
-            r = self._run(step, share)
-            rb = any("rolled back" in str(n) for n in r.notes)
-            self.note(f"{name}: {'rolled back' if rb else ('improved' if r.improved else 'no gain')}, "
-                      f"{r.evals} evals, {r.seconds:.0f}s -> {_short(ctx.current)}")
+            c0 = ctx.current
+            todo = [s for s in self.polish if s != "triggers" or has_meta_groups(ctx.skills())]
+            for i, name in enumerate(todo):
+                left = ctx.budget_left()
+                if left <= 50:
+                    if cyc == 0:
+                        self.note(f"budget exhausted before {name}")
+                    break
+                share = max(50, left // max(1, len(todo) - i))
+                step = make_step(name, None if self.seed is None else self.seed + cyc, share if name.startswith("tree") else None, self.notes)
+                if step is None:
+                    continue
+                if hasattr(step, "verbose"):
+                    step.verbose = False
+                r = self._run(step, share)
+                rb = any("rolled back" in str(n) for n in r.notes)
+                self.note(f"{name}: {'rolled back' if rb else ('improved' if r.improved else 'no gain')}, "
+                          f"{r.evals} evals, {r.seconds:.0f}s -> {_short(ctx.current)}")
+            g = _gain(c0, ctx.current)
+            self.note(f"polish cycle {cyc + 1}: gain {g:.2%}")
+            if g < CYCLE_MIN_GAIN:
+                break
 
     # ------------------------------------------------------------------ run
     def run(self) -> BuildResult:
@@ -776,12 +841,13 @@ class _Synth:
 
 
 def synthesize(skeleton: Skeleton, engine: Any, scorer: Any = None, budget: int = 6000, log_fn=None,
-               gear_optimise: bool = True, polish=POLISH, seed: int = 0) -> BuildResult:
+               gear_optimise: bool = True, polish=POLISH, seed: int = 0,
+               polish_cycles: int = POLISH_CYCLES) -> BuildResult:
     """contracts.Synthesizer: build `skeleton` from nothing in `engine`, judged by `scorer` (default:
     pinnacle_v1 + mapping_v1, DEFAULT_FLOORS, no constraints). Never raises for a bad skeleton: the result
     has ok=False and error set. `budget` is in engine evaluations."""
     return _Synth(skeleton, engine, scorer, budget, log_fn=log_fn, gear_optimise=gear_optimise,
-                  polish=polish, seed=seed).run()
+                  polish=polish, seed=seed, polish_cycles=polish_cycles).run()
 
 
 def summary_row(res: BuildResult) -> dict:
