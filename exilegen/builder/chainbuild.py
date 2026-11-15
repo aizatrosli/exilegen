@@ -560,7 +560,7 @@ def build(chain_id: str, level: int | None = None, exclude=None, budget: int = 6
         out.setdefault("alternatives", [])
     if rx:
         group = next((n for n in res.notes or [] if str(n).startswith("trigger group")), None)
-        out["reaction"] = {"meta": rx["meta_name"], "spells": rx["spell_names"], "event": rx["event_label"],
+        out["reaction"] = {"meta_gem": rx["meta_name"], "casts": rx["spell_names"], "fed_by": rx["event_label"],
                            "built": bool(group) and not rx_note, "modelled": rx["modelled"], "energy": rx["energy"],
                            "note": rx_note or (None if rx["modelled"] else
                                                f"the scorer has no Energy model for {rx['meta_name']}: the triggered "
@@ -572,4 +572,8 @@ def build(chain_id: str, level: int | None = None, exclude=None, budget: int = 6
                seconds=round(time.time() - t0, 1))
     if res.error:
         out["warning"] = res.error
+    if not out.get("dps"):                 # PoB gives the main skill no damage here: the search had nothing to rank by
+        out["feasible"] = False
+        out["warning"] = "; ".join(x for x in (out.get("warning"), f"{main_name} deals no damage in this build: "
+                                               "its supports were not chosen by damage") if x)
     return out
