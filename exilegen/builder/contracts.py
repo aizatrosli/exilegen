@@ -56,6 +56,7 @@ class BuildResult:
     seconds: float = 0.0
     notes: list = field(default_factory=list) # what synth did / why it failed
     error: str | None = None
+    unique_trials: list = field(default_factory=list)  # each forced unique vs a tuned rare in its slot
 
 
 class Synthesizer(Protocol):

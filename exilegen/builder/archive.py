@@ -588,6 +588,7 @@ class Archive:
             "skills": slim_skills(result.skills),
             "evals": result.evals, "seconds": result.seconds,
             "notes": [str(n) for n in (result.notes or [])][:40],
+            "unique_trials": list(getattr(result, "unique_trials", None) or []),
             "error": result.error,
             "worker": worker,
             "job": job or {},

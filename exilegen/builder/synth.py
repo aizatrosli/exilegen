@@ -111,7 +111,7 @@ def _short(r: dict | None) -> str:
 
 class _Synth:
     def __init__(self, sk: Skeleton, engine, scorer, budget: int, log_fn=None, gear_optimise: bool = True,
-                 polish=POLISH, seed: int = 0, polish_cycles: int = POLISH_CYCLES):
+                 polish=POLISH, seed: int = 0, polish_cycles: int = POLISH_CYCLES, unique_trial: str = "on"):
         self.sk, self.e, self.budget, self.seed = sk, engine, int(budget), seed
         self.scorer = make_scorer(scorer, constraints=list(getattr(sk, "constraints", None) or []))
         self.profiles = list(self.scorer.profile_list)
@@ -119,6 +119,8 @@ class _Synth:
         self.gear_optimise = gear_optimise
         self.polish = list(polish or ())
         self.polish_cycles = polish_cycles
+        self.unique_trial = unique_trial       # "on" | "off"
+        self.trials: list[dict] = []
         self.notes: list[str] = []
         self.ctx: Context | None = None
         self.main_ref: dict | None = None      # {group, skill}
@@ -714,6 +716,89 @@ class _Synth:
         self.note(f"gear kept: {best[2]}")
         self.checkpoint()
 
+    # ------------------------------------------------------------------ 7b. unique trials
+    def unique_trials(self):
+        """Make each forced unique earn its slot: swap in a template rare, tune it with optimise_gear and
+        compare (feasibility first, then objective) with the unique.
+
+        Every trial is recorded (BuildResult.unique_trials: unique, slot, role, gain = DPS-weighted objective
+        ratio rare/unique, feasible either way, action). A unique the skeleton cannot do without (it grants
+        the main skill or the trigger, or a constraint requires it) is never tried. One that defines the
+        skeleton's thesis (build_around, chain, anti_meta) is measured but kept, so the archive still holds
+        that idea and its cost is visible. Any other (mutation swaps) is replaced when the rare wins.
+        Weapon slots are skipped: a different weapon base changes what the main skill can use."""
+        from .gear import ARMOUR_SLOTS, JEWELLERY_SLOTS
+        if self.unique_trial == "off":
+            return
+        ctx, gp = self.ctx, self.gp
+        trig = (self.sk.trigger or {}).get("source")
+        from exilegen.scoring.constraints import Constraint
+        required = set()
+        for c in getattr(self.sk, "constraints", None) or []:
+            try:
+                cc = Constraint.parse(c)
+            except Exception:          # noqa: BLE001
+                continue
+            if cc.type == "require_unique" and cc.arg:
+                required.add(cc.arg)
+        keep_roles = {"build_around", "chain", "anti_meta"}
+        weights = _objective_weights(self.scorer)
+        roles, grants = {}, {}
+        for u in self.sk.uniques or []:
+            d = {"name": u} if isinstance(u, str) else u
+            roles[d["name"]] = d.get("role", "")
+            grants[d["name"]] = {str(x) for x in d.get("grants") or []}
+        used = {str(self.sk.main_skill), str(self.main_info.skill_id or "")} | {str(x) for x in self.sk.extra_skills or []} \
+            | {str(x) for x in (self.sk.trigger or {}).get("spells") or []}
+        for slot, val in sorted(gp.taken.items()):
+            if not str(val).startswith("unique:") or slot.startswith("Weapon"):
+                continue
+            name = str(val).split(":", 1)[1]
+            role = roles.get(name, "")
+            if role == "grants_main" or name == trig or name in required or grants.get(name, set()) & used:
+                continue                     # the build needs it: it grants a used skill or is required
+            before = ctx.current
+            c0 = self.e.raw("save_build_code", {})
+            code0 = c0.get("code") if isinstance(c0, dict) else c0
+            trial = {"unique": name, "slot": slot, "role": role}
+            try:
+                if slot in ARMOUR_SLOTS:
+                    tb = gp.armour_base(slot)
+                    made = tb and gp.craft(slot, tb[0], tb[1], "armour", title=f"Trial {slot}")
+                elif slot in JEWELLERY_SLOTS:
+                    tb = gp.jewellery_base(slot)
+                    made = tb and gp.craft(slot, tb[0], tb[1], "Ring" if slot.startswith("Ring") else slot,
+                                           title=f"Trial {slot}")
+                else:
+                    made = None
+                if not made:
+                    raise SynthError("no template base")
+                gp.optimise(weights=weights, slots=[slot])
+                ctx._skills = None
+                ctx.refresh()
+                after = ctx.current
+            except Exception as ex:          # noqa: BLE001 - a failed trial keeps the unique
+                after = None
+                trial["error"] = str(ex)[:120]
+            o0, o1 = (before or {}).get("objective"), (after or {}).get("objective")
+            trial["gain"] = round(math.exp(max(-50.0, min(50.0, o1 - o0))), 4) if o0 is not None and o1 is not None else None
+            trial["feasible_unique"] = bool((before or {}).get("feasible"))
+            trial["feasible_rare"] = bool((after or {}).get("feasible")) if after else None
+            rare_wins = after is not None and Context.better(after, before, 1e-4)
+            if rare_wins and role not in keep_roles:
+                trial["action"] = "replaced"
+                self.note(f"unique trial: {name} ({slot}) replaced by a tuned rare, objective x{trial['gain']}")
+                self.checkpoint()
+            else:
+                trial["action"] = "kept" + (" (thesis)" if rare_wins else "")
+                self.e.load(code=code0, profile=self.profiles[0], main=dict(self.main_ref))
+                gp.taken[slot] = val
+                ctx._skills = None
+                ctx.refresh()
+                self.note(f"unique trial: {name} ({slot}) kept; a tuned rare scores x{trial['gain']}"
+                          + (" (rare is better, kept as the skeleton's thesis)" if rare_wins else ""))
+            self.trials.append(trial)
+
     # ------------------------------------------------------------------ 8. polish
     def _run(self, step, share: int) -> StepResult:
         """Run one optimiser step with a budget share; roll it back if it ends worse (pipeline guard)."""
@@ -802,6 +887,7 @@ class _Synth:
         if self.gear_optimise:
             phases.insert(phases.index(("tree", self.tree)), ("gear_pre", lambda: self.gear(final=False)))
             phases.append(("gear_opt", self.gear))
+            phases.append(("unique_trials", self.unique_trials))
         phases.append(("sockets2", lambda: self.sockets(final=True)))
         phases.append(("polish", self.polish_steps))
         phase = None
@@ -837,17 +923,18 @@ class _Synth:
             res.evals = ctx.evals
         self.note("timing: " + ", ".join(f"{k} {v:.0f}s" for k, v in self.timing.items()))
         res.seconds = time.time() - t0
+        res.unique_trials = list(self.trials)
         return res
 
 
 def synthesize(skeleton: Skeleton, engine: Any, scorer: Any = None, budget: int = 6000, log_fn=None,
                gear_optimise: bool = True, polish=POLISH, seed: int = 0,
-               polish_cycles: int = POLISH_CYCLES) -> BuildResult:
+               polish_cycles: int = POLISH_CYCLES, unique_trial: str = "on") -> BuildResult:
     """contracts.Synthesizer: build `skeleton` from nothing in `engine`, judged by `scorer` (default:
     pinnacle_v1 + mapping_v1, DEFAULT_FLOORS, no constraints). Never raises for a bad skeleton: the result
     has ok=False and error set. `budget` is in engine evaluations."""
     return _Synth(skeleton, engine, scorer, budget, log_fn=log_fn, gear_optimise=gear_optimise,
-                  polish=polish, seed=seed, polish_cycles=polish_cycles).run()
+                  polish=polish, seed=seed, polish_cycles=polish_cycles, unique_trial=unique_trial).run()
 
 
 def summary_row(res: BuildResult) -> dict:
