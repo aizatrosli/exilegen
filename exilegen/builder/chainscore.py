@@ -90,7 +90,9 @@ def _worker(wid: int, jobs, results, budget: int, seed: int):
             if sk is None:
                 row.update(ok=False, error="no skeleton for this chain")
             else:
-                res = synthesize(sk, engine, scorer, budget=budget, seed=seed)
+                # a chain build keeps the chain's uniques: the unique trial would swap them for a tuned rare
+                # whenever that scores higher, and the build would then measure the skill without the chain
+                res = synthesize(sk, engine, scorer, budget=budget, seed=seed, unique_trial="off")
                 s = res.score or {}
                 row.update(summary_row(res))
                 row.update(id=ch["id"], skeleton_id=sk.id, ascendancy=sk.ascendancy, main_skill=ch["main_skill"],

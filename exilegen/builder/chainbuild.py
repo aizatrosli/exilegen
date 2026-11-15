@@ -426,7 +426,8 @@ def _synth(sk, exclude, points, budget, seed, log_fn, out: dict, key: str, engin
         drop_forced(sk, exclude)
         with (engine() if engine else Engine()) as eng:
             res = synthesize(sk, eng, make_scorer(constraints=list(sk.constraints)), budget=budget, seed=seed,
-                             log_fn=log_fn, exclude_supports=exclude, asc_points=points)
+                             log_fn=log_fn, exclude_supports=exclude, asc_points=points,
+                             unique_trial="off")   # the chain's uniques are the point of the build
             if state_tokens is not None and res.ok and res.code:
                 try:
                     res.descriptor["states"] = _states(eng, res.code, state_tokens, res.skills, state_gems)
