@@ -71,7 +71,7 @@ def measured(out: str) -> dict[str, dict]:
             if bsup:
                 m["base_supports"] = bsup[0]
         got = r.get("pinnacle_v1.main")
-        if dps > 0 and got and r.get("main_name") and not str(got).startswith(r["main_name"]):
+        if dps > 0 and got and r.get("main_name") and not str(got).lower().startswith(r["main_name"].lower()):
             # the build's damage comes from another skill (a trigger setup replaced the main): not this chain's result
             m["wrong_main"] = str(got)
             res[r["id"]] = m
