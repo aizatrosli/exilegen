@@ -37,10 +37,24 @@ import time
 from dataclasses import asdict, is_dataclass
 from typing import Any
 
-from .contracts import BuildResult, Skeleton
+from .contracts import BuildResult, Skeleton, main_skill_matches
 
 CORPUS_OVERVIEW = "/mnt/project-files/corpus/poe2/overview.json"
-AXES = ("damage", "activation", "defence", "unique", "ascendancy", "corpus")
+FINE_AXES = ("damage", "activation", "defence", "unique", "ascendancy", "corpus")
+# Coarse cells (the default): few enough that builds of one archetype meet in the same cell and compete,
+# instead of each unique/ascendancy/corpus combination getting a cell of its own (fine axes: 157 cells for 213
+# records, 43 with a second record). damage_family folds "dot:fire" -> "dot", "cold+fire" -> "cold";
+# pool is the defence pool without the mitigation layer; class is the base class.
+COARSE_AXES = ("damage_family", "activation", "pool", "class")
+AXES_PRESETS = {"coarse": COARSE_AXES, "fine": FINE_AXES}
+DEFAULT_AXES = COARSE_AXES
+AXES = FINE_AXES + ("damage_family", "pool", "class")      # every descriptor axis (reports, coverage, feedback)
+# Quarantine. A build whose measured main skill is not the skeleton's (wrong_main) is ranked with the unverified
+# builds in tier 1.
+# A "feasible" build with no honest damage (its main skill is a buff, herald or utility that PoB
+# gives 0 DPS) passes the defence floors on EHP alone. It is kept in tier 2 (like an infeasible build) so it
+# cannot hold a cell, count as a feasible cell or add to the QD score.
+QUARANTINE_MIN_DPS = 0.0
 PARETO_KEYS = ("dps_honest", "ehp", "neg_cost")
 COST_TIER = {"low": 0, "mid": 1, "high": 2}
 MAX_FRONT = {0: 6, 1: 3, 2: 2}          # entries kept per tier per cell
@@ -319,21 +333,51 @@ def describe(result: BuildResult, corpus_obj: Corpus | None = None) -> dict:
     # rarity of the idea: the skeleton's intended main skill (the build's DPS skill may differ)
     rarity_skill = sk.main_skill or skill
     d = {
-        "damage": damage_bucket(doc) if doc else str((sk.tags or {}).get("damage") or "unknown"),
+        "damage": damage_bucket(doc) if doc else "unknown",
         "activation": activation_class(doc, result.skills, sk),
         "defence": defence_bucket(doc, sk),
         "unique": defining_unique(sk),
         "ascendancy": sk.ascendancy or sk.cls or "?",
         "corpus": cp.bucket(rarity_skill, sk.ascendancy),
     }
+    if d["damage"] in ("unknown", "dot:unknown"):     # no typed damage in PoB: the skeleton's intent, else "none"
+        hint = (sk.tags or {}).get("damage") or getattr(sk, "primary_damage", None)
+        d["damage"] = str(hint).lower() if hint else ("unknown" if not doc else "none")
+    derive(d, sk.cls)
     sh = cp.share(rarity_skill, sk.ascendancy)
     d["main_skill"] = skill
     d["corpus_share"] = sh
     return d
 
 
-def cell_key(desc: dict) -> str:
-    return "|".join(str(desc.get(a, "?")) for a in AXES)
+def derive(d: dict, cls: str | None = None) -> dict:
+    """Fill the coarse axes from the fine ones (in place; also for records written before they existed)."""
+    dm = str(d.get("damage") or "unknown")
+    d.setdefault("damage_family", "dot" if dm.startswith("dot:") else dm.split("+")[0])
+    d.setdefault("pool", str(d.get("defence") or "?").split("/")[0])
+    if cls or "class" not in d:
+        d.setdefault("class", cls or "?")
+    return d
+
+
+def resolve_axes(spec=None) -> tuple:
+    """Axes from a preset name ("coarse", "fine"), a comma list or a sequence of descriptor axes."""
+    if spec is None or spec == "":
+        return DEFAULT_AXES
+    if isinstance(spec, str):
+        if spec in AXES_PRESETS:
+            return AXES_PRESETS[spec]
+        spec = [x.strip() for x in spec.split(",") if x.strip()]
+    out = tuple(spec)
+    bad = [a for a in out if a not in AXES]
+    if bad or not out:
+        raise ValueError(f"unknown archive axes {bad or spec}; choose from {', '.join(AXES)} or "
+                         f"{'/'.join(AXES_PRESETS)}")
+    return out
+
+
+def cell_key(desc: dict, axes=DEFAULT_AXES) -> str:
+    return "|".join(str(desc.get(a, "?")) for a in axes)
 
 
 # ---------------------------------------------------------------------------------------------- records
@@ -390,9 +434,19 @@ def max_hit(doc: dict) -> float | None:
     return min(vals) if vals else None
 
 
+def measures_main(rec: dict) -> bool:
+    """Does PoB measure the skeleton's main skill? A trigger setup or a gear change can hand the damage to
+    another skill (13% of archived builds before synth guarded against it); such a build is not the idea it
+    is filed under, so it ranks below honest builds."""
+    skd = rec.get("skeleton") or {}
+    names = {skd.get("main_skill"), (skd.get("tags") or {}).get("main_skill_name")} - {None, ""}
+    return main_skill_matches(names, primary_doc(rec.get("stats")).get("mainSkill"))
+
+
 class Entry:
     """One archived build (a line of archive.jsonl), with the derived ranking keys."""
-    __slots__ = ("rec", "uid", "cell", "tier", "objective", "feasible", "verified", "dps_honest", "ehp", "neg_cost")
+    __slots__ = ("rec", "uid", "cell", "tier", "objective", "feasible", "verified", "dps_honest", "ehp", "neg_cost",
+                 "quarantine")
 
     def __init__(self, rec: dict):
         self.rec = rec
@@ -402,9 +456,15 @@ class Entry:
         self.feasible = bool(s.get("feasible"))
         self.verified = bool(s.get("verified", True)) and not any(
             str(f).startswith("unverified") or ":unverified" in str(f) for f in s.get("flags") or [])
-        self.tier = 0 if self.feasible and self.verified else 1 if self.feasible else 2
         self.objective = _num(s.get("objective"))
         self.dps_honest = _num(s.get("dps_honest"))
+        self.quarantine = ("no_damage" if self.feasible and self.dps_honest is not None
+                           and self.dps_honest <= QUARANTINE_MIN_DPS else None)
+        if self.quarantine is None and self.feasible and not measures_main(rec):
+            self.quarantine = "wrong_main"     # the damage is another skill's: kept, ranked like an unverified build
+            self.verified = False
+        self.tier = (2 if self.quarantine == "no_damage" else 0 if self.feasible and self.verified
+                     else 1 if self.feasible else 2)
         self.ehp = _num(s.get("ehp"))
         self.neg_cost = -float(COST_TIER.get((rec.get("skeleton") or {}).get("budget_tier", "mid"), 1))
 
@@ -489,8 +549,9 @@ class Cell:
 
 # ---------------------------------------------------------------------------------------------- archive
 class Archive:
-    def __init__(self, run_dir: str | None = None, corpus_path: str | None = None):
+    def __init__(self, run_dir: str | None = None, corpus_path: str | None = None, axes=None):
         self.run_dir = run_dir
+        self.axes = resolve_axes(axes)
         self.cells: dict[str, Cell] = {}
         self.records: dict[str, dict] = {}       # uid -> record (every evaluated skeleton)
         self.seen: set[str] = set()              # skeleton ids
@@ -510,11 +571,19 @@ class Archive:
         return os.path.join(self.run_dir, "archive.jsonl") if self.run_dir else None
 
     @classmethod
-    def open(cls, run_dir: str, corpus_path: str | None = None, redescribe: bool = False) -> "Archive":
+    def open(cls, run_dir: str, corpus_path: str | None = None, redescribe: bool = False, axes=None) -> "Archive":
         """Load a run directory. redescribe=True recomputes every stored descriptor with the current
-        describe() (after a descriptor change; the jsonl itself is never rewritten)."""
+        describe() (after a descriptor change; the jsonl itself is never rewritten). axes: the cell axes;
+        default the axes the run was started with (index.json), else DEFAULT_AXES. Records stored under other
+        axes are re-keyed from their descriptor."""
         os.makedirs(run_dir, exist_ok=True)
-        a = cls(run_dir, corpus_path)
+        meta = {}
+        try:
+            with open(os.path.join(run_dir, "index.json"), encoding="utf-8") as f:
+                meta = (json.load(f) or {}).get("meta") or {}
+        except (OSError, ValueError):
+            pass
+        a = cls(run_dir, corpus_path, axes=axes if axes is not None else meta.get("axes"))
         a.redescribe = redescribe
         p = a.jsonl_path
         if os.path.exists(p):
@@ -528,11 +597,8 @@ class Archive:
                     except ValueError:
                         continue          # torn last line after a crash
                     a._ingest(rec)
-        try:
-            with open(os.path.join(run_dir, "index.json"), encoding="utf-8") as f:
-                a.meta = (json.load(f) or {}).get("meta") or {}
-        except (OSError, ValueError):
-            pass
+        a.meta = meta
+        a.meta["axes"] = list(a.axes)
         return a
 
     def _append(self, rec: dict) -> None:
@@ -555,6 +621,7 @@ class Archive:
         with self.lock:
             if extra:
                 self.meta.update(extra)
+            self.meta["axes"] = list(self.axes)
             idx = {"version": 1, "written": time.time(), "n_records": self.n, "meta": self.meta,
                    "stats": self.stats(),
                    "cells": {k: {"desc": c.desc, "attempts": c.attempts,
@@ -582,12 +649,14 @@ class Archive:
             "code": result.code,
             "score": slim_score(result.score),
             "descriptor": result.descriptor,
-            "cell": cell_key(result.descriptor),
+            "cell": cell_key(result.descriptor, self.axes),
+            "axes": list(self.axes),
             "max_hit": max_hit(doc),
             "stats": slim_stats(result.stats),
             "skills": slim_skills(result.skills),
             "evals": result.evals, "seconds": result.seconds,
             "notes": [str(n) for n in (result.notes or [])][:40],
+            "unique_trials": list(getattr(result, "unique_trials", None) or []),
             "error": result.error,
             "worker": worker,
             "job": job or {},
@@ -608,7 +677,7 @@ class Archive:
     def _src(self, rec: dict) -> dict:
         src = (rec.get("skeleton") or {}).get("source") or "?"
         return self.sources.setdefault(src, {"n": 0, "ok": 0, "feasible": 0, "verified": 0, "new_cell": 0,
-                                             "improved": 0, "evals": 0, "seconds": 0.0})
+                                             "quarantined": 0, "wrong_main": 0, "improved": 0, "evals": 0, "seconds": 0.0})
 
     def _ingest(self, rec: dict, fresh: bool = False) -> str:
         """Insert a record (from add(), or replayed from archive.jsonl)."""
@@ -620,7 +689,8 @@ class Archive:
                 br = BuildResult(skeleton=Skeleton(**rec["skeleton"]), ok=True, stats=rec.get("stats"),
                                  skills=rec.get("skills"))
                 rec["descriptor"] = describe(br, self._corpus)
-                rec["cell"] = cell_key(rec["descriptor"])
+                rec["cell"] = cell_key(rec["descriptor"], self.axes)
+                rec["axes"] = list(self.axes)
             except Exception:  # noqa: BLE001 - keep the stored descriptor
                 pass
         self.records[uid] = rec
@@ -640,10 +710,17 @@ class Archive:
             e = Entry(rec)
             s["feasible"] += int(e.feasible)
             s["verified"] += int(e.feasible and e.verified)
-            key = rec.get("cell") or cell_key(rec.get("descriptor") or {})
+            s["quarantined"] += int(e.quarantine == "no_damage")
+            s["wrong_main"] += int(e.quarantine == "wrong_main")
+            desc = rec.get("descriptor") or {}
+            if not rec.get("cell") or tuple(rec.get("axes") or FINE_AXES) != self.axes:
+                derive(desc, (rec.get("skeleton") or {}).get("cls"))
+                rec["descriptor"], rec["cell"], rec["axes"] = desc, cell_key(desc, self.axes), list(self.axes)
+                e.cell = rec["cell"]
+            key = rec["cell"]
             cell = self.cells.get(key)
             if cell is None:
-                cell = self.cells[key] = Cell(key, {a: (rec.get("descriptor") or {}).get(a) for a in AXES})
+                cell = self.cells[key] = Cell(key, {a: desc.get(a) for a in self.axes})
             cell.attempts += 1
             status = cell.offer(e)
             if status == "new_cell" and e.tier == 2:
@@ -670,7 +747,7 @@ class Archive:
             ver = [c for c in self.cells.values() if c.best_tier() == 0]
             qd = sum(max(0.0, c.elite().objective or 0.0) for c in feas)
             qd_v = sum(max(0.0, c.elite().objective or 0.0) for c in ver)
-            axis_cov = {a: len({c.desc.get(a) for c in feas}) for a in AXES}
+            axis_cov = {a: len({c.desc.get(a) for c in feas}) for a in self.axes}
             src = {}
             for k, v in self.sources.items():
                 n = max(1, v["n"])
@@ -679,6 +756,9 @@ class Archive:
             best = min(feas, key=lambda c: c.elite().rank(), default=None)
             return {"records": self.n, "cells": len(self.cells), "cells_feasible": len(feas),
                     "cells_verified": len(ver), "qd_score": qd, "qd_score_verified": qd_v,
+                    "axes": list(self.axes),
+                    "quarantined": sum(v.get("quarantined", 0) for v in self.sources.values()),
+                    "wrong_main": sum(v.get("wrong_main", 0) for v in self.sources.values()),
                     "axis_coverage": axis_cov, "sources": src,
                     "best": None if best is None else {"uid": best.elite().uid, "cell": best.key,
                                                        "objective": best.elite().objective,
@@ -703,8 +783,9 @@ class Archive:
             axis_counts: dict[str, dict] = {a: {} for a in AXES}
             for c in self.cells.values():
                 if c.best_tier() <= 1:
+                    d = c.elite().rec.get("descriptor") or c.desc
                     for a in AXES:
-                        v = str(c.desc.get(a))
+                        v = str(d.get(a))
                         axis_counts[a][v] = axis_counts[a].get(v, 0) + 1
             cc: dict[str, int] = {}
             skill_counts: dict[str, int] = {}

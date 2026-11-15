@@ -55,7 +55,8 @@ class TreeStep:
                  restarts: int = 3, grow_step: int = 12, grow_depth: int = 6, moves_per_batch: int = 40,
                  inner_rounds: int = 8, max_keys: int = 220, branch_max: int = 6, lam: float = 1.0, mu: float = 0.0,
                  prior: Callable[[int, dict], float] | None = None, pins=(), extra_points: int = 0,
-                 on_free_pruned: str = "readd", seed: int = 0, verbose: bool = True):
+                 on_free_pruned: str = "readd", seed: int = 0, verbose: bool = True,
+                 seed_tree: dict | None = None):
         if mode not in ("warm", "scratch"):
             raise ValueError("mode must be warm or scratch")
         self.mode = mode
@@ -75,6 +76,10 @@ class TreeStep:
         self.branch_max = branch_max
         self.lam, self.mu, self.prior = lam, mu, prior
         self.pins = set(int(p) for p in pins)
+        # scratch only: a tree to start from (e.g. a mutated build's parent) as {"nodes": [...],
+        # "attrs": {node: choice}}. Its main-tree nodes are added after the pins, nearest to the class
+        # start first, while points last; growth and local search then repair it.
+        self.seed_tree = seed_tree
         self.extra_points = extra_points
         self.on_free_pruned = on_free_pruned
         self.rng = random.Random(seed)
@@ -802,9 +807,38 @@ class TreeStep:
         for v in S:
             if G.is_attr(v) and v in attrs:
                 A[v] = attrs[v]
+        if self.seed_tree and self.seed_tree.get("nodes"):
+            S, A = self._seed_start(S, A, d0)
         self.fixed = set(fixed) & set(S)
         self._br_cache.clear()
         self._log(f"  scratch start: {len(S)} nodes (pins + paths)")
+        return S, A
+
+    def _seed_start(self, S, A, d0):
+        """Add the seed tree's main-tree nodes to S, nearest to the class start first, each by the
+        shortest path from what S already holds, while main-tree points last."""
+        G = self.G
+        sattrs = {int(k): int(v) for k, v in (self.seed_tree.get("attrs") or {}).items() if v}
+        want = [int(v) for v in self.seed_tree["nodes"] if int(v) in d0 and int(v) not in S]
+        want.sort(key=lambda v: len(d0.get(v, [0] * 99)))
+        added = skipped = 0
+        for v in want:
+            if v in S:
+                continue
+            p = G.paths(self._sources(S, 0), set(S), None, 60, alpha=0.0).get(v)
+            if p is None:
+                skipped += 1
+                continue
+            if self._counts(S)[0] + len([u for u in p if u not in S]) > self.B[0]:
+                skipped += 1
+                continue
+            S, A = self._with(S, A, p, mode=0)
+            added += 1
+        for v in S:
+            if G.is_attr(v) and v in sattrs:
+                A[v] = sattrs[v]
+        self.report["seed"] = {"nodes": len(want), "added": added, "skipped": skipped}
+        self._log(f"  scratch seed: {added} of {len(want)} seed nodes added ({skipped} skipped)")
         return S, A
 
     def _grow(self, S, A):

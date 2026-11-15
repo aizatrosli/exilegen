@@ -56,6 +56,7 @@ class BuildResult:
     seconds: float = 0.0
     notes: list = field(default_factory=list) # what synth did / why it failed
     error: str | None = None
+    unique_trials: list = field(default_factory=list)  # each forced unique vs a tuned rare in its slot
 
 
 class Synthesizer(Protocol):
@@ -67,3 +68,23 @@ class SkeletonGenerator(Protocol):
                  seed: int | None = None) -> list[Skeleton]: ...
 
     def mutate(self, parent: Skeleton, n: int = 1, seed: int | None = None) -> list[Skeleton]: ...
+
+
+def _skill_stem(s: str) -> str:
+    s = str(s or "").lower().replace(" ", "").replace("'", "")
+    return s[:-6] if s.endswith("player") else s
+
+
+def main_skill_matches(names, measured: dict | None) -> bool:
+    """True when the skill PoB measures (a stats doc's mainSkill {id, name}) is the intended main skill:
+    an exact id/name match, or one stem extending the other (Requiem / Requiem Ammo). A trigger setup or a
+    gear change that hands the damage to another skill (Ember Fusillade for Detonate Dead, a weapon's default
+    attack for a skill granted by a unique that was swapped out) does not match. No measurement: True."""
+    ms = measured or {}
+    got = {_skill_stem(ms.get("id")), _skill_stem(ms.get("name"))} - {""}
+    if not got:
+        return True
+    want = {_skill_stem(n) for n in names or []} - {""}
+    if not want or got & want:
+        return True
+    return any(len(min(a, b, key=len)) >= 6 and (a.startswith(b) or b.startswith(a)) for a in got for b in want)

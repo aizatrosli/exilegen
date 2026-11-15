@@ -124,7 +124,9 @@ def test_describe_axes(fake_corpus):
     assert describe(r4)["damage"] == "physical" and describe(r4)["activation"] == "minion"
     assert d3["activation"] == "minion"
     assert d3["defence"] == "es/armour"
-    assert cell_key(d3).count("|") == len(A.AXES) - 1
+    assert cell_key(d3).count("|") == len(A.DEFAULT_AXES) - 1
+    assert cell_key(d3) == "cold|minion|es|Sorceress"
+    assert cell_key(d3, A.FINE_AXES).count("|") == len(A.FINE_AXES) - 1
 
 
 def test_describe_without_stats_uses_skeleton_hints(fake_corpus):
@@ -217,6 +219,54 @@ def test_persistence_resume_and_checkpoint(tmp_path, fake_corpus):
         f.write("\n".join(json.dumps(r) for r in recs) + "\n")
     assert "stale|cell" in Archive.open(d).cells
     assert "stale|cell" not in Archive.open(d, redescribe=True).cells
+
+
+def test_quarantine_zero_damage(fake_corpus):
+    arch = Archive()
+    # a "feasible" build with no honest damage (a herald as main skill) is held in tier 2
+    assert arch.add(result(sk(n=1), dps=0.0, ehp=9e4)) == "new_cell_infeasible"
+    c = next(iter(arch.cells.values()))
+    assert c.best_tier() == 2 and c.elite().quarantine == "no_damage"
+    st = arch.stats()
+    assert st["cells_feasible"] == 0 and st["qd_score"] == 0 and st["quarantined"] == 1
+    # any build that does damage takes the cell
+    assert arch.add(result(sk(n=2), dps=50.0, ehp=1e3)) == "improved"
+    assert c.elite().tier == 0 and not c.tiers[2]
+    assert arch.pick_parent(random.Random(0)).uid == sk(n=2).id
+
+
+def test_axes_presets_and_rekey_on_resume(tmp_path, fake_corpus):
+    assert A.resolve_axes(None) == A.COARSE_AXES and A.resolve_axes("fine") == A.FINE_AXES
+    assert A.resolve_axes("damage_family,class") == ("damage_family", "class")
+    with pytest.raises(ValueError):
+        A.resolve_axes("damage,bogus")
+    d = str(tmp_path / "run")
+    arch = Archive.open(d, axes="fine")
+    # two builds of one archetype that differ only in their unique: separate fine cells, one coarse cell
+    arch.add(result(sk(n=1, uniques=[{"name": "Headhunter"}]), dps=1e5, ehp=2e4))
+    arch.add(result(sk(n=2, uniques=[{"name": "Atziri's Acuity"}]), dps=2e5, ehp=2e4))
+    assert len(arch.cells) == 2
+    arch.checkpoint()
+    arch.close()
+    assert len(Archive.open(d).cells) == 2               # resume keeps the run's own axes (index.json)
+    coarse = Archive.open(d, axes="coarse")
+    assert len(coarse.cells) == 1
+    cell = next(iter(coarse.cells.values()))
+    assert cell.elite().uid == sk(n=2, uniques=[{"name": "Atziri's Acuity"}]).id and cell.desc == {"damage_family": "lightning", "activation": "manual",
+                                                            "pool": "life", "class": "Sorceress"}
+    # records written before the coarse axes existed (no "axes", no derived fields) are re-keyed
+    lines = open(os.path.join(d, "archive.jsonl")).read().splitlines()
+    recs = [json.loads(x) for x in lines]
+    for r in recs:
+        r.pop("axes")
+        for k in ("damage_family", "pool", "class"):
+            r["descriptor"].pop(k)
+    d2 = str(tmp_path / "old")
+    os.makedirs(d2)
+    with open(os.path.join(d2, "archive.jsonl"), "w") as f:
+        f.write("\n".join(json.dumps(r) for r in recs) + "\n")
+    assert len(Archive.open(d2, axes="fine").cells) == 2
+    assert len(Archive.open(d2).cells) == 1
 
 
 def test_stats_and_feedback(fake_corpus):
@@ -431,3 +481,43 @@ def test_cli_build_with_stubs(tmp_path, fake_corpus, monkeypatch, capsys):
     assert "jobs" in capsys.readouterr().out
     assert cli.main(["build-report", "--run-dir", d, "--out-dir", str(tmp_path / "rep")]) == 0
     assert os.path.exists(tmp_path / "rep" / "report.md")
+
+
+def test_runner_successive_halving(tmp_path, fake_corpus):
+    calls = []
+
+    def synth(skeleton, engine, scorer, budget=6000):
+        calls.append((skeleton.id, budget))
+        r = fake_synth(skeleton, engine, scorer, budget)
+        r.evals = budget
+        return r
+    r = Runner(str(tmp_path / "run"), generator=FakeGenerator(), synthesize=synth, workers=2, minutes=1,
+               max_jobs=30, engine_factory=lambda: None, scorer_factory=lambda: None, report=False,
+               budget=4000, halving=True, rung0_frac=0.25, eta=3)
+    out = r.run()
+    cheap = [i for i, b in calls if b == 1000]
+    full = [i for i, b in calls if b == 4000]
+    assert cheap and full
+    assert set(full) <= set(cheap)                       # only skeletons that had a cheap run go full
+    assert len(full) < len(cheap) * 0.7                  # most are not promoted
+    assert r.counts["promoted"] == len(full) and r.counts["rung0"] == len(cheap)
+    recs = [json.loads(x) for x in open(os.path.join(str(tmp_path / "run"), "archive.jsonl"))]
+    assert len({x["uid"] for x in recs}) == len(recs)     # one record per skeleton
+    full_recs = [x for x in recs if (x.get("job") or {}).get("rung") == 1 and x.get("ok")]
+    assert all(x["evals"] == 5000 for x in full_recs)    # cheap + full cost
+
+
+def test_wrong_main_ranked_unverified(fake_corpus):
+    from exilegen.builder.contracts import main_skill_matches as m
+    assert not m({"DetonateDeadPlayer"}, {"id": "EmberFusilladePlayer", "name": "Ember Fusillade"})
+    assert m({"CrossbowRequiemAmmoPlayer"}, {"id": "CrossbowRequiemPlayer", "name": "Requiem"})
+    assert not m({"ArcPlayer"}, {"id": "ArcticArmourPlayer"}) and m({"ArcPlayer"}, None)
+    arch = Archive()
+    honest = result(sk("Spark", n=1), dps=1e5, ehp=2e4)
+    swapped = result(sk("Spark", n=2), dps=1e6, ehp=2e4)
+    swapped.stats["pinnacle_v1"]["mainSkill"] = {"name": "Arc", "id": "ArcPlayer"}
+    arch.add(honest)
+    assert arch.add(swapped) == "front"
+    c = next(iter(arch.cells.values()))
+    assert c.elite().uid == sk("Spark", n=1).id
+    assert c.tiers[1][0].quarantine == "wrong_main" and arch.stats()["wrong_main"] == 1

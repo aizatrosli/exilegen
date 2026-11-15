@@ -43,11 +43,17 @@ from exilegen.optimise.base import Context, StepResult, fields_for, has_meta_gro
 from exilegen.scoring import Scorer
 from exilegen.scoring import floors as F
 
-from .contracts import BuildResult, Skeleton
+from .contracts import BuildResult, Skeleton, main_skill_matches
 from .gear import GearPlanner, weapon_spec
 
 DEFAULT_PROFILES = ["pinnacle_v1", "mapping_v1"]
 POLISH = ("supports", "triggers", "tree_warm", "supports")
+# Budget weight of each polish step within a cycle (share = remaining budget x weight / remaining weights).
+# Measured on 105 builds (2 runs): tree_warm gains 0.195 objective per 1k evals and improves 99% of the time;
+# the first supports pass 0.335; the closing supports pass (same step again, after tree_warm) only 0.022 while
+# taking as many evals. A step that already ran in the cycle gets REPEAT_WEIGHT.
+STEP_WEIGHTS = {"tree_warm": 2.0}
+REPEAT_WEIGHT = 0.3
 POLISH_CYCLES = 3                # repeat POLISH until a cycle gains < 1% (pipeline.CYCLE_MIN_GAIN)
 # share of the evaluation budget per phase (the rest goes to the polish steps)
 SHARE = {"sockets": 0.15, "ascendancy": 0.04, "tree": 0.36}
@@ -111,7 +117,8 @@ def _short(r: dict | None) -> str:
 
 class _Synth:
     def __init__(self, sk: Skeleton, engine, scorer, budget: int, log_fn=None, gear_optimise: bool = True,
-                 polish=POLISH, seed: int = 0, polish_cycles: int = POLISH_CYCLES, asc_points: int | None = None):
+                 polish=POLISH, seed: int = 0, polish_cycles: int = POLISH_CYCLES, asc_points: int | None = None,
+                 unique_trial: str = "on", seed_code: str | None = None):
         self.sk, self.e, self.budget, self.seed = sk, engine, int(budget), seed
         self.scorer = make_scorer(scorer, constraints=list(getattr(sk, "constraints", None) or []))
         self.asc_points = asc_points           # cap on ascendancy points spent (None = all the engine gives)
@@ -120,6 +127,9 @@ class _Synth:
         self.gear_optimise = gear_optimise
         self.polish = list(polish or ())
         self.polish_cycles = polish_cycles
+        self.unique_trial = unique_trial       # "on" | "off"
+        self.seed_code = seed_code             # a related build (a mutation's parent) whose tree seeds ours
+        self.trials: list[dict] = []
         self.notes: list[str] = []
         self.ctx: Context | None = None
         self.main_ref: dict | None = None      # {group, skill}
@@ -334,6 +344,31 @@ class _Synth:
         return w if isinstance(w, str) and w else None
 
     # ------------------------------------------------------------------ main skill pin + load
+    def main_ok(self, stats=None) -> bool:
+        """Is the skill PoB measures the skeleton's main skill? (current stats by default)"""
+        stats = self.ctx.current_stats if stats is None and self.ctx is not None else stats
+        doc = (next(iter(stats.values()), None) if stats and all(isinstance(v, dict) for v in stats.values())
+               else stats) or {}
+        return main_skill_matches(self._main_names(), doc.get("mainSkill"))
+
+    def _repin(self, code: str) -> bool:
+        """After a reload moved the main skill to another group (item-granted groups come and go with gear),
+        find it again by skill id and re-pin. False when no group holds it any more."""
+        names = self._main_names()
+        for g in self.e.skills().get("groups") or []:
+            if g.get("grantedBy") in ("Explode", "Thorns") or g.get("enabled") is False:
+                continue
+            for sk_ in g.get("skills") or []:
+                if (sk_.get("id") or "").lower() in names or (sk_.get("name") or "").lower() in names:
+                    if (g["index"], sk_["index"]) == (self.main_ref["group"], self.main_ref["skill"]):
+                        return False
+                    self.main_ref = {"group": int(g["index"]), "skill": int(sk_["index"])}
+                    self.main_group = int(g["index"])
+                    self.e.load(code=code, profile=self.profiles[0], main=dict(self.main_ref))
+                    self.note(f"main skill re-pinned: group {g['index']} skill {sk_['index']}")
+                    return True
+        return False
+
     def pin_and_load(self):
         """Load the raw build, find the main skill's {group, skill} in the engine's skills view (skill ids,
         item-granted groups included), disable item-granted groups the skeleton does not use, pin."""
@@ -425,6 +460,10 @@ class _Synth:
         ctx._skills = None
         ctx.fields = fields_for(ctx.skills())
         ctx.refresh()
+        if not self.main_ok() and self._repin(code):
+            ctx._skills = None
+            ctx.fields = fields_for(ctx.skills())
+            ctx.refresh()
         main = (next(iter(ctx.current_stats.values())) or {}).get("main") or {}
         if main.get("group") != self.main_ref["group"]:
             self.note(f"warning: engine main is {main} not {self.main_ref}")
@@ -666,8 +705,11 @@ class _Synth:
         avail = int(pts.get("available") or 0)
         alloc = e.tree(frontier=False).get("allocated") or []
         share = max(300, int(self.budget * SHARE["tree"]))
+        seed_tree = self._seed_tree()
+        if seed_tree:
+            share = max(300, share // 2)       # repairing a parent's tree needs less than growing one
         step = TreeStep(mode="scratch", max_evals=share, pins=pins, extra_points=max(0, avail - len(alloc)),
-                        seed=self.seed, verbose=False)
+                        seed=self.seed, verbose=False, seed_tree=seed_tree)
         r = self._run(step, share)
         rep = getattr(step, "report", None) or {}
         cand = rep.get("candidate") or {}
@@ -684,6 +726,29 @@ class _Synth:
         self.note(f"tree scratch: {avail} points, {r.evals} evals, {r.seconds:.0f}s -> {_short(ctx.current)}"
                   + (f" [{'; '.join(str(n) for n in r.notes[:2])}]" if r.notes and not r.improved else ""))
 
+    def _seed_tree(self) -> dict | None:
+        """Main-tree nodes and attribute choices of seed_code (the caller passes one of the same class),
+        read by loading it and then restoring the current build."""
+        if not self.seed_code:
+            return None
+        e, tv = self.e, None
+        c = e.raw("save_build_code", {})
+        cur = c.get("code") if isinstance(c, dict) else c
+        try:
+            e.load(code=self.seed_code, profile=self.profiles[0])
+            tv = e.tree(frontier=False, ascendancy=False)
+        except Exception as ex:          # noqa: BLE001 - no seed: grow from scratch
+            self.note(f"seed tree: could not read the parent build: {str(ex)[:120]}")
+        finally:
+            e.load(code=cur, profile=self.profiles[0], main=dict(self.main_ref))
+            self.ctx._skills = None
+            self.ctx.refresh()
+        nodes = [int(v) for v in (tv or {}).get("allocated") or []]
+        if not nodes:
+            return None
+        self.note(f"seed tree: starting from the parent's {len(nodes)} nodes")
+        return {"nodes": nodes, "attrs": tv.get("attributeChoices") or {}}
+
     # ------------------------------------------------------------------ 7. gear optimise
     def gear(self, final: bool = True):
         """optimise_gear with objective-derived weights; on the final pass also the 'balanced' and 'defence'
@@ -694,6 +759,7 @@ class _Synth:
         code0 = self.e.raw("save_build_code", {})
         code0 = code0.get("code") if isinstance(code0, dict) else code0
         best = (ctx.current, code0, "input")
+        best_stats = ctx.current_stats
         variants = [("objective", _objective_weights(self.scorer), None)]
         if final:
             variants += [("balanced", None, "balanced"), ("defence", None, "defence")]
@@ -708,6 +774,9 @@ class _Synth:
             ctx._skills = None
             ctx.refresh()
             self.note(f"optimise_gear {name}: {len(out['equipped'])} slots -> {_short(ctx.current)}")
+            if not self.main_ok() and self.main_ok(best_stats):
+                self.note(f"optimise_gear {name}: main skill lost, variant skipped")
+                continue
             if Context.better(ctx.current, best[0], 1e-6):
                 c = self.e.raw("save_build_code", {})
                 best = (ctx.current, c.get("code") if isinstance(c, dict) else c, name)
@@ -716,6 +785,92 @@ class _Synth:
         self.e.load(code=best[1], profile=self.profiles[0], main=dict(self.main_ref))
         self.note(f"gear kept: {best[2]}")
         self.checkpoint()
+
+    # ------------------------------------------------------------------ 7b. unique trials
+    def unique_trials(self):
+        """Make each forced unique earn its slot: swap in a template rare, tune it with optimise_gear and
+        compare (feasibility first, then objective) with the unique.
+
+        Every trial is recorded (BuildResult.unique_trials: unique, slot, role, gain = DPS-weighted objective
+        ratio rare/unique, feasible either way, action). A unique the skeleton cannot do without (it grants
+        the main skill or the trigger, or a constraint requires it) is never tried. One that defines the
+        skeleton's thesis (build_around, chain, anti_meta) is measured but kept, so the archive still holds
+        that idea and its cost is visible. Any other (mutation swaps) is replaced when the rare wins.
+        Weapon slots are skipped: a different weapon base changes what the main skill can use."""
+        from .gear import ARMOUR_SLOTS, JEWELLERY_SLOTS
+        if self.unique_trial == "off":
+            return
+        ctx, gp = self.ctx, self.gp
+        trig = (self.sk.trigger or {}).get("source")
+        from exilegen.scoring.constraints import Constraint
+        required = set()
+        for c in getattr(self.sk, "constraints", None) or []:
+            try:
+                cc = Constraint.parse(c)
+            except Exception:          # noqa: BLE001
+                continue
+            if cc.type == "require_unique" and cc.arg:
+                required.add(cc.arg)
+        keep_roles = {"build_around", "chain", "anti_meta"}
+        weights = _objective_weights(self.scorer)
+        roles, grants = {}, {}
+        for u in self.sk.uniques or []:
+            d = {"name": u} if isinstance(u, str) else u
+            roles[d["name"]] = d.get("role", "")
+            grants[d["name"]] = {str(x) for x in d.get("grants") or []}
+        used = {str(self.sk.main_skill), str(self.main_info.skill_id or "")} | {str(x) for x in self.sk.extra_skills or []} \
+            | {str(x) for x in (self.sk.trigger or {}).get("spells") or []}
+        for slot, val in sorted(gp.taken.items()):
+            if not str(val).startswith("unique:") or slot.startswith("Weapon"):
+                continue
+            name = str(val).split(":", 1)[1]
+            role = roles.get(name, "")
+            if role == "grants_main" or name == trig or name in required or grants.get(name, set()) & used:
+                continue                     # the build needs it: it grants a used skill or is required
+            before = ctx.current
+            c0 = self.e.raw("save_build_code", {})
+            code0 = c0.get("code") if isinstance(c0, dict) else c0
+            trial = {"unique": name, "slot": slot, "role": role}
+            try:
+                if slot in ARMOUR_SLOTS:
+                    tb = gp.armour_base(slot)
+                    made = tb and gp.craft(slot, tb[0], tb[1], "armour", title=f"Trial {slot}")
+                elif slot in JEWELLERY_SLOTS:
+                    tb = gp.jewellery_base(slot)
+                    made = tb and gp.craft(slot, tb[0], tb[1], "Ring" if slot.startswith("Ring") else slot,
+                                           title=f"Trial {slot}")
+                else:
+                    made = None
+                if not made:
+                    raise SynthError("no template base")
+                gp.optimise(weights=weights, slots=[slot])
+                ctx._skills = None
+                ctx.refresh()
+                after = ctx.current
+            except Exception as ex:          # noqa: BLE001 - a failed trial keeps the unique
+                after = None
+                trial["error"] = str(ex)[:120]
+            o0, o1 = (before or {}).get("objective"), (after or {}).get("objective")
+            trial["gain"] = round(math.exp(max(-50.0, min(50.0, o1 - o0))), 4) if o0 is not None and o1 is not None else None
+            trial["feasible_unique"] = bool((before or {}).get("feasible"))
+            trial["feasible_rare"] = bool((after or {}).get("feasible")) if after else None
+            rare_wins = after is not None and Context.better(after, before, 1e-4)
+            if rare_wins and not self.main_ok():
+                rare_wins = False
+                trial["main_lost"] = True        # the unique grants (or enables) the main skill
+            if rare_wins and role not in keep_roles:
+                trial["action"] = "replaced"
+                self.note(f"unique trial: {name} ({slot}) replaced by a tuned rare, objective x{trial['gain']}")
+                self.checkpoint()
+            else:
+                trial["action"] = "kept" + (" (thesis)" if rare_wins else "")
+                self.e.load(code=code0, profile=self.profiles[0], main=dict(self.main_ref))
+                gp.taken[slot] = val
+                ctx._skills = None
+                ctx.refresh()
+                self.note(f"unique trial: {name} ({slot}) kept; a tuned rare scores x{trial['gain']}"
+                          + (" (rare is better, kept as the skeleton's thesis)" if rare_wins else ""))
+            self.trials.append(trial)
 
     # ------------------------------------------------------------------ 8. polish
     def _run(self, step, share: int) -> StepResult:
@@ -744,11 +899,13 @@ class _Synth:
         try:
             ctx._skills = None
             ctx.refresh()
-            if Context.better(before, ctx.current, 1e-6):
+            lost = self.main_ok(before_stats) and not self.main_ok()
+            if lost or Context.better(before, ctx.current, 1e-6):
                 e.restore(tok)
                 ctx.current, ctx.current_stats, ctx._skills = before, before_stats, None
                 del ctx.history[n_hist:]
-                r.notes.append("rolled back: ended worse than it started")
+                r.notes.append("rolled back: " + ("the damage moved to another skill" if lost
+                                                  else "ended worse than it started"))
                 r.improved, r.changes = False, []
         finally:
             ctx._drop(tok)
@@ -774,13 +931,14 @@ class _Synth:
                 break
             c0 = ctx.current
             todo = [s for s in self.polish if s != "triggers" or has_meta_groups(ctx.skills())]
+            wts = [REPEAT_WEIGHT if s in todo[:j] else STEP_WEIGHTS.get(s, 1.0) for j, s in enumerate(todo)]
             for i, name in enumerate(todo):
                 left = ctx.budget_left()
                 if left <= 50:
                     if cyc == 0:
                         self.note(f"budget exhausted before {name}")
                     break
-                share = max(50, left // max(1, len(todo) - i))
+                share = max(50, int(left * wts[i] / max(1e-9, sum(wts[i:]))))
                 step = make_step(name, None if self.seed is None else self.seed + cyc, share if name.startswith("tree") else None, self.notes)
                 if step is None:
                     continue
@@ -805,6 +963,7 @@ class _Synth:
         if self.gear_optimise:
             phases.insert(phases.index(("tree", self.tree)), ("gear_pre", lambda: self.gear(final=False)))
             phases.append(("gear_opt", self.gear))
+            phases.append(("unique_trials", self.unique_trials))
         phases.append(("sockets2", lambda: self.sockets(final=True)))
         phases.append(("polish", self.polish_steps))
         phase = None
@@ -840,13 +999,15 @@ class _Synth:
             res.evals = ctx.evals
         self.note("timing: " + ", ".join(f"{k} {v:.0f}s" for k, v in self.timing.items()))
         res.seconds = time.time() - t0
+        res.unique_trials = list(self.trials)
         return res
 
 
 def synthesize(skeleton: Skeleton, engine: Any, scorer: Any = None, budget: int = 6000, log_fn=None,
                gear_optimise: bool = True, polish=POLISH, seed: int = 0,
                polish_cycles: int = POLISH_CYCLES, exclude_supports=None,
-               asc_points: int | None = None) -> BuildResult:
+               asc_points: int | None = None, unique_trial: str = "on",
+               seed_code: str | None = None) -> BuildResult:
     """contracts.Synthesizer: build `skeleton` from nothing in `engine`, judged by `scorer` (default:
     pinnacle_v1 + mapping_v1, DEFAULT_FLOORS, no constraints). Never raises for a bad skeleton: the result
     has ok=False and error set. `budget` is in engine evaluations. `exclude_supports` are support gem display
@@ -855,7 +1016,8 @@ def synthesize(skeleton: Skeleton, engine: Any, scorer: Any = None, budget: int 
     from .supportgems import banned
     with banned(engine, exclude_supports):
         return _Synth(skeleton, engine, scorer, budget, log_fn=log_fn, gear_optimise=gear_optimise,
-                      polish=polish, seed=seed, polish_cycles=polish_cycles, asc_points=asc_points).run()
+                      polish=polish, seed=seed, polish_cycles=polish_cycles, asc_points=asc_points,
+                      unique_trial=unique_trial, seed_code=seed_code).run()
 
 
 def summary_row(res: BuildResult) -> dict:
