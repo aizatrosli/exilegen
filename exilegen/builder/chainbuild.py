@@ -173,6 +173,9 @@ def skeleton(gen, chain: dict, original: dict, level: int, seed: int):
     chain: when the level drops every ascendancy notable the build must not move to another ascendancy."""
     asc = (original.get("asc_nodes") or chain.get("asc_nodes") or [[None]])[0][0]
     gen.level = level
+    if chain.get("reaction"):             # the main skill by hand, with the meta gem and its spell beside it
+        from . import reactions
+        return reactions.skeleton(gen, random.Random(f"{seed}:{chain['id']}"), chain, asc)
     return gen.assemble(random.Random(f"{seed}:{chain['id']}"), chain["main_skill"], source="mechanics_graph",
                         thesis=chain["thesis"], constraints=[],
                         uniques=[{"name": u, "role": "chain"} for u in chain["uniques"]], keystones=chain["keystones"],
@@ -425,8 +428,10 @@ def _synth(sk, exclude, points, budget, seed, log_fn, out: dict, key: str, engin
         sk.constraints = [f"forbid_gem:{x}" for x in exclude]
         drop_forced(sk, exclude)
         with (engine() if engine else Engine()) as eng:
+            from . import reactions
             res = synthesize(sk, eng, make_scorer(constraints=list(sk.constraints)), budget=budget, seed=seed,
                              log_fn=log_fn, exclude_supports=exclude, asc_points=points,
+                             **({"polish": reactions.POLISH} if (sk.tags or {}).get("reaction") else {}),
                              unique_trial="off")   # the chain's uniques are the point of the build
             if state_tokens is not None and res.ok and res.code:
                 try:
@@ -456,6 +461,15 @@ def build(chain_id: str, level: int | None = None, exclude=None, budget: int = 6
     parts = parts_at(original, level)
     cat = catmod.load()
     chain = restricted(original, parts, level, {sid: s.get("name") for sid, s in cat.skills.items()})
+    rx, rx_note = original.get("reaction"), None
+    if rx:
+        from . import reactions
+        gone = {p["name"] for p in parts if not p["included"]}
+        if rx["meta_name"] in gone or set(rx["spell_names"]) & gone:
+            chain.pop("reaction", None)       # below the meta gem's level the build is the main skill alone
+            rx_note = f"{rx['meta_name']} or its spell is not available at level {level}: built without the reaction"
+        elif reactions.buildable(chain):
+            raise ChainError(reactions.buildable(chain))
     gen = Generator(cat)
     sk = skeleton(gen, chain, original, level, seed)
     if sk is None:
@@ -544,6 +558,13 @@ def build(chain_id: str, level: int | None = None, exclude=None, budget: int = 6
                 log_fn(f"the build without Spirit gems failed: {got.get('bare')}")
         out["spirit"] = sp
         out.setdefault("alternatives", [])
+    if rx:
+        group = next((n for n in res.notes or [] if str(n).startswith("trigger group")), None)
+        out["reaction"] = {"meta": rx["meta_name"], "spells": rx["spell_names"], "event": rx["event_label"],
+                           "built": bool(group) and not rx_note, "modelled": rx["modelled"], "energy": rx["energy"],
+                           "note": rx_note or (None if rx["modelled"] else
+                                               f"the scorer has no Energy model for {rx['meta_name']}: the triggered "
+                                               f"spell's damage is counted as if it always fired")}
     over = over_level(sk, level)
     if over:
         out["over_level"] = over

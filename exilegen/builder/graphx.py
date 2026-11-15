@@ -44,6 +44,7 @@ from dataclasses import dataclass, field, asdict
 
 from . import catalog as catmod
 from . import mechgraph
+from . import reactions as rxmod
 from . import chainfit
 from . import chainresults
 from . import edges as edgesmod
@@ -55,7 +56,7 @@ from . import tempo as tempomod
 
 FORMAT, VERSION = "exilegen-graph", 1
 BUDGET_TIERS = ("low", "mid", "high")
-CHAIN_KINDS = ("self_feed", "enabler", "graft", "bridge")
+CHAIN_KINDS = ("self_feed", "enabler", "graft", "bridge", "reaction")
 CONSTRAINT_TYPES = ("one_button", "no_cast", "no_minions", "max_manual_skills", "require_gem", "forbid_gem",
                     "require_unique", "forbid_unique", "require_keystone", "forbid_keystone")
 DMG = ("Physical", "Fire", "Cold", "Lightning", "Chaos")
@@ -301,6 +302,9 @@ def _chain_ok(ch: dict, req: Requirements, cat: catmod.Catalog) -> bool:
 def mechanics(cat: catmod.Catalog, req: Requirements, scores: dict | None = None) -> dict:
     g = mechgraph.MechGraph(cat)
     pool = g.chains(top=max(4 * req.top, 1200), per_token=10 ** 6, per_main=24, per_entity=24)
+    typed = edgesmod.typed(g)          # every link read again against stat ids and PoB tags (edges.py)
+    # chain reactions: a meta gem turns an event of the main skill into a second spell (reactions.py)
+    pool += rxmod.chains(g, cat, typed)
     tempo = tempomod.load()
     lvl = levelmod.load()
     lvl_cfg, _ = levelmod.config(req.leveling_config)
@@ -308,8 +312,10 @@ def mechanics(cat: catmod.Catalog, req: Requirements, scores: dict | None = None
     budget = {"mana_per_second": float(req.mana_per_second), "spirit": float(sp_budget["budget"])}
     for c in pool:
         main = cat.skills[c["main_skill"]]
+        hosted = set((c.get("reaction") or {}).get("spells") or [])      # cast by the meta gem: no cost, no time
         helpers = [cat.skills[g.entities[k].meta["skill"]] for k in c["path"]
-                   if g.entities[k].kind in ("skill", "util") and g.entities[k].meta.get("skill") != c["main_skill"]]
+                   if g.entities[k].kind in ("skill", "util") and g.entities[k].meta.get("skill") != c["main_skill"]
+                   and g.entities[k].meta.get("skill") not in hosted]
         c["tempo"] = tempomod.weigh(main, helpers, tempo, budget)
         c["score_raw"] = c["score"]
         c["score"] = round(c["score_raw"] * c["tempo"]["tempo"], 4)
@@ -354,9 +360,8 @@ def mechanics(cat: catmod.Catalog, req: Requirements, scores: dict | None = None
     # and only show the doubt: in the full2 run doubted chains measured as well as the rest (median 0.69 both),
     # because their gain comes from the part's other stats, not from the link the graph named.
     checker = spiritx.Scorer(g, cat, [], tempo)
-    typed = edgesmod.typed(g)          # every link read again against stat ids and PoB tags (edges.py)
     for c in pool:
-        d = checker.doubts(c) + edgesmod.chain_doubts(g, typed, c)
+        d = checker.doubts(c) + edgesmod.chain_doubts(g, typed, c) + (rxmod.doubts(c) if c.get("reaction") else [])
         if d:
             c["doubts"] = d
     if req.rank_by == "formula":
@@ -367,7 +372,7 @@ def mechanics(cat: catmod.Catalog, req: Requirements, scores: dict | None = None
     nodes, edges = [], []
     for k in sorted(ents):
         e = g.entities[k]
-        meta = {m: e.meta[m] for m in ("ascendancy", "class", "slot") if e.meta.get(m)}
+        meta = {m: e.meta[m] for m in ("ascendancy", "class", "slot", "meta_gem") if e.meta.get(m)}
         if e.kind in ("skill", "util") and e.meta.get("skill") in cat.skills:
             meta["tempo"] = tempomod.facts(cat.skills[e.meta["skill"]], tempo.get(e.meta["skill"], {}))
         nodes.append({"id": k, "kind": e.kind, "name": e.name, **meta})
@@ -382,6 +387,10 @@ def mechanics(cat: catmod.Catalog, req: Requirements, scores: dict | None = None
                                   "type": side, "w": round(l.weight if side == "produces" else max(l.payoff, 0.2), 2),
                                   "line": l.line[:200], **extra})
     for t in sorted(toks):
+        if t.startswith("cast:"):          # a meta gem casting its socketed spell: not a state, nothing PoB knows
+            nodes.append({"id": "token:" + t, "kind": "token", "name": "cast by " + t.split(":", 1)[1], "group": "cast",
+                          "spec": 0.0, "verified": False, "switchable": False})
+            continue
         reg = statesmod.for_token(t)
         prim = reg["states"][0] if reg["states"] else {}
         # additive: who holds the state, its family, whether PoB calculates it and whether scoring can switch it on

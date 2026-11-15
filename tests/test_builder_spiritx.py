@@ -331,7 +331,7 @@ def test_chains_with_a_misread_link_are_marked_and_ranked_last(scorer, pool, cat
     assert scorer.doubts(clean) == []
     n = sum(1 for c in pool if scorer.doubts(c))
     assert 0.1 * len(pool) < n < 0.5 * len(pool)
-    doc = graphx.run({"top": 1200}, cat=cat)["mechanics"]
+    doc = graphx.run({"top": 2000}, cat=cat)["mechanics"]          # the whole pool, reaction chains included
     flags = [bool(c.get("doubts")) for c in doc["chains"]]
     assert flags == sorted(flags) and any(flags) and doc["info"]["doubted"] == sum(flags)
 

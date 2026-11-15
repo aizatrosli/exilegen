@@ -99,6 +99,9 @@ TOKENS: dict[str, dict] = {
     "stat:Life": {"states": ["self|stat|Life"]}, "stat:Mana": {"states": ["self|stat|Mana"]}, "stat:Spirit": {"states": ["self|stat|Spirit"]},
     # mechanics PoB does not calculate
     "remnant": {"states": [], "verified": False}, "glory": {"states": [], "verified": False},
+    # events that only feed a meta gem (reactions.py): PoB has no rate for them
+    "dodge": {"states": [], "verified": False}, "melee_hit": {"states": [], "verified": False},
+    "spell_cast": {"states": [], "verified": False},
     "minion": {"states": []}, "deflect": {"states": []}, "evasion": {"states": []}, "armour": {"states": []},
     "trigger": {"states": [], "verified": False, "note": "meta-gem Energy is not calculated"},
 }

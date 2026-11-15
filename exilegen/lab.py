@@ -184,6 +184,13 @@ def _chain_view(c: dict, names: dict) -> dict:
         out["fitted"] = {k: c["predicted"].get(k) for k in ("score", "works", "gain")}
     if c.get("doubts"):
         out["doubts"] = c["doubts"]
+    rx = c.get("reaction")
+    if rx:                               # a meta gem casting a second spell: what feeds it, and how sure that is
+        out["reaction"] = {"meta_gem": rx["meta_name"], "casts": rx["spell_names"], "fed_by": rx["event_label"],
+                           "payoff": rx["payoff"], "state": rx.get("state"), "spirit": rx["spirit"],
+                           "reliability": {"boss": rx["boss"], "clearing": rx["clearing"]}, "energy": rx["energy"],
+                           "energy_modelled": rx["modelled"], "buildable": rx["buildable"],
+                           "source": rx["source"], "ladder_builds": rx["ladder_builds"]}
     m = c.get("measured")
     if m:
         out["measured"] = {k: m[k] for k in ("built", "feasible", "dps", "ehp", "base_dps", "gain", "gain_fair",

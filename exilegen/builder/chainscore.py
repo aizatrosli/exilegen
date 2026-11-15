@@ -46,10 +46,19 @@ def spread(chains: list[dict], n: int) -> list[dict]:
     return picked
 
 
+def _unverified(score: dict | None) -> bool:
+    """The scorer could not check part of the build (same reading as archive.py: an "unverified" flag, or
+    verified False). It used to read a key the scorer never writes, so every row said verified."""
+    s = score or {}
+    return s.get("verified") is False or any(str(f).startswith("unverified") or ":unverified" in str(f)
+                                             for f in s.get("flags") or [])
+
+
 def _worker(wid: int, jobs, results, budget: int, seed: int):
     from exilegen.engine import Engine
     from .skeletons import Generator
     from .synth import make_scorer, synthesize, summary_row
+    from . import reactions as rxmod
     gen = Generator()
     engine, scorer = Engine(), make_scorer()
     while True:
@@ -68,7 +77,7 @@ def _worker(wid: int, jobs, results, budget: int, seed: int):
                 else:
                     res = synthesize(sk, engine, scorer, budget=budget, seed=seed)
                     row.update(summary_row(res))
-                    row.update(skeleton_id=sk.id, unverified=bool((res.score or {}).get("unverified")), code=res.code,
+                    row.update(skeleton_id=sk.id, unverified=_unverified(res.score), code=res.code,
                                uniques=[u["name"] for u in sk.uniques])
             except Exception as e:
                 row.update(ok=False, error=f"{type(e).__name__}: {e}"[:300])
@@ -86,19 +95,22 @@ def _worker(wid: int, jobs, results, budget: int, seed: int):
                "keystones": ch["keystones"], "asc_nodes": ch["asc_nodes"], "thesis": ch["thesis"]}
         t0 = time.time()
         try:
-            sk = gen._src_mechanics_graph(random.Random(f"{seed}:{ch['id']}"), [], chain=ch)
+            rng = random.Random(f"{seed}:{ch['id']}")
+            # a reaction chain is the main skill by hand plus its meta gem and spell (reactions.py)
+            sk = rxmod.skeleton(gen, rng, ch) if ch.get("reaction") else gen._src_mechanics_graph(rng, [], chain=ch)
             if sk is None:
-                row.update(ok=False, error="no skeleton for this chain")
+                row.update(ok=False, error=(gen.last_reject if ch.get("reaction") else None) or "no skeleton for this chain")
             else:
                 # a chain build keeps the chain's uniques: the unique trial would swap them for a tuned rare
                 # whenever that scores higher, and the build would then measure the skill without the chain
-                res = synthesize(sk, engine, scorer, budget=budget, seed=seed, unique_trial="off")
+                res = synthesize(sk, engine, scorer, budget=budget, seed=seed, unique_trial="off",
+                                 **({"polish": rxmod.POLISH} if ch.get("reaction") else {}))
                 s = res.score or {}
                 row.update(summary_row(res))
                 row.update(id=ch["id"], skeleton_id=sk.id, ascendancy=sk.ascendancy, main_skill=ch["main_skill"],
                            weapon=sk.weapon, defence=sk.defence,
                            base_key="|".join(str(x) for x in (ch["main_skill"], sk.ascendancy, sk.weapon, sk.defence)),
-                           unverified=bool(s.get("unverified")), code=res.code, notes=(res.notes or [])[-3:])
+                           unverified=_unverified(s), code=res.code, notes=(res.notes or [])[-3:])
         except Exception as e:  # a broken chain must not stop the run
             row.update(ok=False, error=f"{type(e).__name__}: {e}"[:300])
             try:
