@@ -137,7 +137,7 @@ class Runner:
                  scorer_factory: Callable | None = None, seed: int = 0, batch: int | None = None,
                  checkpoint_every: float = 60.0, report_every: float = 300.0, report: bool = True,
                  log: Callable | None = None, generator_kwargs: dict | None = None,
-                 halving: bool = False, rung0_frac: float = 0.25, eta: int = 3):
+                 halving: bool = False, rung0_frac: float = 0.25, eta: int = 3, warm_start: bool = True):
         self.run_dir = run_dir
         os.makedirs(run_dir, exist_ok=True)
         self.constraints = list(constraints or [])
@@ -154,6 +154,7 @@ class Runner:
         # pass still took ~60% of a full synth's wall time (gear optimisation and trials do not scale
         # with the eval budget), and only 30% of cheap builds were feasible when archived unpromoted.
         self.halving, self.rung0_frac, self.eta = halving, rung0_frac, max(2, int(eta))
+        self.warm_start = warm_start           # mutations start from their parent's passive tree
         self._rung0: list[tuple] = []          # recent cheap-run keys (feasible, objective)
         self._promo: Any = None                # deque of promoted jobs (created in _main)
         self.engine_factory = engine_factory if engine_factory is not None else default_engine_factory
@@ -308,6 +309,16 @@ class Runner:
         out = self.generator.generate(self.batch, constraints=self.constraints, feedback=fb, seed=seed)
         return arm, list(out or []), parent_id
 
+    def _parent_code(self, parent_id: str, child: Skeleton) -> str | None:
+        """The archived build code of a mutation's parent, when it is a built build of the child's
+        class (its passive tree then seeds the child's tree: a warm start instead of from scratch)."""
+        rec = self.archive.records.get(parent_id) if self.archive else None
+        if not rec or not rec.get("ok") or not rec.get("code"):
+            return None
+        if (rec.get("skeleton") or {}).get("cls") != child.cls:
+            return None
+        return rec["code"]
+
     def _skeleton_cell_key(self):
         """The generator module's own coarse cell function (skeletons.cell_key), if it has one."""
         mod = sys.modules.get(type(self.generator).__module__)
@@ -318,7 +329,15 @@ class Runner:
         sk: Skeleton = job["skeleton"]
         t = time.time()
         try:
-            r = self.synthesize(sk, engine, scorer, int(job.get("budget") or self.budget))
+            budget = int(job.get("budget") or self.budget)
+            seed_code = job.get("seed_code")
+            if seed_code:
+                try:
+                    r = self.synthesize(sk, engine, scorer, budget, seed_code=seed_code)
+                except TypeError:            # a synthesize without warm starts
+                    r = self.synthesize(sk, engine, scorer, budget)
+            else:
+                r = self.synthesize(sk, engine, scorer, budget)
             if not isinstance(r, BuildResult):
                 raise TypeError(f"synthesize returned {type(r).__name__}, not BuildResult")
         except Exception as ex:  # noqa: BLE001 - crash isolation
@@ -524,6 +543,10 @@ class Runner:
                     self.inflight.add(sk.id)
                     self.counts["generated"] += 1
                     job = {"skeleton": sk, "arm": arm, "parent": parent, "batch": batch_no}
+                    if self.warm_start and parent:
+                        pc = self._parent_code(parent, sk)
+                        if pc:
+                            job["seed_code"] = pc
                     if self.halving:
                         job.update(rung=0, budget=max(300, int(self.budget * self.rung0_frac)))
                     await q.put(job)
