@@ -365,8 +365,8 @@ class Generator:
         if not s or s["id"] not in self.mains:
             return self._reject("main skill is not a known main skill")
         cons = _parse_constraints(constraints)
+        roles = {u["name"]: u.get("role", "") for u in (uniques or []) if isinstance(u, dict)}   # before the rebind
         uniques = list(dict.fromkeys(u["name"] if isinstance(u, dict) else u for u in (uniques or [])))
-        roles = {u["name"]: u.get("role", "") for u in (uniques or []) if isinstance(u, dict)}
         # skill must exist: add its granting unique if needed
         req = self.requires_unique(s)
         if req and not set(req) & set(uniques):

@@ -156,3 +156,14 @@ def test_assemble_records_reject_reason(gen):
     sk = gen.assemble(random.Random(0), main, source="test", thesis="t")
     if sk is not None:
         assert gen.last_reject is None
+
+
+def test_unique_roles_reach_the_skeleton():
+    from exilegen.builder.skeletons import Generator
+    g = Generator()
+    sks = [s for s in g.generate(80, seed=21) if s.source in ("build_around", "anti_meta")
+           and any(u.get("role") != "grants_main" for u in s.uniques if isinstance(u, dict))]
+    assert sks
+    for s in sks:
+        roles = {u.get("role") for u in s.uniques if isinstance(u, dict)}
+        assert roles & {"build_around", "anti_meta"}, (s.source, s.uniques)
