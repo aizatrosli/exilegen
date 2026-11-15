@@ -370,7 +370,8 @@ def notes(chain: dict, cat: catmod.Catalog) -> list[dict]:
 
 # ---------------------------------------------------------------------------------------------- reading the graph's links again
 # The mechanics graph matches states by word. Before a Spirit gem is hung on a link, the sentence is read again:
-NOT_MADE_RX = re.compile(r"\bconsum|\bexpend|\bspent\b|\bspending\b|\boffer\b|\bmaximum\b|\binstead of\b|\bremov|\bimmun|\bby (?:inflicting|applying)\b", re.I)
+NOT_MADE_RX = re.compile(r"\bconsum|\bexpend|\bspent\b|\bspending\b|\boffer\b|\bmaximum\b|\binstead of\b|\bremov|\bimmun|\bby (?:inflicting|applying)\b|"
+                         r"\bif (?:they|it|you) hit\b|\brefresh", re.I)
 ON_YOU_RX = re.compile(r"\b(?:shock|ignite|freeze|chill|poison|curse|stun|blind)s you\b|\bto be \w+|"
                        r"\bwhile (?:you are |you're )?(?:shocked|ignited|frozen|chilled|poisoned|bleeding)\b", re.I)
 MAGNITUDE_RX = re.compile(r"contributes? to [^.]*magnitude", re.I)

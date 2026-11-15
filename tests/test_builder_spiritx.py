@@ -187,6 +187,7 @@ def test_links_are_read_again_before_a_gem_hangs_on_them(scorer, pool, cat):
     assert not rm("charge:Power", "+1 to maximum Power Charges") and not rm("charge:Power", "Gain Power Charges instead of Frenzy Charges")
     assert not rm("enemy:Bleeding", "Elemental Damage also Contributes to Bleeding Magnitude")
     assert not rm("enemy:Frozen", "Build Glory by inflicting Freeze, Shock or Ignite on enemies.")      # a condition, not a source
+    assert not rm("enemy:Shocked", "The first two attacks conjure a spirit if they Hit a Shocked enemy and refresh Shock duration.")
     assert rm("charge:Power", "Gain a Power Charge on Critical Hit") and rm("enemy:Shocked", "Storm Lance hits with Lightning damage")
     assert spiritx.DRAWBACK_RX.search("Fireflower: Take 100 Fire Damage when you Ignite an Enemy")
     # Sunder releases a shockwave: it does not Shock, so Herald of Thunder has nothing to wait for
