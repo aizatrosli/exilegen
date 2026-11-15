@@ -7,6 +7,17 @@ object on stdout; logs go to stderr. Exit status 0 means the object is a result;
     python3 -m exilegen.lab synth --skeleton JSON|@file [--constraint C ...] [--profile P ...] [--budget 6000]
     python3 -m exilegen.lab results --run-dir DIR [--top 20] [--tiers 0,1] [--codes]
     python3 -m exilegen.lab status --run-dir DIR
+    python3 -m exilegen.lab chain --chain CHAIN_ID [--level N] [--exclude-support NAME ...] [--compare]
+                                  [--budget 6000] [--seed 7]
+
+`chain` builds one mechanics-graph chain (an id from the graph export) from nothing and reports the build:
+code, honest DPS and EHP under the pinnacle profile, the support gems on the main skill, and the chain's
+`parts` with `included`. `--level` builds what a character of that level has: parts whose leveling step is
+above it are left out, and a level below the main skill's own step is an error. `--exclude-support` (repeatable,
+display names) keeps supports out of every socket; each gets an `alternatives` entry, whose `was_used`,
+`replaced_by` and `dps_without_exclusion` are null unless `--compare` also builds the unrestricted build
+(a second engine at the same time: about the same wall time, twice the CPU). `over_level` appears when the
+build still holds a unique above the level: the generator adds the unique that grants an item-only main skill.
 
 Long searches use the ordinary `python3 -m exilegen build --run-dir DIR ...` (stop with a STOP file); `status`
 and `results` read its run directory. The engine comes from the environment as for the CLI (EXG_POBCTL /
@@ -119,6 +130,16 @@ def cmd_synth(a) -> dict:
             "notes": res.notes, "evals": res.evals, "seconds": res.seconds}
 
 
+def cmd_chain(a) -> dict:
+    from .builder import chainbuild
+    try:
+        out = chainbuild.build(a.chain, level=a.level, exclude=a.exclude_support, budget=a.budget, seed=a.seed,
+                               compare=a.compare, log_fn=_log if a.verbose else None)
+    except chainbuild.ChainError as ex:
+        return {"error": str(ex)}
+    return {"lab": LAB_VERSION, **out}
+
+
 def _entry_view(e, codes: bool) -> dict:
     rec = e.rec
     sk = rec.get("skeleton") or {}
@@ -188,11 +209,21 @@ def parser() -> argparse.ArgumentParser:
     pr.add_argument("--codes", action="store_true", help="include each elite's PoB code")
     pt = sub.add_parser("status")
     pt.add_argument("--run-dir", required=True)
+    pc = sub.add_parser("chain")
+    pc.add_argument("--chain", required=True, help="chain id from the graph export")
+    pc.add_argument("--level", type=int, default=None, help="character level to build at (default: end level)")
+    pc.add_argument("--exclude-support", action="append", default=[], metavar="NAME",
+                    help="support gem display name that must not be socketed (repeatable)")
+    pc.add_argument("--compare", action="store_true",
+                    help="with --exclude-support: also build without the exclusions, to fill the alternatives")
+    pc.add_argument("--budget", type=int, default=6000)
+    pc.add_argument("--seed", type=int, default=7)
+    pc.add_argument("-v", "--verbose", action="store_true")
     return ap
 
 
 COMMANDS = {"version": cmd_version, "optimise": cmd_optimise, "optimize": cmd_optimise, "synth": cmd_synth,
-            "results": cmd_results, "status": cmd_status}
+            "results": cmd_results, "status": cmd_status, "chain": cmd_chain}
 
 
 def main(argv=None) -> int:
