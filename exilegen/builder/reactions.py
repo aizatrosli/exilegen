@@ -261,6 +261,15 @@ def chains(g, cat: catmod.Catalog | None = None, typed: dict | None = None) -> l
                         "boss": ev["boss"], "clearing": ev["clear"], "spirit": m.get("spirit", 0),
                         "source": m.get("source") or {"kind": "gem"}, "ladder_builds": n_lad}
                 ev_link = me.consumes[ev["token"]]
+                # a spell that consumes an enemy state (Snap: a Frozen, Shocked or Ignited enemy) only works when
+                # the main skill puts one of those states on the enemy
+                needs = {t for t, l in xe.consumes.items() if t.startswith("enemy:") and l.payoff >= 1.0}
+                if needs:
+                    feeders_x = [(e, s, w) for e, s, w in feeders
+                                 if any(t in e.produces and e.produces[t].weight >= 0.6 for t in needs)]
+                    info["needs_state"] = sorted(needs)
+                else:
+                    feeders_x = feeders
                 cast_p, cast_c = me.produces[cast_token(m)], xe.consumes[cast_token(m)]
                 for st, lx in _state_links(xe):
                     if st == ev["token"] or (x["id"], st) in bad:
@@ -268,7 +277,7 @@ def chains(g, cat: catmod.Catalog | None = None, typed: dict | None = None) -> l
                     sp = g.spec.get(st, 0)
                     if sp <= 0:
                         continue
-                    for e, s, w in feeders:
+                    for e, s, w in feeders_x:
                         if s["id"] == x["id"]:
                             continue
                         own = e.produces.get(st)
@@ -293,7 +302,7 @@ def chains(g, cat: catmod.Catalog | None = None, typed: dict | None = None) -> l
                                         [e, *extra, me, xe, b], [ev["token"], cast_token(m), st], s,
                                         [lm, ev_link, cast_p, lx, lc], dict(info, payoff="state", state=st)))
                 if n_lad >= DAMAGE_MIN_LADDER and "Damage" in x["types"]:
-                    for e, s, w in feeders:
+                    for e, s, w in feeders_x:
                         if s["id"] == x["id"] or not g._legal([e, *extra], s):
                             continue
                         fit = base * w * (0.3 + 0.3 * min(1.0, n_lad ** 0.5 / 12))
