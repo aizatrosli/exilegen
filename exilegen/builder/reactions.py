@@ -77,6 +77,8 @@ def hostable(m: dict, s: dict) -> bool:
         return False
     if s.get("granted_by") or s.get("asc_granted") or not float(s.get("cast_time") or 0) > 0:
         return False
+    if NO_DAMAGE_RX.search(s.get("description") or ""):
+        return False                         # Frostflame Nova: no damage, and its state needs an Ignite first
     if m.get("host_types") and not set(m["host_types"]) & t:
         return False
     return not set(m.get("exclude_types") or []) & t
@@ -103,6 +105,8 @@ def feeds_by_hand(s: dict) -> bool:
     t = set(s.get("types") or [])
     if s.get("name") in ((load().get("rules") or {}).get("no_damage_mains") or {}).get("skills", []):
         return False
+    if [w for w in s.get("weapon_types") or []] == ["None"]:
+        return False                         # unarmed-only (the Concoctions): the builder cannot hold a caster weapon
     if {"CreatesMinion", "Persistent"} <= t:
         return True                          # a persistent minion: judged by its own event (minion deaths)
     return not (t & NOT_USED_BY_HAND or NO_DAMAGE_RX.search(s.get("description") or ""))
@@ -111,12 +115,15 @@ def feeds_by_hand(s: dict) -> bool:
 def event_killers(chain: dict) -> list[str]:
     """Support gems that must stay off a reaction build: they stop the main skill from making the event that
     feeds the meta gem (Controlled Destruction: no Critical Hits, so Cast on Critical never fires)."""
-    from . import edges
+    from . import edges, supportgems
     want = EVENT_KILLERS.get((chain.get("reaction") or {}).get("event"), ())
-    if not want:
-        return []
-    return sorted(k.split(":", 1)[1] for k, v in edges.load_ids().items()
-                  if k.startswith("support:") and set(v.get("ids") or []) & set(want))
+    out = {k.split(":", 1)[1] for k, v in edges.load_ids().items()
+           if want and k.startswith("support:") and set(v.get("ids") or []) & set(want)}
+    # ... and supports that grant a damage skill of their own, which PoB would take for the build's main skill
+    known = {n.lower(): n for n in supportgems.names()}
+    grants = ((load().get("rules") or {}).get("skill_granting_supports") or {}).get("names") or []
+    out |= {known[n.lower()] for n in grants if n.lower() in known}
+    return sorted(out)
 
 
 def makes_event(ev: dict, s: dict, ent: Entity | None) -> float:
@@ -308,7 +315,6 @@ def chains(g, cat: catmod.Catalog | None = None, typed: dict | None = None) -> l
         d["util_skills"] = [u for u in d["util_skills"] if u not in (info["meta"], *info["spells"])]
         out.append(d)
     out.sort(key=lambda d: (-d["score"], d["id"]))
-    out = [d for d in out if d["score"] >= MIN_SCORE]
     by_main, by_meta, by_spell, seen, kept = Counter(), Counter(), Counter(), set(), []
 
     def take(d):
@@ -324,7 +330,7 @@ def chains(g, cat: catmod.Catalog | None = None, typed: dict | None = None) -> l
             take(d)
     for d in out:
         rx = d["reaction"]
-        if (d["id"] in seen or by_main[d["main_skill"]] >= PER_MAIN or by_meta[rx["meta"]] >= PER_META
+        if (d["id"] in seen or d["score"] < MIN_SCORE or by_main[d["main_skill"]] >= PER_MAIN or by_meta[rx["meta"]] >= PER_META
                 or by_spell[(rx["meta"], rx["spells"][0])] >= PER_SPELL):
             continue
         take(d)

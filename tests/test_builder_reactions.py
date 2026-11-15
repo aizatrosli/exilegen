@@ -120,6 +120,10 @@ def test_only_skills_used_by_hand_feed_a_meta_gem(cat, pool):
     assert reactions.feeds_by_hand(by["Spark"]) and reactions.feeds_by_hand(by["Ember Fusillade"])
     mains = {c["main_name"] for c in _rx(pool)}
     assert not mains & {"Fulmination", "Herald of Ash", "Frostflame Nova", "Briarpatch", "Mist Raven", "Volatile Dead"}
+    assert not any("Concoction" in x for x in mains)
+    assert not any("Frostflame Nova" in c["reaction"]["spell_names"] for c in _rx(pool))
+    shock = next(c for c in _rx(pool) if c["reaction"]["event"] == "enemy:Shocked")
+    assert any("rare against a lone boss" in d for d in shock.get("doubts") or [])
 
 
 def test_supports_that_switch_the_event_off_stay_out(pool):
@@ -128,7 +132,7 @@ def test_supports_that_switch_the_event_off_stay_out(pool):
     shock = next(c for c in _rx(pool) if c["reaction"]["event"] == "enemy:Shocked")
     ks = reactions.event_killers(shock)
     assert "Elemental Focus" in ks and "Stormchain" in ks and "Controlled Destruction" not in ks
-    assert reactions.event_killers({"reaction": {"event": "dodge"}}) == []
+    assert "Fiery Death" in ks and "Fiery Death" in reactions.event_killers({"reaction": {"event": "dodge"}})
 
 
 def test_a_meta_gem_that_never_fires_is_flagged():
