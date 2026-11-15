@@ -37,7 +37,7 @@ import time
 from dataclasses import asdict, is_dataclass
 from typing import Any
 
-from .contracts import BuildResult, Skeleton
+from .contracts import BuildResult, Skeleton, main_skill_matches
 
 CORPUS_OVERVIEW = "/mnt/project-files/corpus/poe2/overview.json"
 FINE_AXES = ("damage", "activation", "defence", "unique", "ascendancy", "corpus")
@@ -49,7 +49,9 @@ COARSE_AXES = ("damage_family", "activation", "pool", "class")
 AXES_PRESETS = {"coarse": COARSE_AXES, "fine": FINE_AXES}
 DEFAULT_AXES = COARSE_AXES
 AXES = FINE_AXES + ("damage_family", "pool", "class")      # every descriptor axis (reports, coverage, feedback)
-# Quarantine: a "feasible" build with no honest damage (its main skill is a buff, herald or utility that PoB
+# Quarantine. A build whose measured main skill is not the skeleton's (wrong_main) is ranked with the unverified
+# builds in tier 1.
+# A "feasible" build with no honest damage (its main skill is a buff, herald or utility that PoB
 # gives 0 DPS) passes the defence floors on EHP alone. It is kept in tier 2 (like an infeasible build) so it
 # cannot hold a cell, count as a feasible cell or add to the QD score.
 QUARANTINE_MIN_DPS = 0.0
@@ -432,6 +434,15 @@ def max_hit(doc: dict) -> float | None:
     return min(vals) if vals else None
 
 
+def measures_main(rec: dict) -> bool:
+    """Does PoB measure the skeleton's main skill? A trigger setup or a gear change can hand the damage to
+    another skill (13% of archived builds before synth guarded against it); such a build is not the idea it
+    is filed under, so it ranks below honest builds."""
+    skd = rec.get("skeleton") or {}
+    names = {skd.get("main_skill"), (skd.get("tags") or {}).get("main_skill_name")} - {None, ""}
+    return main_skill_matches(names, primary_doc(rec.get("stats")).get("mainSkill"))
+
+
 class Entry:
     """One archived build (a line of archive.jsonl), with the derived ranking keys."""
     __slots__ = ("rec", "uid", "cell", "tier", "objective", "feasible", "verified", "dps_honest", "ehp", "neg_cost",
@@ -449,7 +460,11 @@ class Entry:
         self.dps_honest = _num(s.get("dps_honest"))
         self.quarantine = ("no_damage" if self.feasible and self.dps_honest is not None
                            and self.dps_honest <= QUARANTINE_MIN_DPS else None)
-        self.tier = (2 if self.quarantine else 0 if self.feasible and self.verified else 1 if self.feasible else 2)
+        if self.quarantine is None and self.feasible and not measures_main(rec):
+            self.quarantine = "wrong_main"     # the damage is another skill's: kept, ranked like an unverified build
+            self.verified = False
+        self.tier = (2 if self.quarantine == "no_damage" else 0 if self.feasible and self.verified
+                     else 1 if self.feasible else 2)
         self.ehp = _num(s.get("ehp"))
         self.neg_cost = -float(COST_TIER.get((rec.get("skeleton") or {}).get("budget_tier", "mid"), 1))
 
@@ -662,7 +677,7 @@ class Archive:
     def _src(self, rec: dict) -> dict:
         src = (rec.get("skeleton") or {}).get("source") or "?"
         return self.sources.setdefault(src, {"n": 0, "ok": 0, "feasible": 0, "verified": 0, "new_cell": 0,
-                                             "quarantined": 0, "improved": 0, "evals": 0, "seconds": 0.0})
+                                             "quarantined": 0, "wrong_main": 0, "improved": 0, "evals": 0, "seconds": 0.0})
 
     def _ingest(self, rec: dict, fresh: bool = False) -> str:
         """Insert a record (from add(), or replayed from archive.jsonl)."""
@@ -695,7 +710,8 @@ class Archive:
             e = Entry(rec)
             s["feasible"] += int(e.feasible)
             s["verified"] += int(e.feasible and e.verified)
-            s["quarantined"] += int(bool(e.quarantine))
+            s["quarantined"] += int(e.quarantine == "no_damage")
+            s["wrong_main"] += int(e.quarantine == "wrong_main")
             desc = rec.get("descriptor") or {}
             if not rec.get("cell") or tuple(rec.get("axes") or FINE_AXES) != self.axes:
                 derive(desc, (rec.get("skeleton") or {}).get("cls"))
@@ -742,6 +758,7 @@ class Archive:
                     "cells_verified": len(ver), "qd_score": qd, "qd_score_verified": qd_v,
                     "axes": list(self.axes),
                     "quarantined": sum(v.get("quarantined", 0) for v in self.sources.values()),
+                    "wrong_main": sum(v.get("wrong_main", 0) for v in self.sources.values()),
                     "axis_coverage": axis_cov, "sources": src,
                     "best": None if best is None else {"uid": best.elite().uid, "cell": best.key,
                                                        "objective": best.elite().objective,

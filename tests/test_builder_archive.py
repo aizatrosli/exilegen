@@ -505,3 +505,19 @@ def test_runner_successive_halving(tmp_path, fake_corpus):
     assert len({x["uid"] for x in recs}) == len(recs)     # one record per skeleton
     full_recs = [x for x in recs if (x.get("job") or {}).get("rung") == 1 and x.get("ok")]
     assert all(x["evals"] == 5000 for x in full_recs)    # cheap + full cost
+
+
+def test_wrong_main_ranked_unverified(fake_corpus):
+    from exilegen.builder.contracts import main_skill_matches as m
+    assert not m({"DetonateDeadPlayer"}, {"id": "EmberFusilladePlayer", "name": "Ember Fusillade"})
+    assert m({"CrossbowRequiemAmmoPlayer"}, {"id": "CrossbowRequiemPlayer", "name": "Requiem"})
+    assert not m({"ArcPlayer"}, {"id": "ArcticArmourPlayer"}) and m({"ArcPlayer"}, None)
+    arch = Archive()
+    honest = result(sk("Spark", n=1), dps=1e5, ehp=2e4)
+    swapped = result(sk("Spark", n=2), dps=1e6, ehp=2e4)
+    swapped.stats["pinnacle_v1"]["mainSkill"] = {"name": "Arc", "id": "ArcPlayer"}
+    arch.add(honest)
+    assert arch.add(swapped) == "front"
+    c = next(iter(arch.cells.values()))
+    assert c.elite().uid == sk("Spark", n=1).id
+    assert c.tiers[1][0].quarantine == "wrong_main" and arch.stats()["wrong_main"] == 1

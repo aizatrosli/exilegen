@@ -65,6 +65,10 @@ def constraint_ok(e: Entry, constraint: str) -> bool | None:
 
 
 def _status(e: Entry) -> str:
+    if e.quarantine == "wrong_main":
+        return "feasible, UNVERIFIED (damage from another skill)"
+    if e.quarantine == "no_damage":
+        return "QUARANTINED (no damage)"
     return {0: "feasible, verified", 1: "feasible, UNVERIFIED", 2: "INFEASIBLE"}[e.tier]
 
 
@@ -132,6 +136,7 @@ def render(archive: Archive, extra: dict | None = None, top: int = 15, per_group
         ["cells with a feasible build", st["cells_feasible"]],
         ["cells with a feasible verified build", st["cells_verified"]],
         ["quarantined (feasible but no honest damage)", st.get("quarantined", 0)],
+        ["damage from another skill than the main (ranked as unverified)", st.get("wrong_main", 0)],
         ["QD-score (sum of feasible elite objectives)", _f(st["qd_score"], 1)],
         ["QD-score verified only", _f(st["qd_score_verified"], 1)],
         ["axis coverage (distinct values among feasible cells)",
