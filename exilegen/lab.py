@@ -9,6 +9,18 @@ object on stdout; logs go to stderr. Exit status 0 means the object is a result;
     python3 -m exilegen.lab status --run-dir DIR
     python3 -m exilegen.lab chain --chain CHAIN_ID [--level N] [--exclude-support NAME ...] [--compare]
                                   [--spirit-gems auto|none|NAME,NAME] [--spirit-gear N] [--budget 6000] [--seed 7]
+    python3 -m exilegen.lab graph [--requirements JSON|@file] [--scores RUN_DIR] [--main NAME] [--chain CHAIN_ID]
+                                  [--top 10]
+
+`graph` lists mechanics-graph chains for a set of requirements (the fields of builder/graphx.py `Requirements`:
+cls, ascendancy, damage_types, uniques, keystones, chain_kinds, online_by, rank_by, spirit_source, spirit_level,
+spirit_gear, ...), best first, in a short form: `id` (what `chain` takes), `kind`, `main`, `parts`, `links`,
+`thesis`, the formula `score`, `fitted` (the score fitted to PoB runs), `doubts` (links that do not hold up when
+their sentences are read again), `online_level` and `farm` from the leveling plan, and `spirit_gems` (the picks,
+each with its Spirit cost, role and reason). `--scores` attaches what PoB measured for the chain in a chainscore
+run (`measured`). `--main` keeps the chains of one main skill (a part of its name is enough); `--chain` returns one
+chain in full, with its evidence lines, tempo, leveling steps and the Spirit gems that were passed over. `total`
+counts the chains that matched before `--top` cut the list. No engine is needed and it answers in about a second.
 
 `chain` builds one mechanics-graph chain (an id from the graph export) from nothing and reports the build:
 code, honest DPS and EHP under the pinnacle profile, the support gems on the main skill, and the chain's
@@ -153,6 +165,74 @@ def cmd_chain(a) -> dict:
     return {"lab": LAB_VERSION, **out}
 
 
+def _part_names(doc: dict) -> dict:
+    return {n["id"]: n["name"] for n in doc["mechanics"]["nodes"]}
+
+
+def _chain_view(c: dict, names: dict) -> dict:
+    """One chain in the short form the app's assistant reads."""
+    lv = c.get("leveling") or {}
+    sp = c.get("spirit") or {}
+    out = {"id": c["id"], "kind": c["kind"], "main": c["main_name"],
+           "parts": [names.get(k, k) for k in c["path"]], "links": [t.split(":", 1)[-1] for t in c["tokens"]],
+           "ascendancies": sorted({a for a, _ in c.get("asc_nodes") or []}), "uniques": c.get("uniques") or [],
+           "keystones": c.get("keystones") or [], "thesis": c.get("thesis"), "score": c.get("score"),
+           "tempo": (c.get("tempo") or {}).get("tempo"), "online_level": lv.get("online_level"),
+           "farm": lv.get("farm") or [],
+           "spirit_gems": [{k: p.get(k) for k in ("name", "spirit", "role", "why")} for p in sp.get("picks") or []]}
+    if c.get("predicted"):
+        out["fitted"] = {k: c["predicted"].get(k) for k in ("score", "works", "gain")}
+    if c.get("doubts"):
+        out["doubts"] = c["doubts"]
+    m = c.get("measured")
+    if m:
+        out["measured"] = {k: m[k] for k in ("built", "feasible", "dps", "ehp", "base_dps", "gain", "gain_fair",
+                                             "gain_credited", "state_lift", "wrong_main", "thin", "error", "supports",
+                                             "code") if m.get(k) is not None}
+    if (c.get("ladder") or {}).get("cls"):
+        out["ladder"] = c["ladder"]["cls"]
+    return out
+
+
+def cmd_graph(a) -> dict:
+    from .builder import graphx
+    req = json.loads(_read(a.requirements)) if a.requirements else {}
+    if not isinstance(req, dict):
+        raise ValueError("requirements must be a JSON object")
+    want = max(1, a.top)
+    if a.chain or a.main:
+        req["top"] = 2000               # the filter runs after the ranking, so rank everything
+    else:
+        req["top"] = want
+    doc = graphx.run(req, scores_dir=a.scores, codes=bool(a.chain))
+    failed = [{"label": c["label"], "detail": c["detail"]} for c in doc["preflight"] if c["status"] == "fail"]
+    if not doc["passed"]:
+        return {"error": "requirements not met: " + "; ".join(f"{c['label']}: {c['detail']}" for c in failed)}
+    mech = doc["mechanics"]
+    names = _part_names(doc)
+    warnings = [{"label": c["label"], "detail": c["detail"]} for c in doc["preflight"] if c["status"] == "warn"]
+    if a.chain:
+        hit = [c for c in mech["chains"] if c["id"].startswith(a.chain)]
+        if not hit:
+            return {"error": f"chain not found: {a.chain}"}
+        c = hit[0]
+        return {"lab": LAB_VERSION, "chain": {**_chain_view(c, names), "evidence": c.get("evidence"),
+                                              "tempo": c.get("tempo"), "leveling": c.get("leveling"),
+                                              "spirit": c.get("spirit"), "fitted": c.get("predicted"),
+                                              "ladder": c.get("ladder"), "rank": mech["chains"].index(c) + 1},
+                "warnings": warnings}
+    chains = mech["chains"]
+    if a.main:
+        q = a.main.lower()
+        chains = [c for c in chains if q in c["main_name"].lower() or q == c["main_skill"].lower()]
+    info = mech["info"]
+    return {"lab": LAB_VERSION, "rank_by": doc["requirements"]["rank_by"], "pool": info["pool"],
+            "total": len(chains) if a.main else info["kept"], "doubted": info.get("doubted"),
+            "measured": info.get("measured"), "spirit": {k: info["spirit"].get(k) for k in ("budget", "source", "level")
+                                                         if isinstance(info.get("spirit"), dict)},
+            "warnings": warnings, "chains": [_chain_view(c, names) for c in chains[:want]]}
+
+
 def _entry_view(e, codes: bool) -> dict:
     rec = e.rec
     sk = rec.get("skeleton") or {}
@@ -236,11 +316,17 @@ def parser() -> argparse.ArgumentParser:
     pc.add_argument("--budget", type=int, default=6000)
     pc.add_argument("--seed", type=int, default=7)
     pc.add_argument("-v", "--verbose", action="store_true")
+    pg = sub.add_parser("graph")
+    pg.add_argument("--requirements", help="requirements JSON, @file or - for stdin (default: no restrictions)")
+    pg.add_argument("--scores", help="chainscore run directory: attach what PoB measured")
+    pg.add_argument("--main", help="keep the chains of this main skill (part of the name)")
+    pg.add_argument("--chain", help="return this chain in full")
+    pg.add_argument("--top", type=int, default=10)
     return ap
 
 
 COMMANDS = {"version": cmd_version, "optimise": cmd_optimise, "optimize": cmd_optimise, "synth": cmd_synth,
-            "results": cmd_results, "status": cmd_status, "chain": cmd_chain}
+            "results": cmd_results, "status": cmd_status, "chain": cmd_chain, "graph": cmd_graph}
 
 
 def main(argv=None) -> int:
