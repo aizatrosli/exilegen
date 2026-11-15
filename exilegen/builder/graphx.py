@@ -301,7 +301,10 @@ def mechanics(cat: catmod.Catalog, req: Requirements, scores: dict | None = None
                 and not (req.online_by and c["leveling"]["online_level"] > req.online_by)]
     pool.sort(key=lambda c: (-c["score"], c["id"]))
     model = chainfit.load()
+    ladder = _ladder(pool, scores)
     for rank, c in enumerate(pool):
+        if c["id"] in ladder:
+            c["ladder"] = ladder[c["id"]]
         c["formula_rank"] = rank
         sk = cat.skills.get(c["main_skill"]) or {}
         c["main_damage_types"] = list(sk.get("damage_types") or [])
@@ -351,6 +354,36 @@ def mechanics(cat: catmod.Catalog, req: Requirements, scores: dict | None = None
                      **({"fitted": {"chains": model["n"], **model.get("held_out", {})}} if model else {}),
                      "by_kind": dict(Counter(c["kind"] for c in chains)),
                      "support_names": supportgems.names(), "lineage_supports": supportgems.lineage_names()}}
+
+
+def _ladder(pool: list[dict], scores: dict | None) -> dict[str, dict]:
+    """Per chain, how it sits against the poe.ninja ladder reference (laddercmp), trimmed for the graph document."""
+    from . import laddercmp, ladderref
+    try:
+        ref = ladderref.load()
+    except OSError:
+        return {}
+    if not ref or not ref.get("skills"):
+        return {}
+    out = {}
+    for cid, r in laddercmp.per_chain(pool, scores or {}, ref).items():
+        sk = ref["skills"].get(r["main_name"]) or {}
+        d = {"cls": r["cls"], "known": bool(r["in_ref"])}
+        if r["ladder"]:
+            d.update(share=r["ladder"]["share"], rank=r["ladder"]["rank"], n=r["ladder"]["n"])
+            d["supports"] = [n for n, _ in (sk.get("supports") or [])[:5]]
+            d["uniques"] = [n for n, _ in (sk.get("uniques") or [])[:5]]
+            if (sk.get("dps") or {}).get("median"):
+                d["dps_median"], d["dps_p90"] = sk["dps"]["median"], sk["dps"].get("p90")
+        pw = (r.get("power") or {}).get("skill")
+        if pw:
+            d["thin"] = bool(pw["thin"])
+            if pw.get("dps_vs_median") is not None:
+                d["dps_vs_median"] = pw["dps_vs_median"]
+        if r["parts"]:
+            d["paired"] = [p["name"] for p in r["parts"] if p.get("paired")]
+        out[cid] = d
+    return out
 
 
 # ---------------------------------------------------------------------------------------------- ladder
@@ -467,6 +500,12 @@ def run(req_dict: dict, corpus_dir: str | None = None, check_only: bool = False,
     cat = cat or catmod.load()
     req, unknown = Requirements.from_dict(req_dict or {})
     scores = chainresults.measured(scores_dir, codes=codes) if scores_dir else None
+    if scores:
+        from . import laddercmp   # imported here: laddercmp reaches back to this module through chainscore
+        for cid, m in laddercmp.load_run(scores_dir).items():   # pinnacle-profile figures for the ladder comparison
+            for k in ("ascendancy", "pinnacle_dps", "pinnacle_ehp", "base_pinnacle_dps"):
+                if k in m and cid in scores:
+                    scores[cid][k] = m[k]
     checks = preflight(cat, req, unknown, corpus_dir, scores)
     doc = {"format": FORMAT, "version": VERSION, "game": "poe2", "generated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
            "requirements": asdict(req), "preflight": checks, "passed": passed(checks)}
