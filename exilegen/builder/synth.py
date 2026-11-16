@@ -373,6 +373,8 @@ class _Synth:
         if sk.weapon and spec is None:
             self.note(f"weapon hint {sk.weapon!r} unknown; using the skill's requirement")
         off = self.sk.offhand or (self.sk.trigger or {}).get("offhand")
+        if not off and {"RequiresShield", "RequiresBuckler"} & set(self.main_info.types or []):
+            off = "Shield"                # a shield skill (spell or attack) is unusable beside a focus
         if spec is not None and off:
             spec = dict(spec, offhand=off)
             if spec.get("hands") == 2:
