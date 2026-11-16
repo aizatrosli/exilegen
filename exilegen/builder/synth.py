@@ -828,7 +828,8 @@ class _Synth:
         for slot, val in sorted(gp.taken.items()):
             if not str(val).startswith("unique:") or slot.startswith("Weapon"):
                 continue
-            name = str(val).split(":", 1)[1]
+            full = str(val).split(":", 1)[1]           # the item's full title ("Indigon, Magus Tiara")
+            name = next((n for n in roles if full == n or full.startswith(n + ",")), full.split(",")[0].strip())
             role = roles.get(name, "")
             if role == "grants_main" or name == trig or name in required or grants.get(name, set()) & used:
                 continue                     # the build needs it: it grants a used skill or is required
