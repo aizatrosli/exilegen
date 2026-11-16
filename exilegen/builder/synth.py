@@ -564,8 +564,13 @@ class _Synth:
                 break
             beam = nxt[:self.BEAM_WIDTH]
             best_by_size[depth] = nxt[0]
-        # 3. commit the best set (largest on a tie: an empty socket is never better than a neutral support)
-        order = sorted(best_by_size.items(), key=lambda kv: (kv[1][0]["objective"], kv[0]), reverse=True)
+        # 3. commit the best set. A larger set must beat every smaller one by more than a rounding error: on a
+        #    tie the search order is alphabetical, and a group whose skill scores nothing (a triggered spell with
+        #    no Energy) was filled with whatever came first (Admixture, Ambush, Arakaali's Lust ...).
+        top_obj = max(rc[0]["objective"] for rc in best_by_size.values())
+        order = sorted(best_by_size.items(),
+                       key=lambda kv: (kv[1][0]["objective"] >= top_obj - 1e-4, -kv[0] if kv[1][0]["objective"] >= top_obj - 1e-4
+                                       else 0, kv[1][0]["objective"]), reverse=True)
         for size, (r, c) in order[:3]:
             ok, _ = ctx.try_commit(change(c), label=f"socket {', '.join(names[x] for x in c)}", accept=accept)
             if ok:

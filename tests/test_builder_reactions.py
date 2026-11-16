@@ -146,3 +146,11 @@ def test_a_meta_gem_that_never_fires_is_flagged():
                                 "spells": [{"name": "Snap", "dps": 1000.0, "pobRate": 0.25, "castTime": 0.5}]})
     r = energy.correct([g], 20.0)
     assert r.dps_corrected == 0 and any("energy_no_events" in f for f in r.flags)
+
+
+def test_an_empty_meta_gem_is_not_flagged():
+    from exilegen.scoring import energy
+    from exilegen.scoring.adapter import normalise_energy_group
+    g = normalise_energy_group({"group": 5, "meta": "MetaSpellslingerPlayer", "metaName": "Spellslinger", "spells": []})
+    r = energy.correct([g], 20.0)
+    assert r.flags == [] and r.spells == []

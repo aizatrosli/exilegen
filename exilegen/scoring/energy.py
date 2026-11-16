@@ -136,6 +136,8 @@ def correct(groups: list[EnergyGroup] | None, power: float, unmodelled_factor: f
     if not groups:
         return EnergyResult([], 0.0, 0.0, 0.0, flags)
     for g in groups:
+        if not g.spells:                 # a meta gem with nothing socketed (a wand's own Spellslinger): nothing
+            continue                     # is triggered, so there is nothing to correct and nothing unverified
         meta = resolve_meta(g)
         gflags: list[str] = []
         eps = energy_per_sec(g, power, gflags)
