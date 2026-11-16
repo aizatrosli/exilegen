@@ -220,6 +220,8 @@ class GearPlanner:
             # two ring uniques: the second goes to the free ring slot, also when the skeleton names "Ring 1" for both
             # (the catalog says "Ring", which the bridge reads as Ring 1)
             cands = sorted(("Ring 1", "Ring 2"), key=lambda r: r != want)
+        if want == "Weapon 1" and "Weapon 1" in self.taken and "Weapon 2" not in self.taken and not self.two_handed:
+            cands = ["Weapon 2"]          # a second weapon unique goes to the off-hand (catalog.dual_wield_ok)
         for s in cands:
             if s and s in self.taken and (not slot or s.startswith("Ring")):
                 continue

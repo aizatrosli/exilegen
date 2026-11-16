@@ -534,16 +534,32 @@ if __name__ == "__main__":
 SLOT_LIMIT = {"Ring": 2, "Jewel": 3, "Flask": 2, "Charm": 3}
 
 
+MARTIAL_1H = {"Claw", "Dagger", "Flail", "One Hand Axe", "One Hand Mace", "One Hand Sword"}
+
+
+def dual_wield_ok(a: dict, b: dict) -> bool:
+    """Can two weapon uniques share one weapon set? A sceptre sits in the off-hand beside a wand or a one-handed
+    weapon; two one-handed martial weapons can be dual wielded; never two wands, a spear or anything two-handed."""
+    ca, cb = a.get("weapon_class"), b.get("weapon_class")
+    if not ca or not cb or ca in TWO_HANDED or cb in TWO_HANDED:
+        return False
+    if "Sceptre" in (ca, cb):
+        return ca != cb and (ca if cb == "Sceptre" else cb) in MARTIAL_1H | {"Wand"}
+    return ca in MARTIAL_1H and cb in MARTIAL_1H
+
+
 def slot_conflicts(uniques: list[dict]) -> list[str]:
     """Problems with a set of unique items (dicts with slot / two_handed / weapon_class / base_type).
     Max one per slot (rings x2), a two-handed weapon blocks an off-hand except bow + quiver,
-    a quiver needs a bow, at most one weapon unique (we do not dual-wield uniques)."""
+    a quiver needs a bow, two weapon uniques only when one weapon set can hold both (dual_wield_ok)."""
     out = []
     cnt = Counter(u.get("slot") for u in uniques)
+    hand = [u for u in uniques if u.get("slot") == "Weapon 1"]
+    pair = len(hand) == 2 and not any(u.get("slot") == "Weapon 2" for u in uniques) and dual_wield_ok(hand[0], hand[1])
     for slot, n in cnt.items():
         if slot is None:
             out.append("unique without slot")
-        elif n > SLOT_LIMIT.get(slot, 1):
+        elif n > SLOT_LIMIT.get(slot, 1) and not (slot == "Weapon 1" and pair):
             out.append(f"{n} uniques in {slot}")
     names = [u.get("name") for u in uniques]
     if len(set(names)) != len(names):

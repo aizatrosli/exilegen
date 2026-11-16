@@ -317,19 +317,44 @@ class _Synth:
                 raise SynthError(f"weapon base {gm['name']} could not be made")
             self.gp.two_handed = False
             self.gp.taken["Weapon 1"] = f"unique:{gm['name']} (base kept for its skill)"   # not re-rolled later
-        view = self.e.raw("get_skills", {}) or {}
-        for g in view.get("socketGroups") or view.get("groups") or []:
-            if g.get("source") and any(str(x.get("skillId")) == meta_id for x in g.get("gems") or []):
-                return int(g["index"])
+        def find():
+            view = self.e.raw("get_skills", {}) or {}
+            for g in view.get("socketGroups") or view.get("groups") or []:
+                if g.get("source") and any(str(x.get("skillId")) == meta_id for x in g.get("gems") or []):
+                    return g
+            return None
+        g = find()
+        if g is not None:
+            self._top_granted_level(str(g.get("source")))
+            g = find() or g
+            return int(g["index"])
         raise SynthError(f"no item-granted group holds the meta gem {meta_id} (is {gm.get('name')} equipped?)")
+
+    def _top_granted_level(self, source: str) -> None:
+        """An item's "Grants Skill: Level (1-20) X" comes at a middle roll; an end-level build has the top one."""
+        import re
+        m = re.match(r"Item:(\d+):", source)
+        if not m:
+            return
+        try:
+            raw = self.e.raw("item_raw", {"itemId": int(m.group(1))})["raw"]
+            new = "\n".join(re.sub(r"\{range:[0-9.]+\}", "{range:1}", ln) if "Grants Skill: Level (" in ln else ln
+                            for ln in raw.split("\n"))
+            if new != raw:
+                self.e.raw("item_edit", {"itemId": int(m.group(1)), "text": new})
+                self.note("granted skill level set to the top of its range")
+        except Exception as ex:          # noqa: BLE001
+            self.note(f"granted skill level kept: {str(ex)[:100]}")
 
     # ------------------------------------------------------------------ 3. gear (raw)
     def uniques(self):
         sk = self.sk
         self.gp = GearPlanner(self.e, level=sk.level, tier=sk.budget_tier, defence=sk.defence, cls=self.cls,
                               notes=self.notes)
-        for u in sk.uniques or []:
-            u = {"name": u} if isinstance(u, str) else dict(u)
+        us = [{"name": u} if isinstance(u, str) else dict(u) for u in sk.uniques or []]
+        # a sceptre unique beside another weapon unique sits in the off-hand, so it is equipped after it
+        us.sort(key=lambda u: "sceptre" in str(u.get("weapon_class") or u.get("base_type") or "").lower())
+        for u in us:
             got = self.gp.equip_unique(u["name"], u.get("slot"), u.get("variant"))
             if got is None:
                 raise SynthError(f"unique {u['name']!r} could not be equipped")
@@ -405,6 +430,7 @@ class _Synth:
         trig = self.sk.trigger or {}
         wanted = set(main_names) | {str(x).lower() for x in self.sk.extra_skills or []}
         wanted |= {str(x).lower() for x in [trig.get("feeder"), trig.get("feeder_name")] + list(trig.get("spells") or []) if x}
+        wanted |= {str(x).lower() for x in trig.get("keep") or []}     # e.g. Raise Shield beside Cast on Block
 
         def hit(sk_, names):
             return (sk_.get("id") or "").lower() in names or (sk_.get("name") or "").lower() in names

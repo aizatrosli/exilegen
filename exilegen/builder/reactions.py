@@ -398,6 +398,8 @@ def apply(sk, chain: dict):
     src = rx.get("source") or {}
     if src.get("kind") in ("unique", "base"):
         from . import hands
+        if rx["event"] == "block":
+            sk.trigger["keep"] = ["Raise Shield"]      # the shield's own skill is what blocks
         sk.trigger["granted"] = {"kind": src["kind"], "name": src["name"], "class": hands._base_class(src["name"])}
     sk.tags = dict(sk.tags or {}, reaction={"event": rx["event"], "state": rx.get("state"), "payoff": rx["payoff"]})
     sk.id = skeleton_id(sk)
