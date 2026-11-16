@@ -302,6 +302,10 @@ class TestEnergy(unittest.TestCase):
         self.assertAlmostEqual(one("MetaCastOnBlockPlayer", snap, {"block": 0.3}).spells[0].factor, (7.5 / 50) / 0.25)
         self.assertEqual(one("MetaCastLightningSpellOnHitPlayer", snap, {"hits_per_sec": 2.0}).spells[0].factor, 1.0)
         self.assertEqual(one("MetaSpellslingerPlayer", snap, None).spells[0].kind, "unmodelled")
+        g = normalise_energy_group({"group": 2, "metaSkillId": "MetaCastOnBlockPlayer", "genBonus": 0,
+                                    "spells": [{"name": "Repulsion", "id": "A", "castTime": 0.5}],
+                                    "triggered": [{"name": "Repulsion Wave", "id": "B", "pobRate": 0.0, "dps": 676.0}]})
+        self.assertEqual(E.correct([g], 20, main={"block": 0.45}).spells[0].kind, "estimated")
 
     def test_freeze_energy_ignored_unless_reported(self):
         g = {"group": 1, "meta_id": "MetaCastOnElementalAilmentPlayer", "max_energy": 100, "gen_pct": 0,

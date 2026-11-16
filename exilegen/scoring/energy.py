@@ -174,6 +174,10 @@ def correct(groups: list[EnergyGroup] | None, power: float, unmodelled_factor: f
         if meta is None:
             est = estimate_per_sec(g, power, main)
             cost = sum(sp.cast_time * 100.0 for sp in g.spells if sp.cast_time) or None   # a bank is not the cost
+            if cost is None:      # PoB lists a sub-skill ("Repulsion Wave") that the socketed gem's cast time misses
+                socketed = (g.raw or {}).get("spells") or (g.raw or {}).get("socketed") or []
+                cost = sum(float(x.get("castTime") or x.get("cast_time") or 0) * 100.0 for x in socketed
+                           if isinstance(x, dict)) or None
             if est is not None and cost:
                 rate = est / cost
                 gflags.append(f"unverified:energy_estimated:{g.meta_name or g.meta_id}")
