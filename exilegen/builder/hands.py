@@ -46,7 +46,7 @@ def needs(chain: dict, cat: catmod.Catalog) -> list[dict]:
     for u in chain.get("uniques") or []:
         d = cat.uniques.get(u) or {}
         if d.get("slot") == "Weapon 1":
-            out.append({"for": u, "options": [{"item": u, "class": d.get("weapon_class")}]})
+            out.append({"for": u, "role": "stats", "options": [{"item": u, "class": d.get("weapon_class")}]})
     rx = chain.get("reaction") or {}
     held = set(rx.get("spells") or [])
     sids = [chain["main_skill"]] + [k.split(":", 1)[1] for k in chain.get("path") or [] if k.startswith(("util:", "skill:"))]
@@ -61,11 +61,13 @@ def needs(chain: dict, cat: catmod.Catalog) -> list[dict]:
         b = base_granted().get(s.get("name"))
         if b:
             opts.append({"item": b["base"], "class": _base_class(b["base"]), "base": True})
-        if opts:
-            out.append({"for": s["name"], "options": opts})
+        if opts:          # the main skill is used with its weapon in hand; a helper skill only has to be used once
+            out.append({"for": s["name"], "role": "main" if sid == chain["main_skill"] else "helper", "options": opts})
     src = rx.get("source") or {}
     if src.get("kind") == "base":
-        out.append({"for": rx["meta_name"], "options": [{"item": src["name"], "class": _base_class(src["name"]), "base": True}]})
+        # the meta gem gains Energy from the main skill, so its weapon is the one in hand while the main skill is used
+        out.append({"for": rx["meta_name"], "role": "main",
+                    "options": [{"item": src["name"], "class": _base_class(src["name"]), "base": True}]})
     return out
 
 
@@ -100,7 +102,16 @@ def check(chain: dict, cat: catmod.Catalog) -> dict | None:
         return None
     parts = [f"{n['options'][0]['item']}" + (f" (or {len(n['options']) - 1} more)" if len(n["options"]) > 1 else "") +
              (f" for {n['for']}" if n["for"] != n["options"][0]["item"] else "") for n in ns]
-    return {"weapons": [{"for": n["for"], "items": [o["item"] for o in n["options"]]} for n in ns],
-            "why": "Needs weapons that do not fit in one weapon set: " + ", ".join(parts) +
-                   ". Only possible with weapon swap, where each weapon's stats apply only while its set is in use; "
-                   "the builder makes one set."}
+    # After a swap a weapon's own stats are gone: only what it left on the enemy or the ground stays. So the chain
+    # is lost when a weapon that matters for its stats (a weapon unique of the chain) cannot be in hand together
+    # with the weapon the main skill is used with. A helper skill's weapon alone can sit in the other set.
+    stay = [n for n in ns if n["role"] in ("main", "stats")]
+    lost = len(stay) >= 2 and not fits([], stay)
+    weapons = [{"for": n["for"], "role": n["role"], "items": [o["item"] for o in n["options"]]} for n in ns]
+    if lost:
+        why = ("Needs weapons that cannot be in hand together: " + ", ".join(parts) + ". With weapon swap the "
+               "swapped-out weapon's stats and buffs are gone, so its part of the chain does nothing.")
+    else:
+        why = ("Needs weapon swap: " + ", ".join(parts) + ". The second set is only there to use a helper skill; "
+               "what it leaves on the enemy stays after swapping back. The builder makes one set, so this is not built.")
+    return {"weapons": weapons, "lost": lost, "why": why}

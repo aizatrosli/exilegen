@@ -306,6 +306,17 @@ def mechanics(cat: catmod.Catalog, req: Requirements, scores: dict | None = None
     typed = edgesmod.typed(g)          # every link read again against stat ids and PoB tags (edges.py)
     # chain reactions: a meta gem turns an event of the main skill into a second spell (reactions.py)
     pool += rxmod.chains(g, cat, typed)
+    # weapons one set cannot hold (hands.py): a chain whose payoff would be on the swapped-out weapon is not a
+    # chain, because a weapon's stats and buffs are gone after the swap. One that only needs the second set for a
+    # helper skill stays, marked.
+    n_lost = 0
+    for c in list(pool):
+        swap = handsmod.check(c, cat)
+        if swap and swap["lost"]:
+            pool.remove(c)
+            n_lost += 1
+        elif swap:
+            c["weapon_swap"] = swap
     tempo = tempomod.load()
     lvl = levelmod.load()
     lvl_cfg, _ = levelmod.config(req.leveling_config)
@@ -363,10 +374,8 @@ def mechanics(cat: catmod.Catalog, req: Requirements, scores: dict | None = None
     checker = spiritx.Scorer(g, cat, [], tempo)
     for c in pool:
         d = checker.doubts(c) + edgesmod.chain_doubts(g, typed, c) + (rxmod.doubts(c) if c.get("reaction") else [])
-        swap = handsmod.check(c, cat)      # two weapons that one weapon set cannot hold
-        if swap:
-            c["weapon_swap"] = swap
-            d = d + [swap["why"]]
+        if c.get("weapon_swap"):
+            d = d + [c["weapon_swap"]["why"]]
         if d:
             c["doubts"] = d
     if req.rank_by == "formula":
@@ -411,6 +420,7 @@ def mechanics(cat: catmod.Catalog, req: Requirements, scores: dict | None = None
             c["spirit"] = sp.suggest(c, sp_budget["budget"], sp_budget.get("level"), gear=sp_budget.get("gear", 0.0))
     return {"nodes": nodes, "edges": edges, "chains": chains,
             "info": {**g.size(), "raw_chains": g.n_raw_chains, "pool": len(pool), "kept": len(chains), "doubted": sum(1 for c in pool if c.get("doubts")),
+                     "weapon_swap": {"dropped": n_lost, "kept": sum(1 for c in pool if c.get("weapon_swap"))},
                      "typed_edges": dict(Counter(x.verdict for x in typed.values())),
                      **({"measured": chainresults.summary({k: v for k, v in scores.items() if k in {c["id"] for c in pool}}, len(pool))}
                         if scores else {}),
