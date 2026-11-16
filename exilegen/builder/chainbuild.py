@@ -461,6 +461,8 @@ def build(chain_id: str, level: int | None = None, exclude=None, budget: int = 6
     parts = parts_at(original, level)
     cat = catmod.load()
     chain = restricted(original, parts, level, {sid: s.get("name") for sid, s in cat.skills.items()})
+    if original.get("weapon_swap"):
+        raise ChainError(original["weapon_swap"]["why"])
     rx, rx_note, rx_ban = original.get("reaction"), None, []
     if rx:
         from . import reactions

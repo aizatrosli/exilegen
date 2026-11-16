@@ -184,6 +184,8 @@ def _chain_view(c: dict, names: dict) -> dict:
         out["fitted"] = {k: c["predicted"].get(k) for k in ("score", "works", "gain")}
     if c.get("doubts"):
         out["doubts"] = c["doubts"]
+    if c.get("weapon_swap"):
+        out["weapon_swap"] = c["weapon_swap"]["weapons"]
     rx = c.get("reaction")
     if rx:                               # a meta gem casting a second spell: what feeds it, and how sure that is
         out["reaction"] = {"meta_gem": rx["meta_name"], "casts": rx["spell_names"], "fed_by": rx["event_label"],

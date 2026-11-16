@@ -48,6 +48,7 @@ from . import reactions as rxmod
 from . import chainfit
 from . import chainresults
 from . import edges as edgesmod
+from . import hands as handsmod
 from . import leveling as levelmod
 from . import spiritx
 from . import states as statesmod
@@ -362,6 +363,10 @@ def mechanics(cat: catmod.Catalog, req: Requirements, scores: dict | None = None
     checker = spiritx.Scorer(g, cat, [], tempo)
     for c in pool:
         d = checker.doubts(c) + edgesmod.chain_doubts(g, typed, c) + (rxmod.doubts(c) if c.get("reaction") else [])
+        swap = handsmod.check(c, cat)      # two weapons that one weapon set cannot hold
+        if swap:
+            c["weapon_swap"] = swap
+            d = d + [swap["why"]]
         if d:
             c["doubts"] = d
     if req.rank_by == "formula":
