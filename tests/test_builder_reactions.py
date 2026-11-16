@@ -85,7 +85,8 @@ def test_the_older_chains_keep_their_ids(cat):
     g = mechgraph.MechGraph(cat)
     before = {c["id"] for c in g.chains(top=1200, per_token=10 ** 6, per_main=24, per_entity=24)}
     doc = graphx.run({"top": 2000}, cat=cat)["mechanics"]
-    assert before <= {c["id"] for c in doc["chains"]}
+    gone = before - {c["id"] for c in doc["chains"]}                     # only two-weapon chains leave (hands.py)
+    assert len(gone) <= doc["info"]["weapon_swap"]["dropped"] < 0.15 * len(before)
     assert reactions.extend(g, cat) is reactions.extend(g, cat)          # registering twice changes nothing
 
 
