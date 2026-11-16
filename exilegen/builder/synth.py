@@ -317,7 +317,8 @@ class _Synth:
                 raise SynthError(f"weapon base {gm['name']} could not be made")
             self.gp.two_handed = False
             self.gp.taken["Weapon 1"] = f"unique:{gm['name']} (base kept for its skill)"   # not re-rolled later
-        for g in (self.e.raw("get_skills", {}) or {}).get("groups") or []:
+        view = self.e.raw("get_skills", {}) or {}
+        for g in view.get("socketGroups") or view.get("groups") or []:
             if g.get("source") and any(str(x.get("skillId")) == meta_id for x in g.get("gems") or []):
                 return int(g["index"])
         raise SynthError(f"no item-granted group holds the meta gem {meta_id} (is {gm.get('name')} equipped?)")

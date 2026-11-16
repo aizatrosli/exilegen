@@ -199,6 +199,9 @@ class GearPlanner:
 
     # ------------------------------------------------------------------ uniques
     def find_unique(self, name: str) -> dict | None:
+        import unicodedata
+        # PoB's item DB writes names without accents ("Mjolner, Torment Club")
+        name = unicodedata.normalize("NFKD", name).encode("ascii", "ignore").decode()
         try:
             rows = self.e.raw("item_db_list", {"query": name, "limit": 20}).get("items") or []
         except Exception:
