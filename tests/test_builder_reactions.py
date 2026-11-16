@@ -69,7 +69,9 @@ def test_reactions_join_the_pool_with_their_own_kind(pool):
         if r["source"]["kind"] == "gem" and r["spirit"]:
             assert c["tempo"]["spirit_total"] >= r["spirit"]              # the meta gem's Spirit is counted
         if r["source"]["kind"] == "unique":
-            assert r["source"]["name"] in c["uniques"] and not r["buildable"]
+            assert r["source"]["name"] in c["uniques"] and r["buildable"]      # spells go into the item's group
+        if r["source"]["kind"] == "asc":
+            assert not r["buildable"]
     nodes = {n["id"]: n for n in pool["nodes"]}
     assert nodes["util:MetaCastOnCritPlayer"]["meta_gem"] and nodes["token:cast:Cast on Critical"]["group"] == "cast"
 

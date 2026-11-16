@@ -377,9 +377,9 @@ def doubts(chain: dict) -> list[str]:
 def buildable(chain: dict) -> str | None:
     """None when the builder can make the chain, else why not."""
     rx = chain.get("reaction") or {}
-    if rx.get("buildable"):
-        return None
     src = rx.get("source") or {}
+    if rx.get("buildable") or src.get("kind") in ("unique", "base"):
+        return None                       # PoB sockets spells into an item-granted meta gem like any group
     what = {"unique": f"the unique {src.get('name')}", "asc": f"the {src.get('ascendancy')} notable {src.get('name')}",
             "base": f"the {src.get('name')} weapon base"}.get(src.get("kind"), "an item")
     return (f"{rx.get('meta_name')} comes from {what}, not from a gem: the builder cannot socket spells into an "
@@ -395,6 +395,10 @@ def apply(sk, chain: dict):
     sk.extra_skills = [x for x in sk.extra_skills or [] if x not in hosted]
     sk.trigger = {"meta": rx["meta"], "meta_name": rx["meta_name"], "spells": list(rx["spells"]),
                   "feeder": chain["main_skill"], "feeder_name": chain["main_name"], "modelled": bool(rx["modelled"])}
+    src = rx.get("source") or {}
+    if src.get("kind") in ("unique", "base"):
+        from . import hands
+        sk.trigger["granted"] = {"kind": src["kind"], "name": src["name"], "class": hands._base_class(src["name"])}
     sk.tags = dict(sk.tags or {}, reaction={"event": rx["event"], "state": rx.get("state"), "payoff": rx["payoff"]})
     sk.id = skeleton_id(sk)
     return sk

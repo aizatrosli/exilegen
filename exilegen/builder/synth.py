@@ -228,7 +228,8 @@ class _Synth:
         self.main_info = main
         trig = dict(sk.trigger or {})
         meta = None
-        if trig.get("meta"):
+        gm = trig.get("granted")              # the meta gem comes with an item ({"kind", "name"}), not from a gem
+        if trig.get("meta") and not gm:
             try:
                 meta = self.gem(trig["meta"], "meta gem")
             except SynthError as ex:
@@ -249,6 +250,12 @@ class _Synth:
                 self.note(f"trigger: {ex}")
         if meta is not None and not spells and not self.granted_main and main.gem_id:
             spells = [main]
+        if gm and spells:
+            gi = self._granted_meta_group(str(trig["meta"]), gm)
+            for x in spells:
+                self._add_gem(gi, x)
+            self.meta_group = gi
+            self.note(f"trigger group {gi}: {trig.get('meta_name')} (from {gm.get('name')}) + {', '.join(x.name for x in spells)}")
         if meta is not None and not spells:
             self.note(f"trigger: no socketable spell for {meta.name}; meta group skipped")
             meta = None
@@ -297,6 +304,23 @@ class _Synth:
             self.extra_groups.append(gi)
         if self.extra_groups:
             self.note(f"extra skills: {', '.join(str(g) for g in self.extra_groups)}")
+
+    def _granted_meta_group(self, meta_id: str, gm: dict) -> int:
+        """The socket group of a meta gem that an item grants (PoB sockets spells into it like any group).
+        A weapon base that grants it (Spellslinger on the Dueling Wand) is put in the main hand first and kept."""
+        if gm.get("kind") == "base":
+            if "Weapon 1" in self.gp.taken:
+                raise SynthError(f"{gm['name']} is needed in the main hand, which {self.gp.taken['Weapon 1']} holds")
+            cls = gm.get("class") or "Wand"
+            b = next((b for b in self.gp.bases(cls) if b["name"] == gm["name"]), None)
+            if b is None or self.gp.craft("Weapon 1", cls, b, "weapon") is None:
+                raise SynthError(f"weapon base {gm['name']} could not be made")
+            self.gp.two_handed = False
+            self.gp.taken["Weapon 1"] = f"unique:{gm['name']} (base kept for its skill)"   # not re-rolled later
+        for g in (self.e.raw("get_skills", {}) or {}).get("groups") or []:
+            if g.get("source") and any(str(x.get("skillId")) == meta_id for x in g.get("gems") or []):
+                return int(g["index"])
+        raise SynthError(f"no item-granted group holds the meta gem {meta_id} (is {gm.get('name')} equipped?)")
 
     # ------------------------------------------------------------------ 3. gear (raw)
     def uniques(self):

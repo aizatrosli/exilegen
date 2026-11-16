@@ -325,7 +325,7 @@
    "max": "cast_time",
    "host": "spell",
    "modelled": false,
-   "buildable": false,
+   "buildable": true,
    "source": {
     "kind": "unique",
     "name": "Svalinn"
@@ -352,7 +352,7 @@
    "max": "cast_time",
    "host": "spell",
    "modelled": false,
-   "buildable": false,
+   "buildable": true,
    "source": {
     "kind": "unique",
     "name": "Bijouborne"
@@ -377,7 +377,7 @@
    "max": "cast_time",
    "host": "spell",
    "modelled": false,
-   "buildable": false,
+   "buildable": true,
    "source": {
     "kind": "unique",
     "name": "Mjölner"
@@ -435,7 +435,7 @@
    "max": 500,
    "host": "spell",
    "modelled": false,
-   "buildable": false,
+   "buildable": true,
    "source": {
     "kind": "base",
     "name": "Dueling Wand"
