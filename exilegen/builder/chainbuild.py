@@ -28,6 +28,7 @@ tests cover.
 """
 from __future__ import annotations
 
+from exilegen.scoring import energy as _energy
 import copy
 import random
 import threading
@@ -568,6 +569,9 @@ def build(chain_id: str, level: int | None = None, exclude=None, budget: int = 6
                            "built": bool(group) and not rx_note, "modelled": rx["modelled"], "energy": rx["energy"],
                            "kept_out": rx_ban,
                            "note": rx_note or (None if rx["modelled"] else
+                                               f"{rx['meta_name']}'s Energy is estimated from judged event rates, not "
+                                               f"measured: the triggered spell's damage is a rough figure"
+                                               if rx["meta"] in _energy.ESTIMATES else
                                                f"the scorer has no Energy model for {rx['meta_name']}: the triggered "
                                                f"spell's damage is counted as if it always fired")}
     over = over_level(sk, level)

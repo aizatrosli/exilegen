@@ -59,6 +59,9 @@ def synthetic(main_active, supports, stats=None, extra_groups=(), keystones=()):
 ICE_SHOT = gem("Ice Shot", "IceShotPlayer", types=["Attack", "Projectile", "Damage"], activation="manual", damaging=True)
 
 
+from exilegen.scoring.adapter import normalise_energy_group
+
+
 class TestRegistry(unittest.TestCase):
     def test_size_and_curated_offenders(self):
         self.assertGreater(len(REG), 400)
@@ -283,6 +286,22 @@ class TestEnergy(unittest.TestCase):
         self.assertFalse(r["verified"])
         self.assertTrue(any("energy_unmodelled" in f for f in r["flags"]))
         self.assertAlmostEqual(r["dps_energy"], 6000)
+
+    def test_item_granted_metas_are_estimated_not_counted_in_full(self):
+        def one(meta, spell, main):
+            g = normalise_energy_group({"group": 1, "metaSkillId": meta, "meta_name": meta, "genBonus": 0, "spells": [spell]})
+            return E.correct([g], 20, main=main)
+        warp = {"name": "Lightning Warp", "pobRate": 3.3, "dps": 5000.0, "castTime": 0.6}
+        r = one("MetaSpellslingerPlayer", warp, {})
+        self.assertEqual(r.spells[0].kind, "estimated")                 # 20 Energy/s against 60 per cast: 0.33/s
+        self.assertAlmostEqual(r.spells[0].factor, (20 / 60) / 3.3)
+        self.assertTrue(any(f.startswith("unverified:energy_estimated") for f in r.flags))
+        snap = {"name": "Snap", "pobRate": 0.25, "dps": 1000.0, "castTime": 0.5}
+        self.assertEqual(one("MetaSpellslingerPlayer", snap, {}).spells[0].factor, 1.0)
+        self.assertEqual(one("MetaCastOnBlockPlayer", snap, {"block": None}).spells[0].kind, "unmodelled")
+        self.assertAlmostEqual(one("MetaCastOnBlockPlayer", snap, {"block": 0.3}).spells[0].factor, (7.5 / 50) / 0.25)
+        self.assertEqual(one("MetaCastLightningSpellOnHitPlayer", snap, {"hits_per_sec": 2.0}).spells[0].factor, 1.0)
+        self.assertEqual(one("MetaSpellslingerPlayer", snap, None).spells[0].kind, "unmodelled")
 
     def test_freeze_energy_ignored_unless_reported(self):
         g = {"group": 1, "meta_id": "MetaCastOnElementalAilmentPlayer", "max_energy": 100, "gen_pct": 0,

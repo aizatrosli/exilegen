@@ -12,8 +12,9 @@ Feeder events/s = feeder hits/s × chance (crit, shock, ignite). Freeze needs bu
 no usable freeze-event rate, so freeze energy is only counted when the engine reports freeze events/s
 explicitly; otherwise it is ignored (conservative) and flagged when freeze chance > 0.
 Triggered spells are assumed not to generate energy themselves.
-Metas without a model (Cast on Block, Cast on Minion Death, Cast on Dodge, ...) are "unmodelled": their
-spells keep PoB's number × `unmodelled_factor` and the result is flagged unverified.
+Metas without a model (Cast on Minion Death, Cast on Dodge, ...) are "unmodelled": their spells keep PoB's
+number × `unmodelled_factor` and the result is flagged unverified. Four item-granted metas (Spellslinger, Cast on
+Block, Cast on Charm Use, Thundergod's Wrath) are "estimated" from judged event rates (ESTIMATES), also unverified.
 """
 from __future__ import annotations
 
@@ -33,6 +34,21 @@ DEFAULT_PER_EVENT = {
     "MetaCastOnElementalAilmentPlayer": {"shock": 1.0, "ignite": 1.0, "freeze": 10.0},
 }
 SERVER_TICK = 0.033   # s; sanity cap on trigger rate
+
+# Meta gems without a measured model: Energy per second estimated from the main skill's own numbers and judged
+# event rates. Better than counting the spell as if it always fired, but still an estimate, so the result keeps
+# an "unverified:energy_estimated" flag. Energy per event from the gem data (builder/data/meta_gems.json).
+HITS_TAKEN_PER_SEC = 1.0          # judged: hits a lone boss lands on the character
+CHARM_CHARGES_PER_SEC = 2.0       # judged: one 60-charge Charm use every 30 s
+ESTIMATES = {
+    # 2 Energy per 0.1 s of base cast time of spells cast by hand; about one second of base cast time per second
+    "MetaSpellslingerPlayer": lambda main, power: 20.0 * float(main.get("cast_seconds_per_sec") or 1.0),
+    "MetaCastOnBlockPlayer": lambda main, power: (25.0 * HITS_TAKEN_PER_SEC * main["block"]
+                                                  if main.get("block") is not None else None),
+    "MetaCastOnCharmUsePlayer": lambda main, power: 2.0 * CHARM_CHARGES_PER_SEC,
+    "MetaCastLightningSpellOnHitPlayer": lambda main, power: (3.0 * power * main["hits_per_sec"]
+                                                              if main.get("hits_per_sec") is not None else None),
+}
 
 
 @dataclass
@@ -130,7 +146,18 @@ def energy_per_sec(g: EnergyGroup, power: float, flags: list[str] | None = None)
     return e * power * (1.0 + g.gen_pct / 100.0) / (1.0 - 0.5 * refund / 100.0)
 
 
-def correct(groups: list[EnergyGroup] | None, power: float, unmodelled_factor: float = 1.0) -> EnergyResult:
+def estimate_per_sec(g: EnergyGroup, power: float, main: dict | None) -> float | None:
+    """Estimated Energy/s for a meta gem in ESTIMATES (None for any other, or when the main skill's numbers
+    are missing)."""
+    fn = ESTIMATES.get(g.meta_id or "")
+    if fn is None or main is None:
+        return None
+    e = fn(main, power)
+    return None if e is None else e * (1.0 + g.gen_pct / 100.0)
+
+
+def correct(groups: list[EnergyGroup] | None, power: float, unmodelled_factor: float = 1.0,
+            main: dict | None = None) -> EnergyResult:
     flags: list[str] = []
     out: list[SpellResult] = []
     if not groups:
@@ -143,8 +170,16 @@ def correct(groups: list[EnergyGroup] | None, power: float, unmodelled_factor: f
         eps = energy_per_sec(g, power, gflags)
         mx = max_energy(g)
         rate = eps / mx if (eps is not None and mx) else None
+        est = None
         if meta is None:
-            gflags.append(f"unverified:energy_unmodelled:{g.meta_name or g.meta_id}")
+            est = estimate_per_sec(g, power, main)
+            cost = sum(sp.cast_time * 100.0 for sp in g.spells if sp.cast_time) or None   # a bank is not the cost
+            if est is not None and cost:
+                rate = est / cost
+                gflags.append(f"unverified:energy_estimated:{g.meta_name or g.meta_id}")
+            else:
+                est = None
+                gflags.append(f"unverified:energy_unmodelled:{g.meta_name or g.meta_id}")
         elif rate is None:
             gflags.append(f"unverified:energy_inputs_missing:{g.meta_name or g.meta_id}")
         if meta is not None and rate == 0:      # the feeder makes none of the gem's events: the reaction never fires
@@ -155,7 +190,11 @@ def correct(groups: list[EnergyGroup] | None, power: float, unmodelled_factor: f
         for s in g.spells:
             d = s.pob_dps or 0.0
             pr = s.pob_rate if s.pob_rate is not None else g.pob_assumed_rate
-            if meta is None:
+            if est is not None:
+                kind = "estimated"
+                f = min(1.0, rate / pr) if pr else (1.0 if rate > 0 else 0.0)
+                fh = min(1.0, 0.5 * rate / pr) if pr else f
+            elif meta is None:
                 f = fh = unmodelled_factor
                 kind = "unmodelled"
             elif rate is None or not pr:

@@ -110,7 +110,10 @@ class Scorer:
         egroups = bv.energy_groups()
         if egroups and defaulted:
             flags.append(f"profile_default:enemy_power={power}")
-        eres = E.correct(egroups, float(power or 20), self.unmodelled_energy_factor)
+        block = bv.num("block_chance", None, False)
+        main = {"hits_per_sec": bv.num("hits_per_sec", None, False),
+                "block": None if block is None else (block / 100.0 if block > 1 else block)}
+        eres = E.correct(egroups, float(power or 20), self.unmodelled_energy_factor, main=main)
         flags += eres.flags
 
         # 2. DPS parts
