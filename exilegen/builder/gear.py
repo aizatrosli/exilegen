@@ -214,9 +214,11 @@ class GearPlanner:
         want = slot or row.get("slot")
         cands = [want]
         if want and want.startswith("Ring"):
-            cands = ["Ring 1", "Ring 2"] if not slot else [want]
+            # two ring uniques: the second goes to the free ring slot, also when the skeleton names "Ring 1" for both
+            # (the catalog says "Ring", which the bridge reads as Ring 1)
+            cands = sorted(("Ring 1", "Ring 2"), key=lambda r: r != want)
         for s in cands:
-            if s and s in self.taken and not slot:
+            if s and s in self.taken and (not slot or s.startswith("Ring")):
                 continue
             p = {"name": row["name"]}
             if s:

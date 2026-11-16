@@ -31,10 +31,11 @@ SLOT_OF_TYPE = {
     "Helmet": "Helmet", "Ring": "Ring", "Jewel": "Jewel", "Flask": "Flask", "Charm": "Charm",
     "Shield": "Weapon 2", "Focus": "Weapon 2", "Quiver": "Weapon 2",
 }
-TWO_HANDED = {"Bow", "Crossbow", "Staff", "Quarterstaff", "Two Hand Axe", "Two Hand Mace", "Two Hand Sword", "Spear2H"}
+TWO_HANDED = {"Bow", "Crossbow", "Staff", "Quarterstaff", "Two Hand Axe", "Two Hand Mace", "Two Hand Sword", "Spear2H",
+              "Talisman"}        # a talisman takes both hands (PoB PoE2 ItemsTab)
 # weapon classes that occupy only the main hand (an off-hand: shield / focus / quiver / second 1h weapon is allowed)
 ONE_HANDED = {"Claw", "Dagger", "Flail", "One Hand Axe", "One Hand Mace", "One Hand Sword", "Spear", "Wand",
-              "Sceptre", "Talisman"}
+              "Sceptre"}
 # PoB skill weaponTypes key -> our weapon class (quarterstaff attacks are "Staff" in PoB skill data)
 SKILL_WEAPON_ALIAS = {"Staff": "Quarterstaff"}
 # activation-relevant skill types
