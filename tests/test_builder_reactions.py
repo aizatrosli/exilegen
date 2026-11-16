@@ -132,6 +132,9 @@ def test_supports_that_switch_the_event_off_stay_out(pool):
     shock = next(c for c in _rx(pool) if c["reaction"]["event"] == "enemy:Shocked")
     ks = reactions.event_killers(shock)
     assert "Elemental Focus" in ks and "Stormchain" in ks and "Controlled Destruction" not in ks
+    snap = next((c for c in _rx(pool) if c["reaction"]["event"] == "crit" and c["reaction"].get("needs_state")), None)
+    if snap:                                    # Snap consumes an ailment: nothing may stop the main skill's ailments
+        assert {"Controlled Destruction", "Elemental Focus"} <= set(reactions.event_killers(snap))
     assert "Fiery Death" in ks and "Fiery Death" in reactions.event_killers({"reaction": {"event": "dodge"}})
 
 

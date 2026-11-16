@@ -116,7 +116,12 @@ def event_killers(chain: dict) -> list[str]:
     """Support gems that must stay off a reaction build: they stop the main skill from making the event that
     feeds the meta gem (Controlled Destruction: no Critical Hits, so Cast on Critical never fires)."""
     from . import edges, supportgems
-    want = EVENT_KILLERS.get((chain.get("reaction") or {}).get("event"), ())
+    rx = chain.get("reaction") or {}
+    # the feeding event, the state the hosted spell needs on the enemy (Snap: an ailment to consume), and the
+    # state it makes for the payoff: a support that stops any of them breaks the reaction
+    want = set()
+    for tok in [rx.get("event"), rx.get("state"), *(rx.get("needs_state") or [])]:
+        want |= set(EVENT_KILLERS.get(tok, ()))
     out = {k.split(":", 1)[1] for k, v in edges.load_ids().items()
            if want and k.startswith("support:") and set(v.get("ids") or []) & set(want)}
     # ... and supports that grant a damage skill of their own, which PoB would take for the build's main skill
