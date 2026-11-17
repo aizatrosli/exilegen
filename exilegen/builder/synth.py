@@ -316,7 +316,7 @@ class _Synth:
             if b is None or self.gp.craft("Weapon 1", cls, b, "weapon") is None:
                 raise SynthError(f"weapon base {gm['name']} could not be made")
             self.gp.two_handed = False
-            self.gp.taken["Weapon 1"] = f"unique:{gm['name']} (base kept for its skill)"   # not re-rolled later
+            self._granted_base_meta = meta_id     # gear optimise re-rolls this wand: see _resocket_granted
         def find():
             view = self.e.raw("get_skills", {}) or {}
             for g in view.get("socketGroups") or view.get("groups") or []:
@@ -329,6 +329,33 @@ class _Synth:
             g = find() or g
             return int(g["index"])
         raise SynthError(f"no item-granted group holds the meta gem {meta_id} (is {gm.get('name')} equipped?)")
+
+    def _granted_sockets(self, meta_id: str) -> tuple[int | None, list[dict]]:
+        """(group index, gems socketed beside the meta gem) of the item-granted group that holds `meta_id`."""
+        view = self.e.raw("get_skills", {}) or {}
+        for g in view.get("socketGroups") or view.get("groups") or []:
+            gems = g.get("gems") or []
+            if g.get("source") and any(str(x.get("skillId")) == meta_id for x in gems):
+                return int(g["index"]), [x for x in gems if x.get("gemId")]
+        return None, []
+
+    def _resocket_granted(self, meta_id: str, before: list[dict]) -> None:
+        """PoB keys an item-granted group by the item, so replacing the item (gear optimise re-rolls the wand)
+        makes a fresh group with only the meta gem: put the spells and supports back into it."""
+        gi, now = self._granted_sockets(meta_id)
+        if gi is None:
+            self.note("granted meta group lost with its item")
+            return
+        have = {x.get("gemId") for x in now}
+        back = [x for x in before if x.get("gemId") not in have]
+        for x in back:
+            p = {"groupIndex": gi, "gemId": x["gemId"]}
+            if not x.get("support"):
+                p["quality"] = x.get("quality") or 20
+            self.e.raw("add_gem", p)
+        self.meta_group = gi
+        if back:
+            self.note(f"granted meta group {gi}: {len(back)} gems put back after the item was re-rolled")
 
     def _top_granted_level(self, source: str) -> None:
         """An item's "Grants Skill: Level (1-20) X" comes at a middle roll; an end-level build has the top one."""
@@ -825,14 +852,22 @@ class _Synth:
         code0 = code0.get("code") if isinstance(code0, dict) else code0
         best = (ctx.current, code0, "input")
         best_stats = ctx.current_stats
+        gm_id = getattr(self, "_granted_base_meta", None)
+        ref0, meta0, best_ref = dict(self.main_ref), self.meta_group, None
         variants = [("objective", _objective_weights(self.scorer), None)]
         if final:
             variants += [("balanced", None, "balanced"), ("defence", None, "defence")]
         for i, (name, w, preset) in enumerate(variants):
             if i:
+                self.main_ref, self.meta_group = dict(ref0), meta0
                 self.e.load(code=code0, profile=self.profiles[0], main=dict(self.main_ref))
             try:
+                socketed = self._granted_sockets(gm_id)[1] if gm_id else []
                 out = self.gp.optimise(weights=w, preset=preset)
+                if gm_id:                         # the wand that grants the meta gem was re-rolled
+                    self._resocket_granted(gm_id, socketed)
+                    c = self.e.raw("save_build_code", {})
+                    self._repin(c.get("code") if isinstance(c, dict) else c)
             except Exception as ex:
                 self.note(f"optimise_gear {name} failed: {str(ex)[:160]}")
                 continue
@@ -845,8 +880,11 @@ class _Synth:
             if Context.better(ctx.current, best[0], 1e-6):
                 c = self.e.raw("save_build_code", {})
                 best = (ctx.current, c.get("code") if isinstance(c, dict) else c, name)
+                best_ref = (dict(self.main_ref), self.meta_group)
             if ctx.current.get("feasible") and name == "objective" and best[2] == name:
                 break          # feasible with the scorer's own weighting: no defence pass needed
+        self.main_ref, self.meta_group = best_ref or (dict(ref0), meta0)
+        self.main_group = int(self.main_ref["group"])
         self.e.load(code=best[1], profile=self.profiles[0], main=dict(self.main_ref))
         self.note(f"gear kept: {best[2]}")
         self.checkpoint()
