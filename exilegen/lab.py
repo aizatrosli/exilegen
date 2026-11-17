@@ -165,6 +165,36 @@ def cmd_chain(a) -> dict:
     return {"lab": LAB_VERSION, **out}
 
 
+def cmd_score(a) -> dict:
+    """Measure chains the way a scoring run does (chain build, the same character without the chain, the chain's
+    states switched on) into a run directory that keeps what was measured; returns the measured records. With no
+    --chain it only reads the directory."""
+    import contextlib
+    from .builder import chainresults, chainscore
+    ids = list(dict.fromkeys(a.chain or []))
+    if ids:
+        with contextlib.redirect_stdout(sys.stderr):          # the run's progress lines are not part of the answer
+            if a.again:
+                _forget(a.out, ids)
+            chainscore.run(a.out, 0, max(1, min(a.workers, len(ids) * 2)), a.minutes, a.budget, a.seed, baseline=True, ids=ids)
+            chainscore.states(a.out, max(1, min(a.workers, len(ids))))
+    got = chainresults.measured(a.out, codes=True) if os.path.isdir(a.out) else {}
+    return {"lab": LAB_VERSION, "asked": ids, "scored": len(got),
+            "measured": {k: v for k, v in got.items() if not ids or k in ids},
+            "missing": [i for i in ids if i not in got]}
+
+
+def _forget(out: str, ids: list[str]) -> None:
+    """Drop earlier results of these chains so they are measured again (their baselines are kept)."""
+    for name in ("chain_scores.jsonl", "states.jsonl"):
+        path = os.path.join(out, name)
+        if os.path.exists(path):
+            with open(path, encoding="utf-8") as f:
+                rows = [l for l in f if l.strip() and json.loads(l).get("id") not in ids]
+            with open(path, "w", encoding="utf-8") as f:
+                f.writelines(rows)
+
+
 def _part_names(doc: dict) -> dict:
     return {n["id"]: n["name"] for n in doc["mechanics"]["nodes"]}
 
@@ -325,6 +355,14 @@ def parser() -> argparse.ArgumentParser:
     pc.add_argument("--budget", type=int, default=6000)
     pc.add_argument("--seed", type=int, default=7)
     pc.add_argument("-v", "--verbose", action="store_true")
+    px = sub.add_parser("score")
+    px.add_argument("--chain", action="append", default=[], help="chain id to measure (repeatable); none: read only")
+    px.add_argument("--out", required=True, help="run directory that keeps the measurements")
+    px.add_argument("--workers", type=int, default=4)
+    px.add_argument("--minutes", type=float, default=25)
+    px.add_argument("--again", action="store_true", help="measure again chains the directory already holds")
+    px.add_argument("--budget", type=int, default=6000)
+    px.add_argument("--seed", type=int, default=7)
     pg = sub.add_parser("graph")
     pg.add_argument("--requirements", help="requirements JSON, @file or - for stdin (default: no restrictions)")
     pg.add_argument("--scores", help="chainscore run directory: attach what PoB measured")
@@ -335,7 +373,7 @@ def parser() -> argparse.ArgumentParser:
 
 
 COMMANDS = {"version": cmd_version, "optimise": cmd_optimise, "optimize": cmd_optimise, "synth": cmd_synth,
-            "results": cmd_results, "status": cmd_status, "chain": cmd_chain, "graph": cmd_graph}
+            "results": cmd_results, "status": cmd_status, "chain": cmd_chain, "graph": cmd_graph, "score": cmd_score}
 
 
 def main(argv=None) -> int:

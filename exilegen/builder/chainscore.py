@@ -207,14 +207,17 @@ def _base_job(row: dict) -> dict:
     return {k: row.get(k) for k in ("base_key", "main_skill", "main_name", "ascendancy", "weapon", "defence")}
 
 
-def run(out: str, sample: int, workers: int, minutes: float, budget: int, seed: int, baseline: bool = False) -> None:
+def run(out: str, sample: int, workers: int, minutes: float, budget: int, seed: int, baseline: bool = False,
+        ids: list[str] | None = None) -> None:
+    """Score the pool (a spread of `sample`, 0 for all), or only the chains in `ids`."""
     os.makedirs(out, exist_ok=True)
     path, bpath = os.path.join(out, "chain_scores.jsonl"), os.path.join(out, "baselines.jsonl")
     prior = _read(path)
     done = {r["id"] for r in prior}
     based = {r["base_key"] for r in _read(bpath)}
     chains = pool_chains()
-    picked = [c for c in spread(chains, sample) if c["id"] not in done]
+    picked = [c for c in (spread(chains, sample) if ids is None else [c for c in chains if c["id"] in set(ids)])
+              if c["id"] not in done]
     todo: list[dict] = []
     if baseline:                       # baselines owed by chains scored in an earlier session
         for r in prior:

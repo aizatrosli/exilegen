@@ -49,3 +49,20 @@ def test_a_skill_only_one_weapon_grants_counts_as_that_weapon(cat, pool):
     assert 50 < _info(cat)["weapon_swap"]["dropped"] < 0.15 * len(pool)
     plain = next(c for c in pool if c["main_name"] == "Spark" and not c["uniques"])
     assert hands.check(plain, cat) is None and "weapon_swap" not in plain
+
+
+def test_lab_score_reads_and_forgets(tmp_path):
+    import json
+    from exilegen import lab
+    out = tmp_path / "scores"
+    a = lab.parser().parse_args(["score", "--out", str(out)])
+    assert lab.cmd_score(a) == {"lab": lab.LAB_VERSION, "asked": [], "scored": 0, "measured": {}, "missing": []}
+    out.mkdir()
+    rows = [{"id": "aaa", "ok": True, "feasible": True, "dps_honest": 100.0, "main_name": "Spark", "base_key": "k"},
+            {"id": "bbb", "ok": False, "error": "no skeleton"}]
+    (out / "chain_scores.jsonl").write_text("".join(json.dumps(r) + "\n" for r in rows))
+    (out / "baselines.jsonl").write_text(json.dumps({"base_key": "k", "main_name": "Spark", "dps_honest": 50.0, "feasible": True}) + "\n")
+    got = lab.cmd_score(a)
+    assert got["scored"] == 2 and got["measured"]["aaa"]["gain"] == 2.0 and not got["measured"]["bbb"]["built"]
+    lab._forget(str(out), ["aaa"])
+    assert set(lab.cmd_score(a)["measured"]) == {"bbb"}
