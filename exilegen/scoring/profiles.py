@@ -11,11 +11,11 @@ import os
 
 PROFILES_JSON = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "profiles.json")
 
-# Fallbacks. pinnacle: PoB's Pinnacle boss Power is 20 (one-button POC). mapping: a rare-monster target
-# (Power 10, the POC's sensitivity setting) -- an assumption until profiles.json says otherwise.
+# Fallbacks. Monster Power (wiki: Power) = base Power x rarity coefficient (normal 1, magic 2, rare 5);
+# unique monsters are always 20. pinnacle: 20. mapping: a rare monster of average base Power (1.0) = 5.
 DEFAULTS = {
     "pinnacle_v1": {"enemy_power": 20},
-    "mapping_v1": {"enemy_power": 10},
+    "mapping_v1": {"enemy_power": 5},
     "as_exported": {"enemy_power": 20},
 }
 FALLBACK = "pinnacle_v1"

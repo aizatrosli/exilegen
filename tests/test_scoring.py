@@ -296,6 +296,44 @@ class TestEnergy(unittest.TestCase):
         self.assertAlmostEqual(res.spells[0].energy_rate, 0.5 * 10 * 20 / 100)
 
 
+    def _coc(self, feeder):
+        return {"group": 2, "meta_id": "MetaCastOnCritPlayer", "max_energy": 100, "gen_pct": 0,
+                "feeder": feeder, "spells": [{"name": "Comet", "pob_rate": 1.0, "pob_dps": 1000}]}
+
+    def test_crit_energy_scales_with_ailment_threshold(self):
+        # wiki Cast on Critical: 1 Energy per Power, modified by the share of the Ailment Threshold the crit deals
+        g = self._coc({"hits_per_sec": 4, "crit": 0.5, "critHit": 25000, "enemyAilmentThreshold": 100000})
+        res = E.correct(BuildView({"energy": [g]}).energy_groups(), 20)
+        self.assertAlmostEqual(res.spells[0].energy_rate, 4 * 0.5 * 20 * 0.25 / 100)   # 0.1 triggers/s
+        self.assertFalse(any("threshold_unknown" in f for f in res.flags))
+
+    def test_crit_energy_threshold_share_is_capped(self):
+        g = self._coc({"hits_per_sec": 1, "crit": 1.0, "critHit": 500000, "enemyAilmentThreshold": 100000})
+        res = E.correct(BuildView({"energy": [g]}).energy_groups(), 20)
+        self.assertAlmostEqual(res.spells[0].energy_rate, 1 * 20 * E.THRESHOLD_CAP / 100)
+
+    def test_crit_energy_without_threshold_facts_is_flagged(self):
+        g = self._coc({"hits_per_sec": 1, "crit": 1.0})
+        res = E.correct(BuildView({"energy": [g]}).energy_groups(), 20)
+        self.assertAlmostEqual(res.spells[0].energy_rate, 20 / 100)                    # flat fallback
+        self.assertTrue(any(f.startswith("unverified:energy_threshold_unknown:crit_hit") for f in res.flags))
+
+    def test_ignite_energy_scales_shock_does_not(self):
+        g = {"group": 1, "meta_id": "MetaCastOnElementalAilmentPlayer", "max_energy": 100, "gen_pct": 0,
+             "feeder": {"hits_per_sec": 2, "shock": 0.5, "ignite": 0.5, "freeze": 0,
+                        "fireHit": 50000, "enemyAilmentThreshold": 100000},
+             "spells": [{"name": "Comet", "pob_rate": 1.0, "pob_dps": 1000}]}
+        res = E.correct(BuildView({"energy": [g]}).energy_groups(), 20)
+        shock = 2 * 0.5 * 1 * 20
+        ignite = 2 * 0.5 * 1 * 20 * (0.8 * 50000 / 100000)
+        self.assertAlmostEqual(res.spells[0].energy_rate, (shock + ignite) / 100)
+
+    def test_mapping_rare_power_is_five(self):
+        # wiki Power: rarity coefficient 1 / 2 / 5 for normal / magic / rare, unique 20
+        p = Profiles()
+        self.assertEqual(p.param("mapping_v1", "enemy_power")[0], 5)
+        self.assertEqual(p.param("pinnacle_v1", "enemy_power")[0], 20)
+
 class TestFloors(unittest.TestCase):
     def test_corpus_record(self):
         bv = BuildView.from_corpus(CORP[3], "pinnacle_locked")      # CI Oracle, cold/lightning 57

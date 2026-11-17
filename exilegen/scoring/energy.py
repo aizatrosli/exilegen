@@ -6,6 +6,13 @@ Port of tools/poc/one-button/lib.lua (metaEnergy / energyTriggerRate):
     energy/s   = Σ_events  feeder events/s × energy per event per monster Power
                  × enemy Power × (1 + gen%/100) / (1 − ½·min(refund%,100)/100)
     triggers/s = energy/s / max energy          (max energy = Σ socketed spells' base cast time × 100)
+
+Threshold scaling (wiki: Cast on Critical, Cast on Elemental Ailment): energy from a crit is "modified by the
+percentage of the enemy's Ailment Threshold the Critical Hit will deal", and energy from an ignite by the
+percentage the Ignite will deal. So per crit: × min(cap, average crit hit / enemy ailment threshold); per ignite:
+× min(cap, 0.8 × average fire hit / threshold) (Ignite deals 80% of the hit's fire damage). Shock and freeze
+energy are not scaled. The cap is THRESHOLD_CAP (1.0, i.e. never above the old flat model) until an in-game test
+says whether a hit over the threshold gives more. Missing hit or threshold facts keep the flat model and flag it.
     corrected  = PoB DPS × min(1, triggers/s ÷ PoB's assumed triggers/s)
 
 Feeder events/s = feeder hits/s × chance (crit, shock, ignite). Freeze needs buildup on bosses and PoB gives
@@ -33,6 +40,20 @@ DEFAULT_PER_EVENT = {
     "MetaCastOnElementalAilmentPlayer": {"shock": 1.0, "ignite": 1.0, "freeze": 10.0},
 }
 SERVER_TICK = 0.033   # s; sanity cap on trigger rate
+THRESHOLD_CAP = 1.0   # max ailment-threshold share counted per event (unverified in game; 1.0 = conservative)
+IGNITE_SHARE = 0.8    # Ignite deals 80% of the hit's fire damage (wiki: Ignite)
+
+
+def threshold_ratio(f: dict, hit_key: str, scale: float = 1.0, flags: list[str] | None = None,
+                    group=None) -> float:
+    """Share of the enemy's ailment threshold one event deals, capped at THRESHOLD_CAP.
+    Falls back to 1.0 (the flat model) with an unverified flag when the facts are missing."""
+    hit, thr = f.get(hit_key), f.get("ailment_threshold")
+    if hit is None or not thr or thr <= 0:
+        if flags is not None:
+            flags.append(f"unverified:energy_threshold_unknown:{hit_key}:{group}")
+        return 1.0
+    return max(0.0, min(THRESHOLD_CAP, scale * hit / thr))
 
 
 @dataclass
@@ -106,7 +127,7 @@ def energy_per_sec(g: EnergyGroup, power: float, flags: list[str] | None = None)
                 flags.append(f"energy:feeder_missing:{g.group}")
                 return None
             ev = hps * f["crit"]
-        e = ev * per["crit"]
+        e = ev * per["crit"] * threshold_ratio(f, "crit_hit", 1.0, flags, g.group)
     else:
         e = 0.0
         known = False
@@ -116,7 +137,8 @@ def energy_per_sec(g: EnergyGroup, power: float, flags: list[str] | None = None)
                 ev = hps * f[k]
             if ev is not None:
                 known = True
-                e += ev * per[k]
+                ratio = threshold_ratio(f, "fire_hit", IGNITE_SHARE, flags, g.group) if k == "ignite" and ev > 0 else 1.0
+                e += ev * per[k] * ratio
         fev = f.get("freeze_events_per_sec")
         if fev is not None:
             known = True
