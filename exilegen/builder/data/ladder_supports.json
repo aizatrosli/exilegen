@@ -1,0 +1,1371 @@
+{
+"version": 1,
+"source": {
+"league": "Forbidden Rites",
+"version": "1430-20261113-58818",
+"fetched": "2026-11-13T15:59:39.486849Z"
+},
+"builds": 1488,
+"note": "Support gem families on the main socket group of each sampled poe.ninja build, by the skill PoB measured.",
+"skills": {
+"Ancestral Cry": {
+"close combat + elemental armament": 1
+},
+"Arc": {
+"dialla's desire + dominus' grasp + rakiata's flow + urgent totems": 10,
+"dominus' grasp + execute + rakiata's flow + urgent totems": 7,
+"dialla's desire + dominus' grasp + execute + urgent totems": 2,
+"dialla's desire + dominus' grasp + execute + rakiata's flow": 2,
+"dialla's desire + execute + rakiata's flow + urgent totems": 2,
+"dominus' grasp + efficiency + embitter + zenith": 1,
+"arbiter's ignition + dominus' grasp + sione's temper + zenith": 1,
+"dominus' grasp + rakiata's flow + urgent totems + zenith": 1,
+"dialla's desire + dominus' grasp + sione's temper + urgent totems": 1,
+"dominus' grasp + execute + sione's temper + urgent totems": 1,
+"dialla's desire + dominus' grasp + rakiata's flow": 1,
+"boundless energy + efficiency + zenith": 1,
+"dominus' grasp + execute + rakiata's flow + sione's temper": 1,
+"dominus' grasp + embitter + execute + urgent totems": 1,
+"dialla's desire + dominus' grasp + embitter + rakiata's flow": 1,
+"dominus' grasp + efficiency + execute + zenith": 1,
+"dialla's desire + dominus' grasp + urgent totems + vilenta's propulsion": 1,
+"ambush + arbiter's ignition + esh's prowess + execute + sione's temper": 1,
+"dialla's desire + efficiency + execute + rakiata's flow": 1,
+"dialla's desire + efficiency + glacier": 1,
+"efficiency + sione's temper + zenith": 1,
+"dominus' grasp + efficiency + lightning attunement + sione's temper": 1,
+"arbiter's ignition + dialla's desire + dominus' grasp + sione's temper": 1
+},
+"Blasphemy": {
+"heightened curse + ritualistic curse": 1,
+"cursed ground + heightened curse + magnified area + ritualistic curse": 1
+},
+"Blood Boil": {
+"herbalism + prolonged duration": 1
+},
+"Bone Cage": {
+"astral projection + atziri's communion + efficiency + execute": 3,
+"boundless energy + knockback + magnified area": 1,
+"boundless energy + efficiency + energy retention + execute": 1,
+"magnified area + morrigan's insight + spell cascade": 1,
+"astral projection + atziri's communion + efficiency + zenith": 1,
+"astral projection + efficiency + execute": 1
+},
+"Bonestorm": {
+"deliberation + physical mastery + ricochet + urgent totems": 1,
+"blindside + burgeon + execute + heft + zenith": 1
+},
+"Bow Shot": {
+"elemental armament + mobility + multishot + rageforged": 1,
+"armour break + armour demolisher + elemental armament + knockback": 1,
+"ambush + armour break + bleed + execute + gambleshot": 1
+},
+"Chaos Bolt": {
+"chaos mastery + considered casting + rapid casting + unleash": 1
+},
+"Cluster Grenade": {
+"elemental armament + multishot + payload + rigwald's ferocity": 1,
+"fire attunement + multishot + payload + rigwald's ferocity": 1
+},
+"Coiling Bolts": {
+"chaos mastery + considered casting + deliberation + trickster's shard + zenith": 1,
+"armour break + dialla's desire + mobility + trickster's shard + zenith": 1,
+"chaos mastery + deliberation + rapid casting + trickster's shard + zenith": 1
+},
+"Comet": {
+"boundless energy + dialla's desire + rakiata's flow + uhtred's augury": 14,
+"boundless energy + efficiency + spell cascade": 9,
+"boundless energy + efficiency + pinpoint critical + uhtred's augury": 4,
+"efficiency + execute + spell cascade + zenith": 4,
+"boundless energy + efficiency + execute + zenith": 3,
+"cold mastery + efficiency + fluke + pinpoint critical": 3,
+"efficiency + execute + spell cascade": 3,
+"boundless energy + efficiency + execute + spell cascade": 3,
+"efficiency + execute + vorana's siege + zenith": 3,
+"concentrated area + considered casting + elemental focus + execute + rakiata's flow": 2,
+"efficiency + execute + rakiata's flow + spell cascade": 2,
+"boundless energy + execute + uhtred's omen": 2,
+"efficiency + pinpoint critical + spell cascade + vorana's siege": 2,
+"efficiency + execute + rakiata's flow + zenith": 2,
+"dialla's desire + efficiency + rakiata's flow + spell cascade": 2,
+"boundless energy + spell cascade + uhtred's omen": 2,
+"boundless energy + efficiency + uhtred's omen": 2,
+"boundless energy + efficiency + energy retention + spell cascade": 2,
+"efficiency + spell cascade + zenith": 2,
+"concentrated area + elemental focus + execute + rakiata's flow + zenith": 1,
+"arbiter's ignition + embitter + spell cascade": 1,
+"concentrated area + efficiency + spell cascade": 1,
+"boundless energy + cold mastery + rakiata's flow + uhtred's augury": 1,
+"efficiency + energy retention + execute + spell cascade": 1,
+"atziri's communion + boundless energy + rakiata's flow + spell cascade": 1,
+"boundless energy + pinpoint critical + vorana's siege + zenith": 1,
+"efficiency + energy retention + spell cascade": 1,
+"dialla's desire + efficiency + vorana's siege + zenith": 1,
+"efficiency + execute + pinpoint critical": 1,
+"boundless energy + dialla's desire + rakiata's flow + spell cascade": 1,
+"concentrated area + efficiency + execute + zarokh's refrain + zenith": 1,
+"concentrated area + efficiency + execute + zenith": 1,
+"energy retention + execute + spell cascade + zenith": 1,
+"boundless energy + energy retention + sione's temper": 1,
+"boundless energy + spell cascade": 1,
+"dialla's desire + execute + spell cascade + zenith": 1,
+"efficiency + execute + rakiata's flow": 1,
+"boundless energy + efficiency + spell cascade + zenith": 1,
+"dialla's desire + efficiency + embitter + spell cascade": 1,
+"boundless energy + efficiency + zenith": 1,
+"atalui's bloodletting + efficiency + execute + zenith": 1,
+"efficiency + rakiata's flow + zenith": 1,
+"atalui's bloodletting + boundless energy + spell cascade + zenith": 1,
+"boundless energy + uhtred's omen + vorana's siege": 1,
+"blindside + uhtred's augury + vorana's siege": 1,
+"dialla's desire + efficiency + ixchel's torment + zenith": 1,
+"boundless energy + energy retention + fluke + pinpoint critical": 1,
+"concentrated area + elemental focus + execute + rakiata's flow": 1,
+"boundless energy + cold mastery + vorana's siege": 1,
+"deliberation + efficiency + fluke + pinpoint critical": 1,
+"arbiter's ignition + boundless energy + dialla's desire + spell cascade": 1,
+"commiserate + efficiency + zenith": 1,
+"efficiency + execute + zenith": 1,
+"efficiency + rakiata's flow + spell cascade + vorana's siege": 1,
+"dialla's desire + elemental focus + ixchel's torment + rakiata's flow": 1,
+"boundless energy + efficiency + elemental focus": 1,
+"boundless energy + cold mastery + embitter + spell cascade": 1,
+"cold mastery + concentrated area + rakiata's flow + spell cascade": 1,
+"cold mastery + concentrated area + considered casting + elemental focus + execute": 1,
+"boundless energy + dialla's desire + energy retention + uhtred's omen": 1,
+"boundless energy + efficiency + energy retention": 1,
+"efficiency + spell cascade + vorana's siege": 1,
+"efficiency + lifetap + pinpoint critical": 1,
+"boundless energy + concentrated area + efficiency + elemental focus": 1,
+"elemental focus + execute + rakiata's flow + vorana's siege": 1,
+"boundless energy + dialla's desire + rakiata's flow": 1,
+"boundless energy + cold mastery + energy retention + rakiata's flow": 1,
+"boundless energy + energy retention + pinpoint critical + spell cascade": 1,
+"boundless energy + cold mastery + ignite + spell cascade": 1,
+"boundless energy + dialla's desire + spell cascade": 1,
+"boundless energy + efficiency + fluke": 1,
+"boundless energy + cold mastery + dialla's desire + uhtred's augury": 1,
+"magnified area + rakiata's flow + uhtred's augury": 1,
+"dialla's desire + efficiency + spell cascade + zenith": 1,
+"dialla's desire + efficiency + elemental focus + zenith": 1,
+"boundless energy + efficiency + energy retention + uhtred's omen": 1,
+"dialla's desire + efficiency + execute + rakiata's flow": 1,
+"bone shrapnel + cold penetration + spell cascade": 1,
+"cold mastery + efficiency + execute + spell cascade": 1,
+"boundless energy + efficiency + magnified area + spell cascade": 1,
+"dialla's desire + efficiency + pinpoint critical + spell cascade": 1,
+"efficiency + pinpoint critical + vorana's siege": 1,
+"efficiency + freeze + spell cascade": 1,
+"boundless energy + efficiency + execute + rakiata's flow": 1,
+"arbiter's ignition + concentrated area + efficiency + pinpoint critical": 1,
+"boundless energy": 1,
+"efficiency + vorana's siege + zenith": 1,
+"efficiency + pinpoint critical + spell cascade": 1,
+"boundless energy + dialla's desire + execute + rakiata's flow": 1,
+"boundless energy + energy retention + inhibitor + spell cascade": 1,
+"boundless energy + execute + uhtred's augury + zenith": 1,
+"cold mastery + efficiency + rakiata's flow + spell cascade": 1,
+"execute + rakiata's flow + uhtred's augury": 1,
+"boundless energy + cold mastery + rakiata's flow + uhtred's omen": 1,
+"boundless energy + efficiency + energy retention + pinpoint critical": 1,
+"efficiency + execute + ixchel's torment + zenith": 1,
+"efficiency + fluke + pinpoint critical + zenith": 1,
+"energy retention + execute + rakiata's flow + spell cascade": 1,
+"dialla's desire + execute + uhtred's augury": 1,
+"dialla's desire + execute + spell cascade + vorana's siege": 1,
+"rakiata's flow + spell cascade + vorana's siege + zenith": 1,
+"efficiency + pinpoint critical + spell cascade + zenith": 1,
+"cold mastery + concentrated area + ixchel's torment + rakiata's flow": 1
+},
+"Companion: Antlion Charger": {
+"feeding frenzy + loyalty + minion mastery + muster + rage": 1
+},
+"Companion: Mighty Silverfist": {
+"feeding frenzy + loyalty + muster + rapid attacks + tangmazu's thurible": 1,
+"armour break + muster + rage + rapid attacks + tangmazu's thurible": 1,
+"loyalty + magnified area + muster + tangmazu's thurible": 1,
+"feeding frenzy + meat shield + minion mastery + muster + rapid attacks": 1
+},
+"Companion: Quadrilla Sergeant": {
+"feeding frenzy + muster + rapid attacks + supercritical + vorana's siege": 1,
+"dialla's desire + muster + rapid attacks + uul-netol's embrace + vorana's siege": 1,
+"feeding frenzy + muster + rage + rapid attacks + uul-netol's embrace": 1,
+"dialla's desire + feeding frenzy + muster + rapid attacks + uul-netol's embrace": 1
+},
+"Companion: Zekoa, the Headcrusher": {
+"dialla's desire + feeding frenzy + muster + rapid attacks + uul-netol's embrace": 4,
+"feeding frenzy + minion mastery + muster + rage + rapid attacks": 4,
+"feeding frenzy + muster + rage + rapid attacks + tangmazu's thurible": 3,
+"feeding frenzy + minion splash + muster + rage + rapid attacks": 2,
+"feeding frenzy + infernal legion + minion splash + rage + tecrod's revenge": 2,
+"feeding frenzy + muster + rage + rapid attacks + uul-netol's embrace": 2,
+"dialla's desire + feeding frenzy + muster + rage + rapid attacks": 2,
+"dialla's desire + feeding frenzy + minion splash + muster + rapid attacks": 1,
+"dialla's desire + feeding frenzy + muster + tangmazu's thurible + uul-netol's embrace": 1,
+"feeding frenzy + minion splash + rapid attacks + uul-netol's embrace + vorana's siege": 1,
+"feeding frenzy + muster + rapid attacks + uul-netol's embrace": 1,
+"muster + rage + rapid attacks + tangmazu's thurible + vorana's siege": 1,
+"dialla's desire + feeding frenzy + minion splash + muster + uul-netol's embrace": 1,
+"feeding frenzy + loyalty + muster + rage + rapid attacks": 1,
+"heft + hulking minions + muster + rage + rapid attacks": 1,
+"feeding frenzy + muster + rage + tangmazu's thurible": 1,
+"feeding frenzy + minion mastery + rage + rapid attacks + tangmazu's thurible": 1,
+"feeding frenzy + hulking minions + muster + rage + rapid attacks": 1,
+"feeding frenzy + minion mastery + minion splash + muster + rapid attacks": 1,
+"feeding frenzy + minion mastery + muster + rapid attacks + tangmazu's thurible": 1,
+"behead + feeding frenzy + muster + rage + rapid attacks": 1,
+"bleed + feeding frenzy + heft + muster + rapid attacks": 1,
+"feeding frenzy + loyalty + minion splash + muster + rapid attacks": 1,
+"feeding frenzy + loyalty + rage + rapid attacks + uul-netol's embrace": 1,
+"feeding frenzy + minion mastery + minion splash + muster + rage": 1,
+"feeding frenzy + muster + rage + tangmazu's thurible + uul-netol's embrace": 1,
+"dialla's desire + feeding frenzy + minion splash + muster + rage": 1,
+"dialla's desire + feeding frenzy + muster + rage + uul-netol's embrace": 1,
+"feeding frenzy + hulking minions + muster + rage + uul-netol's embrace": 1,
+"feeding frenzy + muster + rage + rapid attacks + vorana's siege": 1,
+"feeding frenzy + minion splash + muster + rapid attacks + tangmazu's thurible": 1,
+"dialla's desire + feeding frenzy + minion mastery + muster + uul-netol's embrace": 1,
+"feeding frenzy + minion splash + muster + rage + uul-netol's embrace": 1
+},
+"Convalescence": {
+"cooldown recovery + prolonged duration + second wind": 3
+},
+"Crossbow Shot": {
+"bleed + brutality + defy + heft + rageforged": 1,
+"corrosion + heft + pin + pinpoint critical": 1,
+"close combat + elemental armament + heft + longshot + rapid attacks": 1,
+"armour break + elemental armament + fork": 1,
+"brutality + fire exposure + pin + rapid attacks": 1,
+"armour break + brutality + deliberation + nimble reload + pin + rapid attacks": 1,
+"elemental armament + projectile acceleration + rapid attacks": 1,
+"bursting plague + projectile acceleration + rapid attacks + retreat": 1,
+"armour explosion + execute + fork + rakiata's flow + searing flame": 1,
+"fire exposure + multishot + rageforged + shock + soul drain": 1,
+"ambush + armour break + elemental armament + elemental focus + rapid attacks": 1,
+"bleed + brutality + deliberation + double barrel + elemental armament + elemental focus + ice bite + rapid attacks": 1,
+"armour break + dominus' grasp + double barrel + efficiency + elemental armament + nova projectiles + rapid attacks": 1,
+"armour break + blindside + brutality + culling strike + deliberation + double barrel + elemental armament + nova projectiles + rising tempest + shock": 1,
+"ambush + armour demolisher + bleed + brutality + embitter + multishot + pin + rapid attacks": 1,
+"cold attunement + cold penetration + freeze + ice bite": 1,
+"armour break + bleed + efficiency + elemental armament + execute + fire penetration + knockback + life leech": 1,
+"armour break + bleed + brutality + double barrel + efficiency + elemental armament + execute + fire attunement + life leech": 1,
+"blind + brutality + rapid attacks": 1,
+"armour break + bleed + brutality + life leech + rapid attacks": 1,
+"ambrosia + cold attunement + ice bite + immolate + inexorable critical": 1,
+"bleed + elemental armament + fire attunement + rage + rapid attacks": 1,
+"elemental armament + lightning attunement + rapid attacks + shock + volt": 1,
+"deliberation + execute + heft + pinpoint critical + rapid attacks": 1,
+"bleed + cold attunement + heft + nimble reload + rapid attacks": 1,
+"close combat + escalating poison + life leech + projectile acceleration": 1,
+"ambush + concentrated area + rapid attacks + stoicism + thrill of the kill": 1,
+"armour break + armour explosion + bleed + brutality + double barrel + efficiency + elemental armament + execute + ignite": 1,
+"armour break + bleed + pin + rapid attacks": 1,
+"armour break + bleed + elemental armament + multishot": 1,
+"knockback + lifetap + stun": 1,
+"double barrel + efficiency + elemental armament + fire attunement": 1
+},
+"Crushing Fear": {
+"chaos mastery + close combat + culling strike + elemental armament + rapid attacks": 1
+},
+"Dark Consequences": {
+"atalui's bloodletting + doedre's undoing + efficiency + impending doom + spell cascade": 6,
+"dialla's desire + doedre's undoing + efficiency + impending doom + spell cascade": 4,
+"doedre's undoing + efficiency + focused curse + heightened curse + magnified area": 2,
+"controlled destruction + doedre's undoing + efficiency + impending doom + spell cascade": 2,
+"chaos attunement + doedre's undoing + efficiency + impending doom + spell cascade": 2,
+"doedre's undoing + efficiency + focused curse + impending doom + spell cascade": 2,
+"atziri's allure + doedre's undoing + efficiency + heightened curse + prolonged duration": 2,
+"doedre's undoing + efficiency + heightened curse + ritualistic curse": 1,
+"armour break + doedre's undoing + efficiency + knockback + prolonged duration": 1,
+"doedre's undoing + efficiency + impending doom + spell cascade + zenith": 1,
+"doedre's undoing + magnified area + overabundance + ritualistic curse + spell cascade": 1,
+"doedre's undoing + efficiency + execute + impending doom + spell cascade": 1,
+"doedre's undoing + efficiency + focused curse + heightened curse + ritualistic curse": 1,
+"atziri's allure + decaying hex + doedre's undoing + prolonged duration": 1,
+"decaying hex + doedre's undoing + efficiency + heightened curse + prolonged duration": 1,
+"doedre's undoing + knockback + magnified area + practical magic": 1,
+"boundless energy + doedre's undoing + heightened curse + magnified area": 1,
+"doedre's undoing + impending doom + rapid casting + spell cascade + zenith": 1,
+"decaying hex + doedre's undoing + efficiency + lifetap + magnified area": 1,
+"doedre's undoing + heightened curse + magnified area + ritualistic curse + zarokh's refrain": 1,
+"doedre's undoing + execute + spell cascade": 1,
+"doedre's undoing + magnified area + prolonged duration": 1,
+"chaos mastery + doedre's undoing + efficiency + ritualistic curse + zenith": 1,
+"doedre's undoing + efficiency + heightened curse + magnified area + spell cascade": 1,
+"doedre's undoing + expand + heightened curse + impending doom + ritualistic curse": 1,
+"controlled destruction + doedre's undoing + impending doom + ritualistic curse + spell cascade": 1,
+"doedre's undoing + efficiency + impending doom + magnified area + spell cascade": 1,
+"decaying hex + doedre's undoing + heightened curse + hex bloom + magnified area": 1,
+"doedre's undoing + efficiency + lifetap + spell cascade + zenith": 1,
+"atalui's bloodletting + doedre's undoing + impending doom + spell cascade + zenith": 1,
+"doedre's undoing + magnified area + ritualistic curse + slow potency": 1,
+"doedre's undoing + efficiency + heightened curse + prolonged duration + rapid casting": 1
+},
+"Defiance Banner": {
+"magnified area + mobility + prolonged duration + refraction": 1
+},
+"Detonate Dead": {
+"corpse conservation + execute + extraction + magnified area + mobility": 1,
+"concentrated area + considered casting + deliberation + elemental focus": 1,
+"efficiency + elemental focus + rapid casting": 1,
+"arcane surge + considered casting + corpse conservation + magnified area + spell echo": 1,
+"boundless energy + energy retention + magnified area": 1
+},
+"Devour": {
+"blazing critical + prolonged duration + rage + thrill of the kill": 1,
+"blazing critical + charge profusion + rapid attacks + thrill of the kill": 1
+},
+"Disengage": {
+"cooldown recovery + holy descent + rage + rapid attacks": 1
+},
+"Doom Blast": {
+"atalui's bloodletting + cursed ground + impending doom + rising tempest + spell cascade": 1,
+"cursed ground + execute + impending doom + rakiata's flow + spell cascade": 1
+},
+"Earthshatter": {
+"aftershock + branching fissures + heft + rapid attacks + uul-netol's embrace": 1,
+"aftershock + atalui's bloodletting + branching fissures + garukhan's resolve + rapid attacks": 1,
+"aftershock + branching fissures + efficiency + verglas + vorana's siege": 1,
+"aftershock + armour break + branching fissures + rapid attacks + vorana's siege": 1,
+"aftershock + branching fissures + garukhan's resolve + rakiata's flow + rapid attacks": 1,
+"aftershock + armour break + branching fissures + life leech + rapid attacks": 1,
+"aftershock + branching fissures + rapid attacks + stoicism + verglas": 1
+},
+"Ember Fusillade": {
+"compressed duration + efficiency + execute + sione's temper + swift affliction": 2,
+"deliberation + dominus' grasp + execute + sione's temper": 1,
+"compressed duration + rakiata's flow + sione's temper + swift affliction + zenith": 1,
+"deliberation + efficiency + energy retention + wildshards": 1,
+"boundless energy + execute + wildshards + zenith": 1,
+"compressed duration + extraction + projectile acceleration + rapid casting + swift affliction": 1,
+"chaos attunement + deliberation + execute + xoph's pyre + zenith": 1,
+"deliberation + energy retention + execute + wildshards": 1
+},
+"Entangle": {
+"accelerated growth + branching fissures + dialla's desire + uul-netol's embrace + zenith": 2,
+"accelerated growth + branching fissures + heft + rapid casting + uul-netol's embrace": 1,
+"branching fissures + dialla's desire + heft + uul-netol's embrace + zenith": 1,
+"boundless energy + branching fissures + slow potency": 1,
+"accelerated growth + branching fissures + considered casting + execute + zenith": 1,
+"branching fissures + execute + living lightning + rakiata's flow + rapid casting": 1
+},
+"Essence Drain": {
+"chaos mastery + profanity + swift affliction + vilenta's propulsion + zenith": 1,
+"chain + considered casting + swift affliction + zenith": 1,
+"chain + considered casting + sione's temper + swift affliction + zenith": 1,
+"chain + considered casting + efficiency + swift affliction + zenith": 1,
+"chain + considered casting + deliberation + dominus' grasp + swift affliction": 1,
+"considered casting + deliberation + derange + swift affliction + zenith": 1
+},
+"Explosive Grenade": {
+"concentrated area + defy + elemental armament + fire penetration + rageforged": 1,
+"deliberation + elemental armament + elemental focus + fire attunement + rakiata's flow": 1,
+"deliberation + elemental armament + fire attunement + fire penetration + multishot": 1,
+"concentrated area + deliberation + elemental armament + elemental focus + multishot": 1,
+"deliberation + elemental armament + fire attunement + immolate + short fuse": 1,
+"concentrated area + defy + elemental armament + rageforged + short fuse": 1,
+"bhatair's vengeance + cold penetration + elemental armament + multishot + rageforged": 1,
+"payload + rakiata's flow + short fuse + urgent totems": 1,
+"defy + elemental armament + multishot + rakiata's flow + short fuse": 1,
+"cooldown recovery + defy + elemental armament + rageforged": 1,
+"elemental armament + fire attunement + ignite": 1,
+"defy + elemental armament + multishot + payload + short fuse": 1,
+"elemental armament + rageforged + rakiata's flow + rigwald's ferocity + short fuse": 1,
+"efficiency + elemental armament + magnified area + multishot + short fuse": 1
+},
+"Explosive Shot": {
+"elemental armament + ignite + ratha's assault + searing flame": 1
+},
+"Explosive Spear": {
+"armour break + elemental armament + execute + short fuse + vorana's siege": 1
+},
+"Falling Thunder": {
+"garukhan's resolve + nova projectiles + perpetual charge + rakiata's flow + verglas": 4,
+"nova projectiles + perpetual charge + rakiata's flow + ricochet + verglas": 3,
+"atalui's bloodletting + nova projectiles + perpetual charge + rakiata's flow + verglas": 3,
+"blindside + culmination + elemental armament + nova projectiles + rakiata's flow": 2,
+"execute + nova projectiles + perpetual charge + ricochet + verglas": 1,
+"efficiency + nova projectiles + perpetual charge + rakiata's flow + verglas": 1,
+"execute + garukhan's resolve + nova projectiles + perpetual charge + verglas": 1,
+"culmination + execute + nova projectiles + rageforged + rakiata's flow": 1,
+"culmination + heightened charges + perpetual charge + rageforged + ricochet": 1,
+"execute + nova projectiles + perpetual charge + rakiata's flow + ricochet": 1,
+"execute + nova projectiles + perpetual charge + rakiata's flow + verglas": 1,
+"atalui's bloodletting + nova projectiles + perpetual charge + verglas": 1,
+"nova projectiles + perpetual charge + pinpoint critical + rakiata's flow + verglas": 1,
+"elemental armament + nova projectiles + perpetual charge + ricochet + verglas": 1,
+"nova projectiles + perpetual charge + rakiata's flow + ricochet + rising tempest": 1,
+"elemental armament + lightning attunement + perpetual charge + projectile acceleration": 1,
+"defy + execute + nova projectiles + perpetual charge + rakiata's flow": 1,
+"execute + garukhan's resolve + nova projectiles + perpetual charge + rakiata's flow": 1,
+"blindside + elemental armament + elemental focus + pinpoint critical + rakiata's flow": 1,
+"elemental armament + nova projectiles + perpetual charge + rakiata's flow + verglas": 1,
+"garukhan's resolve + nova projectiles + oisin's oath + perpetual charge + rakiata's flow": 1,
+"efficiency + execute + nova projectiles + perpetual charge + rakiata's flow": 1
+},
+"Fireball": {
+"cold exposure + concentrated area + multishot + prolonged duration": 1
+},
+"Firestorm": {
+"deliberation + execute + overabundance + prolonged duration + unleash": 1
+},
+"Flame Breath": {
+"ambrosia + burgeon + concentrated area + elemental armament + momentum": 1,
+"burgeon + efficiency + elemental armament + fire penetration + xoph's pyre": 1,
+"concentrated area + elemental armament + fire penetration + rapid attacks": 1
+},
+"Flame Wall": {
+"boundless energy + cooldown recovery + efficiency": 1,
+"frost nexus + magnified area + pinpoint critical + rapid casting": 1
+},
+"Flameblast": {
+"concentrated area + considered casting + controlled destruction + deliberation + searing flame": 18,
+"burgeon + concentrated area + considered casting + controlled destruction + searing flame": 18,
+"concentrated area + considered casting + controlled destruction + dialla's desire + searing flame": 3,
+"burgeon + concentrated area + considered casting + dialla's desire + searing flame": 2,
+"eternal flame + scouring flame + uhtred's constellation + vorana's siege + wildfire": 2,
+"concentrated area + considered casting + controlled destruction + dialla's desire + scouring flame": 2,
+"burgeon + concentrated area + considered casting + controlled destruction + scouring flame": 2,
+"burgeon + concentrated area + considered casting + dialla's desire + scouring flame": 1,
+"concentrated area + considered casting + controlled destruction + cooldown recovery + searing flame": 1,
+"burgeon + considered casting + controlled destruction + ignite + searing flame": 1,
+"concentrated area + considered casting + ignite + searing flame + xoph's pyre": 1,
+"concentrated area + considered casting + controlled destruction + scouring flame + zenith": 1,
+"concentrated area + considered casting + controlled destruction + ignite + searing flame": 1,
+"atziri's impatience + concentrated area + considered casting + deliberation + searing flame": 1,
+"burgeon + considered casting + fire mastery + searing flame + wildfire": 1,
+"burgeon + concentrated area + considered casting + deliberation + searing flame": 1,
+"concentrated area + considered casting + fire mastery + ignite + searing flame": 1,
+"concentrated area + considered casting + controlled destruction + deliberation + scouring flame": 1,
+"concentrated area + considered casting + controlled destruction + deliberation + ignite": 1,
+"concentrated area + considered casting + dialla's desire + eternal flame + searing flame": 1,
+"burgeon + concentrated area + controlled destruction + searing flame + xoph's pyre": 1,
+"concentrated area + considered casting + dialla's desire + fire mastery + scouring flame": 1,
+"concentrated area + considered casting + controlled destruction + dialla's desire + ignite": 1,
+"burgeon + concentrated area + considered casting + inexorable critical + searing flame": 1,
+"burgeon + concentrated area + considered casting + ignite + searing flame": 1,
+"concentrated area + considered casting + controlled destruction + deliberation + dialla's desire": 1,
+"atziri's impatience + concentrated area + considered casting + controlled destruction + searing flame": 1
+},
+"Flash Grenade": {
+"admixture + bleed + cooldown recovery + deep cuts + deliberation": 1
+},
+"Flicker Strike": {
+"close combat + concentrated area + elemental armament + hit and run + perpetual charge": 3,
+"close combat + concentrated area + elemental armament + hit and run + rakiata's flow": 2,
+"close combat + elemental armament + hit and run + perpetual charge + vorana's siege": 1,
+"concentrated area + execute + rageforged + rakiata's flow + rigwald's ferocity": 1,
+"close combat + elemental armament + heightened charges + hit and run + perpetual charge": 1,
+"ancestral call + blindside + close combat + culmination + pinpoint critical": 1,
+"close combat + concentrated area + hit and run + rakiata's flow + rigwald's ferocity": 1,
+"close combat + concentrated area + hit and run + perpetual charge": 1,
+"concentrated area + culling strike + defy + elemental armament + perpetual charge": 1,
+"chaos attunement + concentrated area + elemental armament + inexorable critical + pinpoint critical": 1,
+"concentrated area + elemental armament + execute + hit and run + rakiata's flow": 1,
+"close combat + concentrated area + execute + hit and run + rageforged": 1,
+"execute + hit and run + perpetual charge + rageforged + rakiata's flow": 1,
+"close combat + concentrated area + elemental armament + hit and run + rageforged": 1,
+"concentrated area + execute + hit and run + minion pact + rakiata's flow": 1,
+"heightened charges + hit and run + momentum + perpetual charge + rapid attacks": 1,
+"concentrated area + dialla's desire + execute + hit and run + rakiata's flow": 1,
+"close combat + concentrated area + elemental armament + execute + rapid attacks": 1,
+"efficiency + heavy swing + perpetual charge + rakiata's flow + rigwald's ferocity": 1,
+"close combat + hit and run + perpetual charge + rakiata's flow + vorana's siege": 1,
+"concentrated area + elemental armament + hit and run + rageforged + rakiata's flow": 1,
+"close combat + concentrated area + culmination + dialla's desire + execute": 1,
+"ancestral call + concentrated area + momentum + perpetual charge + rageforged": 1,
+"close combat + concentrated area + elemental armament + perpetual charge + rageforged": 1,
+"concentrated area + elemental armament + hit and run + perpetual charge + verglas": 1
+},
+"Freezing Mark": {
+"charged mark + eternal mark + prolonged duration": 1
+},
+"Frost Bomb": {
+"arbiter's ignition + cooldown recovery + execute + short fuse + spell cascade": 1
+},
+"Frost Wall": {
+"glacier + ixchel's torment + morrigan's insight": 1,
+"charge profusion + creeping chill": 1
+},
+"Frostbolt": {
+"arbiter's ignition + breachlord's amalgam + considered casting + rakiata's flow + zenith": 7,
+"breachlord's amalgam + considered casting + elemental focus + rakiata's flow + verglas": 4,
+"breachlord's amalgam + considered casting + projectile acceleration + rakiata's flow + tul's stillness": 4,
+"breachlord's amalgam + considered casting + projectile acceleration + rakiata's flow + zenith": 3,
+"breachlord's amalgam + considered casting + deliberation + rakiata's flow + verglas": 2,
+"breachlord's amalgam + projectile acceleration + rakiata's flow + tul's stillness + verglas": 2,
+"breachlord's amalgam + considered casting + deliberation + projectile acceleration + rakiata's flow": 2,
+"breachlord's amalgam + elemental focus + projectile acceleration + rakiata's flow + verglas": 2,
+"arbiter's ignition + breachlord's amalgam + considered casting + projectile acceleration + rakiata's flow": 2,
+"breachlord's amalgam + considered casting + rakiata's flow + verglas + zenith": 2,
+"breachlord's amalgam + considered casting + frostfire + projectile acceleration + rakiata's flow": 2,
+"breachlord's amalgam + considered casting + execute + rakiata's flow + verglas": 2,
+"breachlord's amalgam + considered casting + projectile acceleration + rakiata's flow + verglas": 2,
+"breachlord's amalgam + considered casting + rakiata's flow + tul's stillness + verglas": 1,
+"breachlord's amalgam + considered casting + execute + projectile acceleration + rakiata's flow": 1,
+"efficiency + pierce + projectile acceleration + rapid casting + sione's temper": 1,
+"efficiency + execute + rakiata's flow + sione's temper + vilenta's propulsion": 1,
+"arbiter's ignition + breachlord's amalgam + rakiata's flow + supercritical + zenith": 1,
+"arbiter's ignition + breachlord's amalgam + considered casting + deliberation + zenith": 1,
+"breachlord's amalgam + considered casting + deliberation + projectile acceleration + zenith": 1,
+"breachlord's amalgam + considered casting + elemental focus + execute + rakiata's flow": 1,
+"arbiter's ignition + breachlord's amalgam + considered casting + rakiata's flow + supercritical": 1,
+"arbiter's ignition + breachlord's amalgam + rakiata's flow + supercritical + verglas": 1,
+"breachlord's amalgam + considered casting + projectile acceleration + zenith": 1,
+"breachlord's amalgam + cold mastery + considered casting + rakiata's flow + verglas": 1,
+"cold attunement + rakiata's flow + sione's temper + vilenta's propulsion + zenith": 1,
+"breachlord's amalgam + considered casting + deliberation + verglas + zenith": 1,
+"breachlord's amalgam + rakiata's flow + tul's stillness + verglas + zenith": 1,
+"breachlord's amalgam + elemental focus + projectile acceleration + rakiata's flow + zenith": 1,
+"breachlord's amalgam + considered casting + frostfire + rakiata's flow + zenith": 1,
+"breachlord's amalgam + projectile acceleration + rakiata's flow + ricochet + zenith": 1,
+"arbiter's ignition + breachlord's amalgam + considered casting + deliberation + rakiata's flow": 1,
+"arbiter's ignition + breachlord's amalgam + considered casting + execute + rakiata's flow": 1,
+"armour break + breachlord's amalgam + elemental focus + projectile acceleration + rakiata's flow": 1,
+"breachlord's amalgam + considered casting + projectile acceleration + verglas + zenith": 1,
+"breachlord's amalgam + elemental focus + rakiata's flow + verglas + zenith": 1,
+"arbiter's ignition + breachlord's amalgam + frostfire + projectile acceleration + rakiata's flow": 1,
+"blindside + cold mastery + execute + sione's temper + vilenta's propulsion": 1,
+"arbiter's ignition + breachlord's amalgam + projectile acceleration + rakiata's flow + tul's stillness": 1,
+"arbiter's ignition + breachlord's amalgam + projectile acceleration + rakiata's flow + zenith": 1,
+"breachlord's amalgam + commiserate + considered casting + rakiata's flow + zenith": 1
+},
+"Galvanic Shards": {
+"execute + fork + garukhan's resolve + rakiata's flow + verglas": 1
+},
+"Gas Grenade": {
+"arakaali's lust + deadly poison + elemental focus + encroaching ground + persistent ground": 1
+},
+"Gathering Storm": {
+"pinpoint critical + searing flame + supercritical + tasalio's rhythm + xoph's pyre": 1
+},
+"Ghost Dance": {
+"cool headed + cooldown recovery + strong hearted": 1
+},
+"Glacial Bolt": {
+"ahn's citadel + execute + garukhan's resolve + rakiata's flow + vorana's siege": 1
+},
+"Glacial Lance": {
+"elemental armament + garukhan's resolve + rakiata's flow + rapid attacks + rigwald's ferocity": 1,
+"elemental armament + freeze + ice bite + perpetual charge + pinpoint critical": 1,
+"elemental armament + perpetual charge + rakiata's flow + rapid attacks + vorana's siege": 1,
+"elemental armament + garukhan's resolve + perpetual charge + rakiata's flow + rigwald's ferocity": 1
+},
+"Grenade": {
+"elemental armament + fire attunement + magnified area + short fuse": 1
+},
+"Grim Pillars": {
+"cold mastery + rakiata's flow + urgent totems + vorana's siege": 7,
+"efficiency + rakiata's flow + urgent totems + vorana's siege": 6,
+"rakiata's flow + uhtred's augury + urgent totems": 5,
+"execute + rakiata's flow + urgent totems + vorana's siege": 4,
+"rakiata's flow + urgent totems + vorana's siege": 4,
+"dialla's desire + rakiata's flow + urgent totems + vorana's siege": 4,
+"execute + rakiata's flow + urgent totems": 4,
+"execute + rakiata's flow + uhtred's augury": 3,
+"execute + urgent totems + zenith": 3,
+"cold mastery + efficiency + magnified area + urgent totems": 2,
+"cold mastery + execute + rakiata's flow + urgent totems": 2,
+"dialla's desire + rakiata's flow + uhtred's augury": 2,
+"execute + uhtred's augury + urgent totems": 2,
+"execute + rakiata's flow + vorana's siege": 1,
+"uhtred's augury + urgent totems + vorana's siege": 1,
+"rakiata's flow + uhtred's augury + urgent totems + vorana's siege": 1,
+"prolonged duration + rakiata's flow + urgent totems": 1,
+"execute + urgent totems + vorana's siege": 1,
+"dialla's desire + elemental focus + execute + rakiata's flow": 1,
+"execute + magnified area + rakiata's flow + urgent totems": 1,
+"magnified area + rakiata's flow + urgent totems": 1,
+"urgent totems + vorana's siege": 1,
+"mobility + rakiata's flow + urgent totems + vorana's siege": 1,
+"execute + rakiata's flow + urgent totems + zenith": 1,
+"cold mastery + rapid casting + urgent totems": 1,
+"dialla's desire + rakiata's flow + urgent totems": 1,
+"execute + frostfire + rakiata's flow + urgent totems": 1,
+"supercritical + urgent totems + vorana's siege": 1,
+"cold exposure + cold penetration + efficiency + urgent totems": 1,
+"dialla's desire + execute + rakiata's flow + urgent totems": 1,
+"astral projection + magnified area + reinforced totems + urgent totems": 1,
+"rakiata's flow + uhtred's augury + vorana's siege": 1,
+"astral projection + efficiency + spell cascade": 1
+},
+"Hand of Chayula": {
+"ailith's chimes + culmination": 1
+},
+"High Velocity Rounds": {
+"bleed + brutality + deliberation + heft + maim": 1
+},
+"His Scattering Calamity": {
+"compressed duration + esh's radiance + execute + rakiata's flow + zenith": 11,
+"compressed duration + esh's radiance + lightning mastery + rakiata's flow + zenith": 2,
+"compressed duration + execute + rakiata's flow + sione's temper + swift affliction": 1,
+"dialla's desire + esh's radiance + execute + rakiata's flow + zenith": 1,
+"compressed duration + esh's prowess + rakiata's flow + sione's temper + zenith": 1,
+"atalui's bloodletting + rakiata's flow + sione's temper + swift affliction + zenith": 1,
+"considered casting + rapid casting + wildshards + zenith": 1
+},
+"Hollow Focus": {
+"armour break + blind + cooldown recovery + culling strike + magnified area": 1
+},
+"Hollow Resonance": {
+"blindside + close combat + magnified area + mana leech": 1,
+"cooldown recovery + execute + stun": 1,
+"blindside + elemental armament + execute + magnified area": 1
+},
+"Ice Nova": {
+"considered casting + rakiata's flow + runic extraction + vorana's siege + zenith": 3,
+"execute + rakiata's flow + runic extraction + vorana's siege + zenith": 2,
+"considered casting + execute + rakiata's flow + verglas + vorana's siege": 1,
+"considered casting + efficiency + rakiata's flow + vorana's siege + zenith": 1,
+"considered casting + execute + rakiata's flow + vorana's siege + zenith": 1,
+"ice bite + prolonged duration + rapid casting + runic extraction + zenith": 1,
+"cold mastery + execute + rakiata's flow + rapid casting + vorana's siege": 1,
+"boundless energy + energy retention + knockback": 1,
+"astral projection + cold mastery + cold penetration + magnified area + rapid casting": 1,
+"astral projection + encroaching ground + magnified area + persistent ground + rapid casting": 1
+},
+"Ice Shot": {
+"elemental armament + fork + garukhan's resolve + ice bite + rakiata's flow": 18,
+"elemental armament + execute + garukhan's resolve + rakiata's flow + rigwald's ferocity": 10,
+"elemental armament + fork + garukhan's resolve + rakiata's flow + rapid attacks": 8,
+"elemental armament + fork + garukhan's resolve + nova projectiles + rakiata's flow": 6,
+"execute + garukhan's resolve + nova projectiles + rakiata's flow + verglas": 4,
+"elemental armament + garukhan's resolve + ice bite + rakiata's flow + rigwald's ferocity": 4,
+"elemental armament + execute + fork + garukhan's resolve + rakiata's flow": 3,
+"execute + fork + garukhan's resolve + nova projectiles + rakiata's flow": 3,
+"deliberation + elemental armament + garukhan's resolve + ice bite + rakiata's flow": 3,
+"elemental armament + garukhan's resolve + nova projectiles + projectile acceleration + rakiata's flow": 2,
+"elemental armament + execute + garukhan's resolve + projectile acceleration + rakiata's flow": 2,
+"elemental armament + execute + garukhan's resolve + rakiata's flow + rapid attacks": 2,
+"execute + fork + garukhan's resolve + rakiata's flow + rapid attacks": 2,
+"elemental armament + execute + garukhan's resolve + rakiata's flow + verglas": 2,
+"efficiency + elemental armament + execute + garukhan's resolve + rakiata's flow": 2,
+"cold attunement + elemental armament + fork + garukhan's resolve + rakiata's flow": 2,
+"elemental armament + execute + garukhan's resolve + nova projectiles + rakiata's flow": 2,
+"deliberation + elemental armament + fork + ice bite + rapid attacks": 2,
+"alignment + nova projectiles + projectile acceleration + volatility": 2,
+"elemental armament + fork + garukhan's resolve + projectile acceleration + rakiata's flow": 2,
+"elemental armament + fork + freeze + ice bite + rapid attacks": 2,
+"cold attunement + elemental armament + fork + ice bite + rapid attacks": 2,
+"cold attunement + elemental armament + fork + ice bite + rakiata's flow": 2,
+"embitter + fork + mobility + projectile acceleration + ricochet": 1,
+"embitter + garukhan's resolve + minion pact + nova projectiles + rapid attacks": 1,
+"execute + garukhan's resolve + nova projectiles + oisin's oath + rakiata's flow": 1,
+"elemental armament + execute + garukhan's resolve + nova projectiles + tul's stillness": 1,
+"elemental armament + execute + garukhan's resolve + mobility + rakiata's flow": 1,
+"efficiency + elemental armament + fork + garukhan's resolve + rakiata's flow": 1,
+"elemental armament + fork + garukhan's resolve + rakiata's flow + rigwald's ferocity": 1,
+"elemental armament + execute + rakiata's flow + rapid attacks + rigwald's ferocity": 1,
+"deliberation + elemental armament + embitter + minion pact + rapid attacks": 1,
+"deliberation + elemental armament + execute + garukhan's resolve + rakiata's flow": 1,
+"elemental armament + execute + fork + garukhan's resolve + tul's stillness": 1,
+"elemental armament + fork + ice bite + projectile acceleration + rakiata's flow": 1,
+"elemental armament + execute + rapid attacks": 1,
+"elemental armament + embitter + garukhan's resolve + nova projectiles + verglas": 1,
+"elemental armament + fork + garukhan's resolve + rakiata's flow + salvo": 1,
+"cold attunement + elemental armament + fork + rakiata's flow + rapid attacks": 1,
+"elemental armament + garukhan's resolve + rakiata's flow + rapid attacks + tul's stillness": 1,
+"elemental armament + fork + freeze + rapid attacks + supercritical": 1,
+"elemental armament + fork + garukhan's resolve + oisin's oath + rakiata's flow": 1,
+"dominus' grasp + garukhan's resolve + nova projectiles + rakiata's flow + ricochet": 1,
+"execute + garukhan's resolve + rakiata's flow + rapid attacks + tul's stillness": 1,
+"elemental armament + freeze + ice bite + rakiata's flow + rapid attacks": 1,
+"execute + garukhan's resolve + oisin's oath + rakiata's flow + verglas": 1,
+"elemental armament + execute + garukhan's resolve + oisin's oath + rakiata's flow": 1,
+"efficiency + embitter + garukhan's resolve + ice bite + nova projectiles": 1,
+"efficiency + embitter + execute + fork + garukhan's resolve": 1,
+"elemental armament + garukhan's resolve + ice bite + rakiata's flow + stoicism": 1,
+"deliberation + elemental armament + fork + rakiata's flow + rapid attacks": 1,
+"deliberation + electrocute + elemental armament + ice bite + rakiata's flow": 1,
+"deliberation + elemental armament + nova projectiles + rakiata's flow + stoicism": 1,
+"elemental armament + execute + rakiata's flow + supercritical": 1,
+"elemental armament + garukhan's resolve + ice bite + rakiata's flow + supercritical": 1,
+"dominus' grasp + elemental armament + projectile acceleration + rakiata's flow + retreat": 1,
+"garukhan's resolve + minion pact + nova projectiles + rakiata's flow + supercritical": 1,
+"elemental armament + execute + ice bite + rapid attacks + supercritical": 1,
+"elemental armament + elemental focus + execute + garukhan's resolve + rakiata's flow": 1,
+"elemental armament + fork + garukhan's resolve + rageforged + rakiata's flow": 1,
+"elemental armament + elemental focus + execute + nova projectiles + rakiata's flow": 1,
+"elemental armament + execute + garukhan's resolve + rakiata's flow + ricochet": 1,
+"atalui's bloodletting + embitter + execute + garukhan's resolve + nova projectiles": 1,
+"atalui's bloodletting + elemental armament + embitter + execute + rakiata's flow": 1,
+"elemental armament + ice bite + projectile acceleration + rakiata's flow + rapid attacks": 1,
+"elemental armament + embitter + execute + rapid attacks": 1,
+"deliberation + elemental armament + garukhan's resolve + rakiata's flow + rigwald's ferocity": 1,
+"elemental armament + fork + garukhan's resolve + rakiata's flow + ricochet": 1,
+"elemental armament + fork + garukhan's resolve + rakiata's flow + supercritical": 1,
+"execute + garukhan's resolve + nova projectiles + rakiata's flow + rigwald's ferocity": 1,
+"deliberation + elemental armament + fork + ice bite + stoicism": 1,
+"deliberation + elemental armament + ice bite + rakiata's flow + rapid attacks": 1,
+"deliberation + elemental armament + projectile acceleration + rakiata's flow + rapid attacks": 1,
+"elemental armament + garukhan's resolve + nova projectiles + rakiata's flow + rapid attacks": 1,
+"elemental armament + garukhan's resolve + oisin's oath + rakiata's flow + rapid attacks": 1,
+"elemental armament + projectile acceleration + rakiata's flow + rapid attacks + supercritical": 1,
+"cold attunement + fork + ice bite + rapid attacks": 1,
+"execute + fork + garukhan's resolve + rakiata's flow + rigwald's ferocity": 1,
+"blazing critical + elemental armament + ice bite + pinpoint critical + rapid attacks": 1,
+"cold attunement + cold penetration + elemental armament + fork + ice bite": 1,
+"elemental armament + execute + ice bite + rageforged + rapid attacks": 1,
+"cold attunement + elemental armament + ice bite + rakiata's flow + rapid attacks": 1,
+"armour break + elemental armament + execute + pinpoint critical + rakiata's flow": 1,
+"armour break + efficiency + elemental armament + projectile acceleration + uruk's smelting": 1,
+"elemental armament + garukhan's resolve + ice bite + nova projectiles + rakiata's flow": 1,
+"cold penetration + elemental armament + oisin's oath + projectile acceleration + rapid attacks": 1,
+"efficiency + projectile acceleration + rakiata's flow + rapid attacks + verglas": 1,
+"execute + garukhan's resolve + ice bite + rakiata's flow + rapid attacks": 1,
+"elemental armament + fork + ice bite + rapid attacks + tul's stillness": 1,
+"electromagnetism + elemental armament + frozen spite + ice bite + innervate": 1,
+"deliberation + elemental armament + frozen spite + ice bite + stoicism": 1,
+"bleed + elemental armament + fork + ice bite + tul's stillness": 1,
+"bleed + elemental armament + fork + pinpoint critical + rapid attacks": 1,
+"chain + cold attunement + elemental armament + ice bite + rapid attacks": 1,
+"elemental armament + fork + ice bite + rakiata's flow + rapid attacks": 1,
+"cold attunement + deliberation + elemental armament + rakiata's flow + ricochet": 1,
+"efficiency + elemental armament + garukhan's resolve + rakiata's flow + rigwald's ferocity": 1,
+"cold penetration + elemental armament + ice bite + projectile acceleration + rapid attacks": 1,
+"elemental armament + fork + ice bite + rapid attacks": 1,
+"elemental armament + execute + garukhan's resolve + rageforged + rakiata's flow": 1
+},
+"Ice Strike": {
+"blazing critical + close combat + elemental armament + rage + rapid attacks": 1,
+"blindside + concentrated area + elemental armament + inexorable critical + rakiata's flow": 1,
+"clash + crescendo + execute + garukhan's resolve + rakiata's flow": 1,
+"crescendo + elemental armament + ice bite + oisin's oath + rakiata's flow": 1
+},
+"Icestorm": {
+"cold attunement + cold mastery + considered casting + expand + rapid casting": 1
+},
+"Incendiary Shot": {
+"atalui's bloodletting + fiery death + ignite + ratha's assault + xoph's pyre": 1
+},
+"Incinerate": {
+"burgeon + fire mastery + ignite + searing flame": 1,
+"considered casting + controlled destruction + fire mastery + ignite + searing flame": 1
+},
+"Into the Breach": {
+"harmonic remnants + remnant potency + selfless remnants": 1
+},
+"Kelari, the Tainted Sands": {
+"bidding + kurgal's leash + muster + uul-netol's embrace + vorana's siege": 2,
+"bidding + hulking minions + muster + uul-netol's embrace + vorana's siege": 1
+},
+"Killing Palm": {
+"blazing critical + charge profusion + rage + thrill of the kill": 2,
+"ancestral call + charge profusion + rage + rapid attacks": 1,
+"blazing critical + charge profusion + prolonged duration + rapid attacks + thrill of the kill": 1,
+"charge profusion + culling strike + rapid attacks": 1,
+"blazing critical + prolonged duration + rapid attacks + thrill of the kill": 1,
+"blazing critical + innervate + prolonged duration + rage + thrill of the kill": 1,
+"ancestral call + culling strike + deep freeze": 1
+},
+"Leap Slam": {
+"atalui's bloodletting + close combat + life leech + momentum + tectonic slams": 1
+},
+"Life Remnants": {
+"": 1
+},
+"Lightning Bolt": {
+"concentrated area + deliberation + execute + mana flare + rakiata's flow": 3,
+"concentrated area + execute + mana flare + rakiata's flow + spell cascade": 2,
+"cooldown recovery + execute + mana flare + rakiata's flow + spell cascade": 1,
+"concentrated area + deliberation + esh's prowess + spell cascade + zenith": 1,
+"concentrated area + deliberation + elemental focus + execute + rakiata's flow": 1,
+"concentrated area + deliberation + lightning mastery + mana flare + spell cascade": 1,
+"concentrated area + considered casting + pinpoint critical + rapid casting + zenith": 1,
+"deliberation + execute + mana flare + rakiata's flow + vorana's siege": 1,
+"deliberation + elemental focus + esh's radiance + execute + rakiata's flow": 1
+},
+"Lightning Spear": {
+"elemental armament + execute + fork + pinpoint critical + rakiata's flow": 1,
+"efficiency + elemental armament + innervate + lightning mastery + rapid attacks": 1,
+"elemental armament + fork + garukhan's resolve + rakiata's flow + rapid attacks": 1,
+"elemental armament + fork + lightning mastery + rigwald's ferocity + stoicism": 1,
+"elemental armament + fork + innervate + minion pact + rakiata's flow": 1,
+"elemental armament + fork + garukhan's resolve + rakiata's flow + rigwald's ferocity": 1
+},
+"Lightning Warp": {
+"encroaching ground + magnified area + rapid casting + unleash": 1,
+"blindside + commiserate + ignite + rapid casting + vorana's siege": 1,
+"armour break + blind + lightning attunement + lightning exposure": 1,
+"considered casting + efficiency + eonyr's thunder + unleash + vorana's siege": 1,
+"deliberation + esh's radiance + extraction + rakiata's flow + vorana's siege": 1,
+"arbiter's ignition + boundless energy": 1,
+"esh's radiance + ignite + lightning mastery + pinpoint critical + thrill of the kill": 1,
+"blazing critical + innervate + magnified area + rakiata's flow + thrill of the kill": 1,
+"efficiency + innervate + lightning mastery + soul drain + zenith": 1,
+"efficiency + execute + minion pact + vorana's siege + zenith": 1,
+"esh's prowess + khatal's rejuvenation + magnified area + pinpoint critical + unleash": 1,
+"pinpoint critical + sione's temper": 1
+},
+"Living Bomb": {
+"boundless energy + efficiency + spell cascade": 3,
+"efficiency + spell cascade + zenith": 2,
+"dialla's desire + glacier + uhtred's augury": 2,
+"boundless energy + efficiency + zenith": 2,
+"esh's radiance + fire mastery + overabundance + withering touch": 2,
+"boundless energy + efficiency + overabundance + zenith": 1,
+"spell cascade + vorana's siege + zenith": 1,
+"arbiter's ignition + concentrated area + spell cascade": 1,
+"concentrated area + execute + rakiata's flow": 1,
+"efficiency + spell cascade + vorana's siege": 1,
+"efficiency + ixchel's torment + zenith": 1,
+"concentrated area + efficiency + energy retention": 1,
+"boundless energy + pinpoint critical + spell cascade": 1,
+"dominus' grasp + efficiency": 1,
+"efficiency + harmonic remnants": 1,
+"boundless energy + sione's temper": 1,
+"boundless energy + efficiency + ixchel's torment": 1,
+"arbiter's ignition + boundless energy + efficiency": 1,
+"boundless energy + dialla's desire + spell cascade": 1,
+"arbiter's ignition + fire mastery + fire penetration + harmonic remnants + rapid casting": 1,
+"fire mastery + harmonic remnants + ignite + rapid casting + searing flame": 1,
+"boundless energy + compressed duration + concentrated area + overabundance": 1,
+"boundless energy + harmonic remnants + magnified area + overabundance": 1,
+"concentrated area + considered casting + controlled destruction + deliberation + searing flame": 1,
+"execute + sione's temper + zenith": 1,
+"energy retention + vorana's siege": 1,
+"boundless energy + rakiata's flow + spell cascade": 1,
+"arbiter's ignition + overabundance": 1,
+"boundless energy + execute + spell cascade": 1,
+"boundless energy + fire penetration + overabundance + uhtred's augury": 1,
+"dialla's desire + efficiency + vorana's siege": 1,
+"efficiency + execute + spell cascade": 1,
+"efficiency + execute + sione's temper": 1,
+"efficiency + pinpoint critical": 1,
+"boundless energy + energy retention + overabundance": 1,
+"efficiency + harmonic remnants + ignite + overabundance + zenith": 1,
+"harmonic remnants + lifetap + overabundance + pinpoint critical": 1,
+"arbiter's ignition + cooldown recovery": 1,
+"efficiency + spell cascade + uhtred's augury": 1,
+"boundless energy + concentrated area + spell cascade": 1,
+"boundless energy + magnified area + overabundance": 1,
+"esh's radiance + overabundance + withering touch": 1,
+"boundless energy + overabundance + zenith": 1,
+"arbiter's ignition + branching fissures + morrigan's insight": 1,
+"efficiency + pinpoint critical + spell cascade": 1,
+"arbiter's ignition + efficiency + uhtred's rite + zenith": 1,
+"boundless energy + uhtred's omen + vorana's siege": 1,
+"cold mastery + efficiency + energy capacitor": 1,
+"deliberation + elemental focus + supercritical": 1,
+"boundless energy + uhtred's omen": 1,
+"boundless energy + rising tempest + spell cascade": 1,
+"efficiency + execute + rakiata's flow": 1,
+"dialla's desire + efficiency + pinpoint critical": 1
+},
+"Lunar Assault": {
+"elemental armament + execute + garukhan's resolve + magnified area + rakiata's flow": 1,
+"bhatair's vengeance + elemental armament + rakiata's flow + rapid attacks + supercritical": 1,
+"elemental armament + ice bite + magnified area + rakiata's flow + rapid attacks": 1,
+"bhatair's vengeance + elemental armament + garukhan's resolve + rakiata's flow + tul's stillness": 1,
+"bhatair's vengeance + blindside + elemental armament + rakiata's flow + vorana's siege": 1
+},
+"Manifest Weapon": {
+"elemental armament + embitter + magnified area + xoph's pyre": 1
+},
+"Mantra of Destruction": {
+"ailith's chimes + chaos mastery + charge profusion + prolonged duration": 1
+},
+"Molten Blast": {
+"magnified area + nova projectiles + poison + rapid attacks + salvo": 1
+},
+"Molten Crash": {
+"close combat + elemental armament + holy descent + rapid attacks": 1,
+"aftershock + armour break + brambleslam + crater": 1
+},
+"Molten Shower": {
+"concentrated area + cooldown recovery + elemental armament + fire attunement + projectile acceleration": 1,
+"cooldown recovery + elemental armament + fire attunement + projectile acceleration": 1
+},
+"Navira, the Last Mirage": {
+"bidding + frost nexus + muster + rakiata's flow + tul's stillness": 12,
+"bidding + encroaching ground + frost nexus + muster + tul's stillness": 6,
+"bidding + encroaching ground + frost nexus + muster + rakiata's flow": 4,
+"bidding + frost nexus + muster + tul's stillness + vorana's siege": 2,
+"bidding + encroaching ground + frost nexus + rakiata's flow + tul's stillness": 1,
+"bidding + encroaching ground + muster + rakiata's flow + tul's stillness": 1,
+"bidding + elemental focus + muster + rakiata's flow + tul's stillness": 1,
+"bidding + encroaching ground + frost nexus + magnified area + muster": 1,
+"bidding + frost nexus + magnified area + muster + rakiata's flow": 1
+},
+"Oil Barrage": {
+"fork + garukhan's resolve + nova projectiles + ricochet + salvo": 3,
+"fork + nova projectiles + rapid attacks + ricochet + salvo": 1,
+"dominus' grasp + nova projectiles + rakiata's flow + ricochet + salvo": 1,
+"fork + hit and run + nova projectiles + ricochet + salvo": 1,
+"dominus' grasp + nova projectiles + pinpoint critical + ricochet + salvo": 1,
+"fork + nova projectiles + projectile acceleration + ricochet + salvo": 1,
+"armour break + hit and run + nova projectiles + ricochet + salvo": 1,
+"armour break + fork + nova projectiles + ricochet + salvo": 1,
+"dominus' grasp + nova projectiles + rageforged + ricochet + salvo": 1,
+"dominus' grasp + execute + nova projectiles + ricochet + salvo": 1,
+"hit and run + nova projectiles + rakiata's flow + ricochet + salvo": 1,
+"burgeon + close combat + nova projectiles + salvo": 1,
+"dominus' grasp + nova projectiles + ricochet + salvo": 1,
+"burgeon + close combat + nova projectiles + ricochet + salvo": 1,
+"close combat + hit and run + nova projectiles + ricochet + salvo": 1,
+"dominus' grasp + nova projectiles + projectile acceleration + ricochet + salvo": 1,
+"elemental armament + projectile acceleration + rapid attacks + salvo": 1,
+"brutality + burgeon + rageforged + rapid attacks": 1,
+"burgeon + concentrated area + pinpoint critical + rapid attacks + retreat": 1,
+"elemental armament + fork + nova projectiles + ricochet + salvo": 1,
+"dominus' grasp + fork + nova projectiles + ricochet + salvo": 1
+},
+"Oil Grenade": {
+"blind + elemental armament + maim + multishot": 1,
+"elemental armament + elemental focus + exploit weakness + fire attunement + rageforged": 1,
+"blazing critical + maim + persistent ground + potent exposure + slow potency": 1,
+"multishot + potent exposure + prolonged duration": 1,
+"elemental armament + life leech + multishot + potent exposure + prolonged duration": 1,
+"mobility + multishot + nova projectiles + poison": 1,
+"bleed + deliberation + heft + life leech + poison": 1,
+"bleed + deliberation + heft + multishot": 1
+},
+"Orb of Storms": {
+"efficiency + execute + lightning mastery + overabundance + zenith": 1,
+"efficiency + harmonic remnants + magnified area + overabundance": 1,
+"arcane surge + considered casting + efficiency + lightning penetration + overabundance": 1,
+"considered casting + efficiency + lightning mastery + overabundance + zenith": 1,
+"controlled destruction + overabundance + unleash": 1,
+"considered casting + overabundance + unleash": 1
+},
+"Overwhelming Presence": {
+"herbalism + precision + vitality + warm blooded": 1
+},
+"Permafrost Bolts": {
+"close combat + elemental armament + projectile acceleration + rakiata's flow + rapid attacks": 1
+},
+"Plasma Blast": {
+"bleed + concoct + deep cuts + pinpoint critical + rageforged": 4,
+"bleed + burgeon + concoct + deep cuts + pinpoint critical": 2,
+"armour demolisher + efficiency + elemental armament + execute + steadfast": 1,
+"bleed + burgeon + concoct + elemental armament + rageforged": 1,
+"bleed + concoct + deep cuts + elemental armament + pinpoint critical": 1,
+"bleed + deep cuts + elemental armament + pinpoint critical + rageforged": 1,
+"ambrosia + bleed + concoct + deep cuts + pinpoint critical": 1,
+"bleed + culling strike + deep cuts + elemental armament + rapid attacks": 1,
+"bleed + deep cuts + elemental armament + pinpoint critical + volt": 1
+},
+"Poisonburst Arrow": {
+"blindside + bursting plague + execute + projectile acceleration + tacati's ire": 1,
+"deadly poison + execute + garukhan's resolve + rigwald's ferocity + tacati's ire": 1,
+"bursting plague + deadly poison + execute + fork + garukhan's resolve": 1,
+"deadly poison + execute + fork + garukhan's resolve + tacati's ire": 1,
+"bursting plague + deadly poison + escalating poison + fork + poison": 1
+},
+"Pounce": {
+"blind + brutus' brain + maim + minion splash + rapid attacks": 1
+},
+"Primal Strikes": {
+"close combat + concentrated area + elemental armament + elemental focus + rapid attacks": 1
+},
+"Profane Ritual": {
+"charge profusion + compressed duration + corpse conservation + mobility + rapid casting": 1,
+"charge profusion + derange + mobility + rapid casting": 1,
+"charge profusion + cold mastery + glacier": 1,
+"chaotic freeze + charge profusion + corpse conservation + rapid casting": 1
+},
+"Purity of Ice": {
+"herbalism + warm blooded": 1
+},
+"Quarterstaff Strike": {
+"ancestral call + bleed + elemental armament + rage": 1,
+"armour break + armour demolisher + prolonged duration + rage": 1,
+"cold attunement + concentrated area + culling strike + ice bite + rapid attacks": 1,
+"behead + bleed + life leech + rage": 1,
+"armour break + cold attunement + elemental armament + heavy swing": 1,
+"blindside + close combat + elemental armament + execute + rapid attacks": 1,
+"behead + bleed + brutality + execute + life leech + magnified area + rapid attacks + shock conduction + volatility": 1,
+"ambrosia + concentrated area + coursing current + pinpoint critical + thrill of the kill": 1,
+"ambush + concentrated area + coursing current + culling strike + magnified area": 1,
+"blindside + elemental armament + elemental focus + execute + rapid attacks": 1,
+"ancestral call + blindside + close combat + concentrated area + rapid attacks": 1,
+"ambush + execute + living lightning + magnified area": 1,
+"behead + bleed + efficiency + execute + rage": 1,
+"bleed + heavy swing + heft + rage + stun": 1,
+"close combat + concentrated area + heft + rapid attacks": 1,
+"bounty + combo finisher + culling strike + magnified area + rapid attacks": 1,
+"ancestral call + execute + rapid attacks": 1,
+"frozen spite + rapid attacks + verglas": 1,
+"armour break + blind + rage + rapid attacks + uruk's smelting": 1,
+"close combat + concentrated area + garukhan's resolve + lightning exposure": 1,
+"efficiency + elemental armament + heavy swing + heft + rage": 1,
+"close combat + pinpoint critical + rage": 1,
+"concentrated area + elemental armament + magnified area + pinpoint critical": 1,
+"bleed + rage + rapid attacks + slow potency": 1,
+"concentrated area + elemental armament + elemental focus + hourglass + rapid attacks": 1
+},
+"Raise Shield": {
+"": 2,
+"concentrated area + heavy swing + impale + life leech": 1,
+"ignite + scouring flame + steadfast": 1,
+"enduring impact + retaliate + stun + vanguard": 1
+},
+"Rampage": {
+"burgeon + efficiency + heavy swing + momentum + rageforged": 1
+},
+"Rapid Shot": {
+"elemental armament + immolate + multishot + rapid attacks + stoicism": 1,
+"elemental armament + nimble reload + projectile acceleration + rapid attacks + xoph's pyre": 1,
+"elemental armament + eternal flame + fire attunement + immolate": 1
+},
+"Reap": {
+"concentrated area + deliberation + heft + physical mastery + zenith": 3,
+"considered casting + deliberation + physical mastery + zenith": 1
+},
+"Refutation": {
+"cooldown recovery + prolonged duration + rapid casting": 1,
+"atziri's impatience + mobility + prolonged duration": 1
+},
+"Rend": {
+"heightened charges + magnified area + prolonged duration + rage": 1,
+"blazing critical + heightened charges + prolonged duration + thrill of the kill": 1,
+"heightened charges + hit and run + perpetual charge + prolonged duration + rapid attacks": 1,
+"ancestral call + bleed + blind + prolonged duration + rapid attacks": 1,
+"elemental armament + embitter + magnified area + rage + rakiata's flow": 1,
+"ancestral call + bhatair's vengeance + elemental armament + embitter + hit and run": 1,
+"bhatair's vengeance + elemental armament + garukhan's resolve + magnified area + rakiata's flow": 1,
+"close combat + elemental armament + rapid attacks": 1,
+"blazing critical + magnified area + perpetual charge + prolonged duration + rapid attacks": 1,
+"garukhan's resolve + knockback + living lightning + magnified area + withering touch": 1
+},
+"Resonating Shield": {
+"blind + magnified area + momentum + rapid attacks": 1,
+"bleed + deadly resolve + heavy swing + heft + poison": 1
+},
+"Righteous Descent": {
+"bleed + concoct + fist of war + pinpoint critical + zerphi's infamy": 1,
+"bleed + elemental armament + fist of war + pinpoint critical + zerphi's infamy": 1
+},
+"Ritual Sacrifice": {
+"efficiency + gorge + prolonged duration": 1
+},
+"Ruzhan, the Blazing Sword": {
+"bidding + magnified area + muster + rakiata's flow + xoph's pyre": 1,
+"bidding + hulking minions + long fuse + muster + xoph's pyre": 1
+},
+"Seismic Cry": {
+"cooldown recovery + mobility + stoicism": 1,
+"atalui's bloodletting + dialla's desire + physical mastery + rakiata's flow + vorana's siege": 1
+},
+"Shattering Palm": {
+"elemental armament + execute + rakiata's flow + rigwald's ferocity + vorana's siege": 7,
+"blindside + rakiata's flow + supercritical + verglas + vorana's siege": 1,
+"ancestral call + execute + rakiata's flow + rigwald's ferocity + vorana's siege": 1,
+"execute + rage + rakiata's flow + rigwald's ferocity + vorana's siege": 1,
+"clash + elemental armament + execute + rakiata's flow + vorana's siege": 1,
+"close combat + elemental armament + rakiata's flow + rising tempest + vorana's siege": 1,
+"elemental armament + execute + rigwald's ferocity": 1,
+"ancestral call + blindside + execute + rakiata's flow + supercritical": 1,
+"blindside + execute + rakiata's flow + rigwald's ferocity + vorana's siege": 1,
+"elemental armament + pinpoint critical + rakiata's flow + rigwald's ferocity + vorana's siege": 1,
+"rage + rakiata's flow + rigwald's ferocity + supercritical + vorana's siege": 1
+},
+"Shattering Spite": {
+"concoct + deep cuts + elemental armament + rageforged + rigwald's ferocity": 1,
+"bleed + concoct + elemental armament + rageforged": 1
+},
+"Shield Wall": {
+"ahn's citadel + armour break + garukhan's resolve + kaom's madness + supercritical": 3,
+"ahn's citadel + fire attunement + kaom's madness + rakiata's flow + supercritical": 3,
+"ahn's citadel + armour break + kaom's madness + rapid attacks + supercritical": 1,
+"elemental armament + fire attunement + rakiata's flow + supercritical + vorana's siege": 1,
+"ahn's citadel + atalui's bloodletting + clash + execute + kaom's madness": 1,
+"ahn's citadel + elemental armament + execute + kaom's madness + magnified area": 1,
+"atalui's bloodletting + brutality + heavy swing + heft + life leech": 1,
+"heft + prolonged duration + styrn's ferocity": 1,
+"ahn's citadel + atalui's bloodletting + kaom's madness + rapid attacks + uul-netol's embrace": 1
+},
+"Shockburst Rounds": {
+"concentrated area + elemental armament + elemental focus + fresh clip + lightning attunement": 1
+},
+"Shred": {
+"crescendo + elemental armament + elemental focus + execute + rapid attacks": 1,
+"close combat + crescendo + garukhan's resolve + long fuse + rapid attacks": 1,
+"life leech + long fuse + rage + rapid attacks": 1,
+"ambush + freeze + ice bite": 1
+},
+"Siphoning Strike": {
+"charge profusion + rage + rapid attacks": 1
+},
+"Skeletal Brute": {
+"efficiency + heft + last gasp + minion mastery + muster": 1,
+"brutality + feeding frenzy + heft + minion mastery + muster": 1,
+"bidding + feeding frenzy + minion splash + muster + rapid attacks": 1
+},
+"Skeletal Sniper": {
+"deep freeze + feeding frenzy + kurgal's leash + minion mastery + muster": 1,
+"corrosion + feeding frenzy + fork + muster + poison": 1
+},
+"Skeletal Storm Mage": {
+"deliberation + elemental focus + feeding frenzy + lightning mastery + rapid casting": 2,
+"esh's radiance + feeding frenzy + muster + rapid casting": 1,
+"dialla's desire + dominus' grasp + esh's radiance + feeding frenzy + muster": 1
+},
+"Skyfall": {
+"efficiency + execute + spell cascade": 1,
+"boundless energy + dialla's desire + efficiency": 1,
+"glacier + uhtred's exodus": 1,
+"cold mastery + magnified area + spell cascade + tul's stillness": 1,
+"cold mastery + efficiency + spell cascade": 1,
+"boundless energy + efficiency + zenith": 1,
+"cold mastery + concentrated area + dialla's desire + execute + ice bite": 1
+},
+"Snap": {
+"concentrated area + execute + rapid casting + spell cascade": 1,
+"dialla's desire + efficiency + glacier": 1
+},
+"Snipe": {
+"garukhan's resolve + rakiata's flow + tasalio's rhythm + verglas + window of opportunity": 1,
+"pin + rakiata's flow + tasalio's rhythm + verglas + window of opportunity": 1
+},
+"Spark": {
+"efficiency + pierce + rakiata's flow + vilenta's propulsion + zenith": 5,
+"efficiency + execute + rakiata's flow + vilenta's propulsion + zenith": 3,
+"efficiency + execute + projectile acceleration + rakiata's flow + zenith": 3,
+"atalui's bloodletting + pierce + rakiata's flow + vilenta's propulsion + zenith": 2,
+"atalui's bloodletting + esh's radiance + pierce + projectile acceleration + rakiata's flow": 2,
+"execute + pierce + projectile acceleration + rakiata's flow + zenith": 2,
+"efficiency + esh's prowess + execute + projectile acceleration + rakiata's flow": 2,
+"dialla's desire + efficiency + rakiata's flow + vilenta's propulsion + zenith": 1,
+"dialla's desire + execute + projectile acceleration + rakiata's flow + zenith": 1,
+"blind + pierce + rapid casting + sione's temper + vilenta's propulsion": 1,
+"execute + projectile acceleration + rakiata's flow + verglas + zenith": 1,
+"efficiency + execute + rakiata's flow + rapid casting + zenith": 1,
+"execute + rakiata's flow + verglas + vilenta's propulsion + zenith": 1,
+"considered casting + execute + projectile acceleration + rakiata's flow + unleash": 1,
+"efficiency + execute + projectile acceleration + rakiata's flow + verglas": 1,
+"efficiency + pierce + sione's temper + vilenta's propulsion + zenith": 1,
+"efficiency + pierce + rakiata's flow + sione's temper + vilenta's propulsion": 1,
+"execute + rakiata's flow + urgent totems + vilenta's propulsion": 1,
+"considered casting + esh's radiance + execute + projectile acceleration + rakiata's flow": 1,
+"efficiency + esh's radiance + pierce + projectile acceleration + rakiata's flow": 1,
+"considered casting + pinpoint critical + projectile acceleration + rakiata's flow + zenith": 1,
+"atalui's bloodletting + deliberation + projectile acceleration + rakiata's flow + zenith": 1,
+"efficiency + execute + pinpoint critical + projectile acceleration + rakiata's flow": 1,
+"execute + pinpoint critical + rakiata's flow + vilenta's propulsion + zenith": 1,
+"deliberation + esh's radiance + execute + rakiata's flow + vilenta's propulsion": 1,
+"pierce + projectile acceleration + rakiata's flow + verglas + zenith": 1,
+"efficiency + mobility + pinpoint critical + rakiata's flow + vilenta's propulsion": 1,
+"considered casting + execute + pinpoint critical + projectile acceleration + rakiata's flow": 1,
+"arbiter's ignition + pinpoint critical + projectile acceleration + rakiata's flow + rapid casting": 1,
+"efficiency + esh's prowess + projectile acceleration + rakiata's flow + rapid casting": 1,
+"pierce + rakiata's flow + urgent totems + vilenta's propulsion": 1,
+"": 1,
+"pierce + pinpoint critical + rakiata's flow + rapid casting + vilenta's propulsion": 1,
+"pierce + rakiata's flow + rising tempest + vilenta's propulsion + zenith": 1
+},
+"Spear Throw": {
+"elemental armament + magnified area + perpetual charge + projectile acceleration + rapid attacks": 1,
+"ambush + cold attunement + concentrated area + coursing current + deep freeze": 1,
+"heft + projectile acceleration + retreat": 1,
+"": 1,
+"fork + pierce + rapid attacks + shock + swift affliction": 1
+},
+"Spearfield": {
+"bursting plague + compressed duration + deadly poison + delayed reaction + uruk's smelting": 1,
+"corrosion + deadly poison + impale + rearm + uruk's smelting": 1,
+"bursting plague + corrosion + rage + rearm + uruk's smelting": 1
+},
+"Spiral Volley": {
+"armour break + concussive runes + perpetual charge + projectile acceleration + uul-netol's embrace": 2,
+"dominus' grasp + elemental armament + perpetual charge + ricochet": 1,
+"armour break + execute + perpetual charge + projectile acceleration": 1,
+"armour break + execute + heft + perpetual charge + projectile acceleration": 1
+},
+"Staggering Palm": {
+"ancestral call + close combat + multishot + prolonged duration + rage": 1,
+"blazing critical + pinpoint critical + prolonged duration + volatility": 1
+},
+"Stampede": {
+"elemental armament + execute + fist of war + magnified area + momentum": 1
+},
+"Stormblast Bolts": {
+"concentrated area + elemental armament + elemental focus + rapid attacks + rigwald's ferocity": 1,
+"blindside + close combat + concentrated area + deliberation + elemental armament": 1,
+"blindside + close combat + concentrated area + elemental armament + rakiata's flow": 1,
+"close combat + concentrated area + deliberation + elemental armament + rapid attacks": 1,
+"close combat + concentrated area + elemental armament + rakiata's flow + rapid attacks": 1
+},
+"Summon Infernal Hound": {
+"elemental army + hulking minions + loyalty + meat shield + minion mastery": 1
+},
+"Sunder": {
+"atalui's bloodletting + brutality + heavy swing + urgent totems": 3,
+"atalui's bloodletting + brutality + heavy swing + heft": 1,
+"atalui's bloodletting + brutality + rapid attacks + urgent totems": 1,
+"branching fissures + defy + magnified area + rapid attacks + stoicism": 1
+},
+"Supercharged Slam": {
+"fist of war + heavy swing + heft + rigwald's ferocity + vorana's siege": 1,
+"fist of war + garukhan's resolve + heavy swing + rageforged + supercritical": 1
+},
+"Supporting Fire": {
+"bidding + dialla's desire + lightning attunement + muster + uul-netol's embrace": 1,
+"armour break + brutality + heft": 1
+},
+"Tempest Bell": {
+"ailith's chimes + ancestral call + close combat + durability + elemental armament": 1,
+"ancestral call + close combat + magnified area + prolonged duration + rage": 1,
+"ancestral call + close combat + concentrated area + rage": 1,
+"ancestral call + heavy swing + heft + magnified area + supercritical": 1
+},
+"Tempest Flurry": {
+"crescendo + rage + rakiata's flow + rapid attacks + rigwald's ferocity": 1
+},
+"The Stars Answer": {
+"": 1
+},
+"Thrashing Vines": {
+"blindside + execute + rapid casting + uul-netol's embrace + zenith": 1,
+"concentrated area + physical mastery + rapid casting": 1,
+"concentrated area + considered casting + efficiency + physical mastery + rapid casting": 1,
+"concentrated area + considered casting + heft + physical mastery + rapid casting": 1,
+"concentrated area + considered casting + heft + physical mastery + zarokh's refrain": 1,
+"concentrated area + considered casting + heft + rapid casting + stun": 1
+},
+"Time of Need": {
+"clarity + cooldown recovery + warm blooded": 1
+},
+"Tornado": {
+"advancing storm + considered casting + deliberation + dialla's desire + swift affliction": 1,
+"catalysing elements + considered casting + physical mastery + swift affliction + zenith": 1,
+"catalysing elements + considered casting + magnified area + physical mastery + swift affliction": 1,
+"catalysing elements + considered casting + deliberation + physical mastery + swift affliction": 1
+},
+"Twister": {
+"execute + garukhan's resolve + projectile acceleration + rakiata's flow + verglas": 9,
+"elemental armament + garukhan's resolve + projectile acceleration + rakiata's flow + salvo": 8,
+"deliberation + elemental armament + garukhan's resolve + projectile acceleration + rakiata's flow": 8,
+"execute + garukhan's resolve + projectile acceleration + rakiata's flow + salvo": 8,
+"elemental armament + execute + garukhan's resolve + projectile acceleration + rakiata's flow": 6,
+"elemental armament + garukhan's resolve + projectile acceleration + prolonged duration + rakiata's flow": 6,
+"garukhan's resolve + projectile acceleration + prolonged duration + rakiata's flow + salvo": 6,
+"execute + garukhan's resolve + projectile acceleration + rageforged + rakiata's flow": 5,
+"deliberation + elemental armament + projectile acceleration + prolonged duration + rakiata's flow": 5,
+"elemental armament + garukhan's resolve + projectile acceleration + rakiata's flow + retreat": 3,
+"elemental armament + pinpoint critical + projectile acceleration + prolonged duration + salvo": 2,
+"elemental armament + execute + projectile acceleration + rakiata's flow + verglas": 2,
+"armour break + execute + projectile acceleration + prolonged duration + rakiata's flow": 2,
+"elemental armament + pinpoint critical + projectile acceleration + prolonged duration + rakiata's flow": 2,
+"armour break + execute + garukhan's resolve + projectile acceleration + rakiata's flow": 2,
+"elemental armament + projectile acceleration + prolonged duration + rakiata's flow + salvo": 2,
+"concentrated area + garukhan's resolve + projectile acceleration + prolonged duration + rakiata's flow": 2,
+"garukhan's resolve + projectile acceleration + rakiata's flow + salvo + verglas": 2,
+"armour break + execute + projectile acceleration + rakiata's flow + verglas": 1,
+"deliberation + elemental armament + pinpoint critical + projectile acceleration + retreat": 1,
+"elemental armament + execute + innervate + projectile acceleration + rigwald's ferocity": 1,
+"embitter + execute + projectile acceleration + prolonged duration + rakiata's flow": 1,
+"execute + garukhan's resolve + projectile acceleration + rakiata's flow + retreat": 1,
+"elemental armament + projectile acceleration + prolonged duration": 1,
+"elemental armament + garukhan's resolve + projectile acceleration + rakiata's flow + stoicism": 1,
+"armour break + garukhan's resolve + projectile acceleration + rakiata's flow + retreat": 1,
+"deliberation + elemental armament + garukhan's resolve + projectile acceleration + salvo": 1,
+"elemental armament + execute + projectile acceleration + rakiata's flow + salvo": 1,
+"deliberation + elemental armament + projectile acceleration + rakiata's flow + retreat": 1,
+"armour break + deliberation + pinpoint critical + projectile acceleration + rakiata's flow": 1,
+"elemental armament + garukhan's resolve + projectile acceleration + prolonged duration + salvo": 1,
+"elemental armament + execute + garukhan's resolve + projectile acceleration + salvo": 1,
+"deliberation + garukhan's resolve + projectile acceleration + rakiata's flow + verglas": 1,
+"concentrated area + elemental armament + garukhan's resolve + projectile acceleration + prolonged duration": 1,
+"deliberation + garukhan's resolve + projectile acceleration + rakiata's flow + retreat": 1,
+"execute + pinpoint critical + projectile acceleration + prolonged duration + verglas": 1,
+"concentrated area + execute + garukhan's resolve + projectile acceleration + rakiata's flow": 1,
+"deliberation + elemental armament + embitter + projectile acceleration + rakiata's flow": 1,
+"deliberation + execute + projectile acceleration + rakiata's flow + retreat": 1,
+"armour break + execute + projectile acceleration + prolonged duration + salvo": 1,
+"armour break + deliberation + execute + projectile acceleration + rakiata's flow": 1,
+"armour break + execute + projectile acceleration + rakiata's flow + salvo": 1,
+"deliberation + elemental armament + execute + pinpoint critical + projectile acceleration": 1,
+"pinpoint critical + projectile acceleration + rakiata's flow + retreat + salvo": 1,
+"elemental armament + garukhan's resolve + projectile acceleration + rageforged + rakiata's flow": 1,
+"execute + pinpoint critical + projectile acceleration + rakiata's flow + salvo": 1,
+"elemental armament + garukhan's resolve + minion pact + projectile acceleration + rakiata's flow": 1,
+"armour break + elemental armament + projectile acceleration + rakiata's flow + retreat": 1,
+"deliberation + projectile acceleration + rageforged + rakiata's flow + vorana's siege": 1,
+"bleed + deep cuts + pinpoint critical + projectile acceleration + salvo": 1,
+"garukhan's resolve + projectile acceleration + rakiata's flow + retreat + salvo": 1,
+"elemental armament + embitter + execute + projectile acceleration + verglas": 1,
+"armour break + elemental armament + projectile acceleration + prolonged duration": 1,
+"armour break + elemental armament + projectile acceleration + rakiata's flow + salvo": 1,
+"deliberation + elemental armament + longshot + projectile acceleration + prolonged duration": 1,
+"deliberation + elemental armament + pinpoint critical + rakiata's flow + supercritical": 1,
+"elemental armament + longshot + projectile acceleration + rakiata's flow + rigwald's ferocity": 1,
+"embitter + execute + garukhan's resolve + projectile acceleration + rakiata's flow": 1,
+"deliberation + elemental armament + execute + garukhan's resolve + projectile acceleration": 1,
+"execute + garukhan's resolve + oisin's oath + projectile acceleration + rakiata's flow": 1,
+"deliberation + execute + projectile acceleration + prolonged duration + rigwald's ferocity": 1,
+"elemental armament + execute + garukhan's resolve + projectile acceleration + verglas": 1,
+"olroth's hubris + projectile acceleration + rigwald's ferocity + salvo + vorana's siege": 1,
+"garukhan's resolve + projectile acceleration + rakiata's flow + verglas + vorana's siege": 1,
+"elemental armament + garukhan's resolve + projectile acceleration + retreat": 1,
+"deliberation + elemental armament + projectile acceleration + rakiata's flow + salvo": 1,
+"projectile acceleration + prolonged duration + retreat + salvo + vorana's siege": 1,
+"projectile acceleration + rageforged + rakiata's flow + salvo + vorana's siege": 1,
+"elemental armament + frost nexus + projectile acceleration + salvo": 1,
+"electrocute + elemental armament + projectile acceleration + prolonged duration + rakiata's flow": 1,
+"deliberation + elemental armament + pinpoint critical + projectile acceleration": 1,
+"pinpoint critical + projectile acceleration + prolonged duration + rakiata's flow + salvo": 1,
+"elemental armament + execute + mobility + projectile acceleration + prolonged duration": 1,
+"elemental armament + projectile acceleration + prolonged duration + rageforged + salvo": 1,
+"armour break + elemental armament + innervate + projectile acceleration + retreat": 1,
+"elemental armament + execute + pinpoint critical + projectile acceleration + rakiata's flow": 1,
+"elemental armament + ice bite + projectile acceleration + retreat + salvo": 1,
+"deliberation + elemental armament + ice bite + projectile acceleration + prolonged duration": 1,
+"elemental armament + projectile acceleration + salvo": 1,
+"elemental armament + garukhan's resolve + rakiata's flow + salvo + verglas": 1,
+"garukhan's resolve + projectile acceleration + prolonged duration + rakiata's flow + retreat": 1,
+"blindside + projectile acceleration + rakiata's flow + salvo + verglas": 1
+},
+"Volcano": {
+"pierce + projectile acceleration + prolonged duration + rapid casting + wildshards": 1
+},
+"Voltaic Barrier": {
+"ahn's citadel + blindside + kaom's madness + pinpoint critical + uruk's smelting": 1
+},
+"Voltaic Grenade": {
+"cooldown recovery + elemental armament + lightning attunement + payload + shock": 1,
+"elemental armament + esh's prowess + execute + rigwald's ferocity + short fuse": 1
+},
+"War Banner": {
+"daresso's passion + magnified area + prolonged duration + refraction": 1
+},
+"Whirling Assault": {
+"heavy swing + heft + magnified area + rage + rapid attacks": 1,
+"elemental armament + execute + oisin's oath + rakiata's flow + vorana's siege": 1,
+"ancestral call + armour break + atalui's bloodletting + heavy swing + heft": 1,
+"ancestral call + atalui's bloodletting + garukhan's resolve + heavy swing + rigwald's ferocity": 1,
+"ancestral call + atalui's bloodletting + heavy swing + rigwald's ferocity": 1,
+"ancestral call + armour break + heavy swing + rageforged + uruk's smelting": 1,
+"ancestral call + atalui's bloodletting + garukhan's resolve + rigwald's ferocity + uul-netol's embrace": 1,
+"ambush + ancestral call + heavy swing + heft + rapid attacks": 1
+},
+"Whirling Slash": {
+"heightened accuracy + knockback + medved's felling + rapid attacks + rigwald's ferocity": 1,
+"knockback + rage": 1,
+"knockback + rage + rapid attacks": 1,
+"ailith's chimes + culmination + living lightning + rapid attacks + rigwald's ferocity": 1
+},
+"Wild Protector": {
+"feeding frenzy + loyalty + muster + rage + rapid attacks": 1,
+"feeding frenzy + hulking minions + muster + rage + rapid attacks": 1,
+"hulking minions + loyalty + muster": 1,
+"heft + hulking minions + muster + rapid attacks": 1
+},
+"Wind Dancer": {
+"blind + magnified area + maim + rage": 1
+},
+"Wind Serpent's Fury": {
+"heavy swing + heft + pinpoint critical + rageforged": 1
+},
+"Wolf Pack": {
+"amanamu's tithe + infernal legion + minion instability + romira's requital": 1,
+"amanamu's tithe + feeding frenzy + infernal legion + romira's requital": 1,
+"amanamu's tithe + blind + feeding frenzy + infernal legion + loyalty": 1,
+"blind + brutality + meat shield + rapid attacks + romira's requital": 1,
+"feeding frenzy + infernal legion + loyalty": 1,
+"amanamu's tithe + feeding frenzy + infernal legion + loyalty": 1,
+"feeding frenzy + heavy swing + minion mastery + minion splash + muster": 1,
+"feeding frenzy + loyalty + minion splash + muster + rapid attacks": 1
+}
+}
+}
