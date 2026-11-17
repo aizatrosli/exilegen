@@ -279,7 +279,11 @@ class Generator:
         quiver = any(self.cat.uniques[u].get("base_type") == "Quiver" for u in uniques)
         if quiver:
             return "Bow"
-        wt = [w for w in s.get("weapon_types") or [] if w != "None"]
+        raw_wt = s.get("weapon_types") or []
+        if raw_wt == ["None"]:
+            return "Unarmed"                  # Concoctions, palm skills: any weapon disables them
+        wt = [w for w in raw_wt if w != "None"]
+        wt = [w for w in wt if w in catmod.RELEASED_WEAPONS] or wt
         if "Attack" in s["types"] and wt and "NonWeaponAttack" not in s["types"]:
             if prefer in wt:
                 return prefer

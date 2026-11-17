@@ -62,7 +62,7 @@ def weapon_spec(name: str | None) -> dict | None:
         if part in T["weapon_types"]:
             return dict(T["weapon_types"][part], name=part)
         for k, v in T["weapon_types"].items():
-            if k.lower() == part.lower() or v["type"].lower() == part.lower():
+            if k.lower() == part.lower() or (v["type"] or "").lower() == part.lower():
                 return dict(v, name=k)
     return None
 
@@ -82,6 +82,7 @@ class GearPlanner:
         self._affixes: dict = {}
         self.taken: dict[str, str] = {}          # slot -> what holds it ("unique:<name>", "template", ...)
         self.two_handed = False
+        self.skill_types: set = set()            # main skill types, set by synth before templates are crafted
 
     # ------------------------------------------------------------------ bases
     def bases(self, type_name: str) -> list[dict]:
@@ -163,14 +164,57 @@ class GearPlanner:
                     break
         return out
 
+    LIFE_RX = re.compile(r"Life")
+    ES_WISH = ["^IncreasedEnergyShield$", "^EnergyShield$", "^GlobalEnergyShieldPercent$"]
+
+    def _gem_level_wish(self) -> list[str] | None:
+        """The +skill-level affix that fits the main skill (None: none fits / unknown skill)."""
+        t = self.skill_types
+        if not t:
+            return None
+        if t & {"Minion", "CreatesMinion"}:
+            return ["^GlobalIncreaseMinionSpellSkillGemLevel$", "^GlobalIncreaseMinionSkillGemLevel$"]
+        if "Spell" in t:
+            return ["^GlobalIncreaseSpellSkillGemLevel$"]
+        if "Attack" in t:
+            alts = ["^GlobalIncreaseMeleeSkillGemLevel$"] if "Melee" in t else []
+            if t & {"Projectile", "ProjectilesFromUser"}:
+                alts.append("^GlobalIncreaseProjectileSkillGemLevel$")
+            return alts or None
+        return None
+
+    def _follow_plan(self, t: dict) -> dict:
+        """Templates follow the defence plan and skill kind: no life affixes on CI (ES first on ES builds),
+        and the +level affix of the main skill's kind (no +spell levels on an attack amulet)."""
+        ci = (self.defence or "").lower() == "ci"
+
+        def fix(wishes):
+            out = []
+            for alts in wishes:
+                if any("GemLevel" in a for a in alts):
+                    w = self._gem_level_wish()
+                    if w:
+                        out.append(w)
+                    continue
+                if any(self.LIFE_RX.search(a) for a in alts):
+                    if ci:
+                        out.append(self.ES_WISH)
+                        continue
+                    if self.es and alts == ["^IncreasedLife$"]:
+                        out.append(self.ES_WISH + alts)
+                        continue
+                out.append(alts)
+            return out
+        return {k: fix(v) if k in ("prefixes", "suffixes") else v for k, v in t.items()}
+
     def template_for(self, slot: str, kind: str) -> dict:
         T = templates()["templates"]
         if kind == "armour":
             t = dict(T["armour"]["es" if self.es else "life"])
             if slot == "Boots":
                 t = {"prefixes": T["Boots"]["extra_prefix_first"] + t["prefixes"], "suffixes": t["suffixes"]}
-            return t
-        return T.get(kind) or T.get(slot) or {"prefixes": [], "suffixes": []}
+            return self._follow_plan(t)
+        return self._follow_plan(T.get(kind) or T.get(slot) or {"prefixes": [], "suffixes": []})
 
     def craft(self, slot: str, type_name: str, base: dict, kind: str, title: str | None = None) -> dict | None:
         pre, suf, pl, sl = self.affix_groups(type_name, base["name"])
@@ -239,7 +283,11 @@ class GearPlanner:
 
     # ------------------------------------------------------------------ weapons
     def equip_weapons(self, spec: dict | None) -> None:
-        """Main hand from `spec` (weapon_spec) unless a unique holds it; off-hand when one-handed."""
+        """Main hand from `spec` (weapon_spec) unless a unique holds it; off-hand when one-handed.
+        An "Unarmed" spec (type None) leaves both hands empty: any weapon disables unarmed skills."""
+        if spec and spec.get("type") is None:
+            self.notes.append("gear: unarmed (no weapon)")
+            return
         if "Weapon 1" not in self.taken and spec:
             how = templates()["weapon_pick"].get(spec["type"], "weapon")
             b = self.pick_base(spec["type"], how)
@@ -255,6 +303,22 @@ class GearPlanner:
         if self.two_handed and off != "Quiver":
             return
         if off is None:
+            return
+        if off == "Buckler":
+            # bucklers are the evasion shields (PoB tags them buckler; Parry needs one)
+            b = self.pick_base("Shield: Evasion", "defence")
+            if b:
+                self.craft("Weapon 2", "Shield: Evasion", b, "Shield")
+            return
+        if off == "Armoured Shield":
+            # Shield Charge / Resonating Shield need a shield with Armour
+            kinds = [d for d in (self.dtype, self.dtype.split("/")[0]) if "Armour" in d] + \
+                ["Armour", "Armour/Evasion", "Armour/Energy Shield"]
+            for d in kinds:
+                b = self.pick_base(f"Shield: {d}", "defence")
+                if b:
+                    self.craft("Weapon 2", f"Shield: {d}", b, "Shield")
+                    return
             return
         if off == "Shield":
             for d in (self.dtype, self.dtype.split("/")[0], "Armour"):

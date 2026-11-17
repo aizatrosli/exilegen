@@ -25,7 +25,7 @@
 #   on_never: block | discount   what to do when credit is 0 (default: block for role skill, discount otherwise)
 #   treatment: {profile: {action: allow|discount|block|flag|adjust, credit: x, dps_multiplier: x}} explicit override
 #   requires / if_unmet: build signals that must hold; if one is false -> if_unmet {action, credit}
-#   check: name of a custom check in conditions.py (atziri_life_loss, life_cost_sustain, zerphi_glory,
+#   check: name of a custom check in conditions.py (demon_form_sustain, inexorable_critical, atziri_life_loss, life_cost_sustain, zerphi_glory,
 #          uhtred_one_other_support, spell_cascade_group, ailment_payoff)
 #   utility: {profile: {movement_speed_mult, aoe_mult}} adjustments fed to the objective's utility terms
 #   verified: true when the rule was checked against game behaviour or a POC; source: where it came from
@@ -178,8 +178,9 @@ conditions:
     default: 0.7
     as_exported: 1.0
   on_death:
+    desc: "Needs an enemy to die (Fiery Death, on-death explosions). A single Pinnacle boss never dies mid-fight."
     default: 0.3
-    pinnacle_v1: 0.2
+    pinnacle_v1: 0.0
     mapping_v1: 0.8
     as_exported: 1.0
   proximity:
@@ -250,6 +251,8 @@ entries:
     match: {ids: [DetonateDeadPlayer], names: [Detonate Dead]}
     role: skill
     conditions: [corpses_present]
+    check: own_corpse_life
+    params: {own_corpse_profiles: [pinnacle_v1]}
     treatment:
       as_exported: {action: allow}
     verified: true
@@ -261,7 +264,7 @@ entries:
     role: skill
     conditions: []
     check: ailment_payoff
-    params: {ailments: [shock, ignite, freeze]}
+    params: {ailments: [shock, ignite, freeze], alternative_targets: [Frostbolt]}
     verified: false
     source: "one-button POC 223/1231/350: Snap swaps survived the energy correction. Snap consumes a Frozen/Shocked/Ignited state; credit = best ailment chance of the build's hits (needs per-skill chances from the engine)."
 
@@ -280,10 +283,22 @@ entries:
     name: Inexorable Critical
     match: {ids: [SupportInevitableCriticalsPlayer, SupportInevitableCriticalsPlayerTwo], names: [Inexorable Critical I, Inexorable Critical II]}
     role: support
-    conditions: [ramp_up_time]
+    conditions: []
+    check: inexorable_critical
+    params: {full_after_seconds: 10}
     typical_share: 0.3
     verified: true
-    source: "support-opt POC: 5/20 strict picks. Crit chance accumulates +10%/s (II: +40%/s, crit damage -10%/s) up to a cap; PoB evaluates the capped state."
+    source: "support-opt POC: 5/20 strict picks. The bonus grows with seconds since the skill last crit and is lost on every crit (gem text); PoB evaluates the full 10 s value. Credit = time-average of the bonus at the skill's crit rate."
+  - id: gem.demon_form
+    kind: gem
+    name: Demon Form
+    match: {ids: [DemonFormPlayer], names: [Demon Form]}
+    role: global
+    check: demon_form_sustain
+    params: {max_stacks: 10}
+    typical_share: 0.25
+    verified: false
+    source: "Gem text: 1 Demonflame a second up to 10, life lost faster per stack, reverts at 1 life. PoB's config turns Demon Form on at 10 stacks (ConfigOptions inDemonForm/demonFormStacks) and the life loss only lowers NetLifeRegen. Credit = stacks the build's recovery holds / 10."
   - id: support.atziris_impatience
     kind: support
     name: Atziri's Impatience
@@ -332,6 +347,7 @@ entries:
     match: {ids: [SupportHitAndRunPlayer], names: [Hit and Run]}
     role: support
     conditions: [moving]
+    whole_skill: true
     typical_share: 0.6
     verified: true
     source: "support-opt POC (Flicker, Oil Barrage, Falling Thunder). skill_unusable_until_moved_X_distance=100: uses are gated by movement; PoB applies +40% skill speed with no gate. typical_share 0.6 because the gate limits the whole skill, not just the bonus."

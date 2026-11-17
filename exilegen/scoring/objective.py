@@ -19,6 +19,9 @@ from . import energy as E
 from . import floors as F
 from .adapter import BuildView
 from .conditions import Part, Registry, combined_factor
+
+# reported damage-over-time cap: an ailment above ~35.8M DPS deals 0 instead of being clamped (community report)
+DOT_CAP = 35.8e6
 from .profiles import Profiles
 
 DEFAULT_WEIGHTS = {
@@ -53,6 +56,7 @@ class Scorer:
     profiles: Profiles | None = None
     floor_mode: str | None = None            # override every floor's mode (absolute|relative|either)
     unmodelled_energy_factor: float = 1.0
+    min_dps: float | None = 1.0           # a build that deals no honest damage is infeasible (None: off)
     reject_unverified: bool = False
     _cache: dict = field(default_factory=dict, repr=False)
 
@@ -138,6 +142,16 @@ class Scorer:
         dps_raw = sum(p.dps_raw for p in parts)
         dps_energy = sum(p.dps for p in parts)
         dps_honest = sum(p.dps * combined_factor(p) for p in parts)
+        if self.min_dps is not None and dps_honest < self.min_dps and profile != "as_exported":
+            violations.append({"rule": "floor", "entry": "dps", "shortfall": 1.0,
+                               "detail": f"honest DPS {_fmt(dps_honest)} < {self.min_dps:g}: the build deals no damage"})
+        hs, cd = bv.num("offence.hitSpeed", None, record=False), bv.num("offence.cooldown", None, record=False)
+        if hs and cd and cd > 0:
+            # PoB uses the fixed hit rate and ignores the cooldown (Hourglass on Rain of Arrows / Ball Lightning)
+            flags.append(f"unverified:cooldown_ignored:{cd:.2g}s cooldown with a fixed hit rate of {hs:.3g}/s")
+        nh = bv.num("stats.NonHitDPS", None, record=False)
+        if nh is not None and nh > DOT_CAP:
+            flags.append(f"unverified:dot_over_cap:{nh:.3g} (damage over time above ~35.8M deals nothing in game)")
 
         # 4. floors
         fres = F.check(self.floors, bv, bbv, self.floor_mode)

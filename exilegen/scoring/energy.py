@@ -9,10 +9,15 @@ Port of tools/poc/one-button/lib.lua (metaEnergy / energyTriggerRate):
 
 Threshold scaling (wiki: Cast on Critical, Cast on Elemental Ailment): energy from a crit is "modified by the
 percentage of the enemy's Ailment Threshold the Critical Hit will deal", and energy from an ignite by the
-percentage the Ignite will deal. So per crit: × min(cap, average crit hit / enemy ailment threshold); per ignite:
-× min(cap, 0.8 × average fire hit / threshold) (Ignite deals 80% of the hit's fire damage). Shock and freeze
-energy are not scaled. The cap is THRESHOLD_CAP (1.0, i.e. never above the old flat model) until an in-game test
-says whether a hit over the threshold gives more. Missing hit or threshold facts keep the flat model and flag it.
+percentage the Ignite will deal. So per crit: × raw crit hit (before mitigation) / enemy ailment threshold; per
+ignite: × 0.8 × raw fire hit / threshold (Ignite deals 80% of the hit's fire damage). There is no cap (wiki worked
+examples: a 10× threshold hit gives 10× energy), but a meta triggers at most once per hit and excess energy is
+discarded, so triggers/s never exceeds the feeder's events/s. Energy per event rounds down to 0.01 (wiki Energy).
+Shock and freeze energy are not scaled. Missing hit or threshold facts keep the flat model and flag it.
+
+Other inputs: energy lines from the passive tree and items ("Meta Skills gain X% increased/more Energy", refund
+chance) that PoB does not parse, and the meta's "Socketed Skills deal X% less Damage" (Cast on Critical: 20% less),
+which PoB ignores, applied to the corrected DPS of the socketed spells.
     corrected  = PoB DPS × min(1, triggers/s ÷ PoB's assumed triggers/s)
 
 Feeder events/s = feeder hits/s × chance (crit, shock, ignite). Freeze needs buildup on bosses and PoB gives
@@ -24,6 +29,7 @@ spells keep PoB's number × `unmodelled_factor` and the result is flagged unveri
 """
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass, field
 
 from .adapter import EnergyGroup
@@ -40,13 +46,15 @@ DEFAULT_PER_EVENT = {
     "MetaCastOnElementalAilmentPlayer": {"shock": 1.0, "ignite": 1.0, "freeze": 10.0},
 }
 SERVER_TICK = 0.033   # s; sanity cap on trigger rate
-THRESHOLD_CAP = 1.0   # max ailment-threshold share counted per event (unverified in game; 1.0 = conservative)
+THRESHOLD_CAP = float("inf")   # wiki: no cap on the threshold share (excess energy is discarded at max energy)
+# "Socketed Skills deal X% less Damage" when the engine does not report the meta's own stat
+DEFAULT_SOCKETED_DAMAGE = {"MetaCastOnCritPlayer": 0.8, "MetaCastOnElementalAilmentPlayer": 1.0}
 IGNITE_SHARE = 0.8    # Ignite deals 80% of the hit's fire damage (wiki: Ignite)
 
 
 def threshold_ratio(f: dict, hit_key: str, scale: float = 1.0, flags: list[str] | None = None,
                     group=None) -> float:
-    """Share of the enemy's ailment threshold one event deals, capped at THRESHOLD_CAP.
+    """Share of the enemy's ailment threshold one event deals (uncapped; see THRESHOLD_CAP).
     Falls back to 1.0 (the flat model) with an unverified flag when the facts are missing."""
     hit, thr = f.get(hit_key), f.get("ailment_threshold")
     if hit is None or not thr or thr <= 0:
@@ -70,6 +78,7 @@ class SpellResult:
     corrected: float
     factor_half_energy: float
     flags: list[str] = field(default_factory=list)
+    damage_more: float = 1.0        # the meta's "Socketed Skills deal X% less Damage", already in `corrected`
 
 
 @dataclass
@@ -110,7 +119,8 @@ def max_energy(g: EnergyGroup) -> float | None:
     return sum(ct * 100.0 for ct in cts) if cts else None
 
 
-def energy_per_sec(g: EnergyGroup, power: float, flags: list[str] | None = None) -> float | None:
+def energy_per_sec(g: EnergyGroup, power: float, flags: list[str] | None = None,
+                   event_rate: list | None = None) -> float | None:
     """Energy/s for a modelled meta group, or None if unmodelled / feeder unknown."""
     flags = flags if flags is not None else []
     meta = resolve_meta(g)
@@ -127,9 +137,11 @@ def energy_per_sec(g: EnergyGroup, power: float, flags: list[str] | None = None)
                 flags.append(f"energy:feeder_missing:{g.group}")
                 return None
             ev = hps * f["crit"]
-        e = ev * per["crit"] * threshold_ratio(f, "crit_hit", 1.0, flags, g.group)
+        e = ev * _per_event(per["crit"] * power * threshold_ratio(f, "crit_hit", 1.0, flags, g.group))
+        events = ev
     else:
         e = 0.0
+        events = 0.0
         known = False
         for k in ("shock", "ignite"):
             ev = f.get(f"{k}_events_per_sec")
@@ -138,18 +150,27 @@ def energy_per_sec(g: EnergyGroup, power: float, flags: list[str] | None = None)
             if ev is not None:
                 known = True
                 ratio = threshold_ratio(f, "fire_hit", IGNITE_SHARE, flags, g.group) if k == "ignite" and ev > 0 else 1.0
-                e += ev * per[k] * ratio
+                e += ev * _per_event(per[k] * power * ratio)
+                events += ev
         fev = f.get("freeze_events_per_sec")
         if fev is not None:
             known = True
-            e += fev * per["freeze"]
+            e += fev * _per_event(per["freeze"] * power)
+            events += fev
         elif (f.get("freeze") or 0) > 0:
             flags.append(f"energy:freeze_ignored:{g.group}")
         if not known:
             flags.append(f"energy:feeder_missing:{g.group}")
             return None
     refund = min(g.refund_pct, 100.0)
-    return e * power * (1.0 + g.gen_pct / 100.0) / (1.0 - 0.5 * refund / 100.0)
+    if event_rate is not None:
+        event_rate.append(events)
+    return e * (1.0 + g.gen_pct / 100.0) * (1.0 + g.gen_more_pct / 100.0) / (1.0 - 0.5 * refund / 100.0)
+
+
+def _per_event(v: float) -> float:
+    """Energy gained from one event, rounded down to 0.01 (wiki Energy)."""
+    return math.floor(max(0.0, v) * 100.0 + 1e-9) / 100.0
 
 
 def correct(groups: list[EnergyGroup] | None, power: float, unmodelled_factor: float = 1.0) -> EnergyResult:
@@ -160,9 +181,17 @@ def correct(groups: list[EnergyGroup] | None, power: float, unmodelled_factor: f
     for g in groups:
         meta = resolve_meta(g)
         gflags: list[str] = []
-        eps = energy_per_sec(g, power, gflags)
+        evr: list = []
+        eps = energy_per_sec(g, power, gflags, evr)
         mx = max_energy(g)
         rate = eps / mx if (eps is not None and mx) else None
+        if rate is not None and evr and rate > evr[0]:
+            rate = evr[0]                      # at most one trigger per hit; excess energy is discarded
+            gflags.append(f"energy:one_trigger_per_hit:{g.group}")
+        dmg = g.socketed_damage_more
+        if dmg is None and meta is not None:
+            dmg = DEFAULT_SOCKETED_DAMAGE.get(meta, 1.0)
+        dmg = 1.0 if dmg is None else dmg
         if meta is None:
             gflags.append(f"unverified:energy_unmodelled:{g.meta_name or g.meta_id}")
         elif rate is None:
@@ -185,9 +214,11 @@ def correct(groups: list[EnergyGroup] | None, power: float, unmodelled_factor: f
                 f = min(1.0, rate / pr)
                 fh = min(1.0, 0.5 * rate / pr)
                 kind = MODELS[meta]
-            out.append(SpellResult(g.group, s.name, s.id, g.meta_name or g.meta_id, kind, d, pr, rate, f, d * f, fh, list(gflags)))
+            m = dmg if meta is not None else 1.0
+            out.append(SpellResult(g.group, s.name, s.id, g.meta_name or g.meta_id, kind, d, pr, rate, f, d * f * m, fh,
+                                   list(gflags), damage_more=m))
         flags.extend(x for x in gflags if x not in flags)
     raw = sum(s.pob_dps for s in out)
     cor = sum(s.corrected for s in out)
-    half = sum(s.pob_dps * s.factor_half_energy for s in out)
+    half = sum(s.pob_dps * s.factor_half_energy * s.damage_more for s in out)
     return EnergyResult(out, raw, cor, half, flags)

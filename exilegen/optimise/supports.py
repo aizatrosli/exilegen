@@ -358,7 +358,8 @@ class SupportStep:
                  if (gems.get(s) or {}).get("id") in supportable or n_active <= 1]
         blocked = self._blocked_names(sups)
         self.registry_blocked.setdefault(group, []).extend(blocked)
-        cands = [s for s in sups if not s.get("socketed") and s["name"] not in blocked]
+        from exilegen.builder.catalog import is_removed_gem
+        cands = [s for s in sups if not s.get("socketed") and s["name"] not in blocked and not is_removed_gem(s["name"])]
         return slots, cands, gems, vs
 
     def _blocked_names(self, sups: list[dict]) -> set:

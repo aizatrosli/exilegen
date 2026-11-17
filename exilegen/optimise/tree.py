@@ -440,6 +440,9 @@ class TreeStep:
         return {self.G.start} | {v for v, mm in S.items() if mm == 0 or (m and mm == m)}
 
     def _valid(self, S):
+        # keystones and jewel sockets cannot be weapon-set specific (wiki Weapon set)
+        if any(m and self.G.kind(v) in ("keystone", "jewel") and v not in self.fixed for v, m in S.items()):
+            return False
         return self._within_budget(S) and self.fixed <= set(S) and self.G.connected(S, self.free)
 
     def _with(self, S, A, adds=(), removes=(), mode=0):

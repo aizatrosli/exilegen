@@ -468,10 +468,17 @@ class TriggerStep:
             o = w.get("offence") or {}
             hps = o.get("hitsPerSec") or 0.0
             ev = 0.0
+            thr = o.get("enemyAilmentThreshold") or 0.0
+
+            def share(hit, scale=1.0):
+                # energy per crit / ignite scales with the raw hit over the enemy's ailment threshold (wiki
+                # Cast on Critical), so a slow hard hitter can out-feed a fast weak one; unknown -> 1
+                return scale * hit / thr if (hit is not None and thr > 0) else 1.0
             if "crit" in kinds:
-                ev += hps * min(100.0, o.get("critChance") or 0.0) / 100.0
+                ev += hps * min(100.0, o.get("critChance") or 0.0) / 100.0 * share(o.get("critHit"))
             if kinds & {"shock", "ignite"}:
-                ev += hps * (min(100.0, o.get("shockChance") or 0.0) + min(100.0, o.get("igniteChance") or 0.0)) / 100.0
+                ev += hps * (min(100.0, o.get("shockChance") or 0.0)
+                             + min(100.0, o.get("igniteChance") or 0.0) * share(o.get("fireHit"), 0.8)) / 100.0
             d = (w.get("dps") or {}).get("best") or 0.0
             return ev * 1e9 + d          # energy events first, the feeder's own DPS breaks ties
         return metric

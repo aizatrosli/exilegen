@@ -180,7 +180,45 @@ class TestSupportConditions(unittest.TestCase):
 
     def test_hit_and_run_partial(self):
         r = self.score(synthetic(ICE_SHOT, [("Hit and Run", "SupportHitAndRunPlayer")]))
-        self.assertAlmostEqual(r["dps_honest"], 1_000_000 * (1 - 0.5 * 0.6))
+        # the movement gate limits every use of the skill, so the moving credit applies to the whole skill
+        self.assertAlmostEqual(r["dps_honest"], 1_000_000 * 0.5)
+
+    def test_zerphi_counts_only_other_skills_life_cost(self):
+        doc = synthetic(ICE_SHOT, [("Zerphi's Infamy", "SupportZerphisLegacyPlayer")],
+                        {"LifePerSecondCost": 1000, "LifeRegenRecovery": 2000, "Speed": 2.0})
+        # the supported skill pays all the life itself: none of it is spent on OTHER skills -> no Glory
+        doc["skills"] = [{"group": 1, "name": "Ice Shot", "id": "IceShotPlayer", "offence": {"speed": 2.0},
+                          "lifeUsePerSec": 1000}]
+        self.assertAlmostEqual(self.score(doc)["dps_honest"], 0.0)
+        doc["skills"].append({"group": 2, "name": "Other", "id": "X", "offence": {"speed": 1.0}, "lifeUsePerSec": 4000})
+        # 5% of 4000 = 200 Glory/s covers 2 uses/s x 50
+        self.assertAlmostEqual(self.score(doc)["dps_honest"], 1_000_000)
+
+    def test_inexorable_critical_time_average(self):
+        import math
+        doc = synthetic(ICE_SHOT, [("Inexorable Critical I", "SupportInevitableCriticalsPlayer")])
+        doc["skills"] = [{"group": 1, "name": "Ice Shot", "id": "IceShotPlayer",
+                          "offence": {"hitsPerSec": 2.0, "critChance": 10.0}}]
+        r = self.score(doc)
+        c = [x for x in r["conditions"] if x["entry_id"] == "support.inexorable_critical"][0]
+        lam = 0.2
+        self.assertAlmostEqual(c["credit"], (1 - math.exp(-lam * 10)) / (lam * 10), places=4)
+        self.assertLess(r["dps_honest"], 1_000_000)
+
+    def test_snap_uses_other_skills_chance_or_frostbolt(self):
+        snap = gem("Snap", "SnapPlayer", types=["Spell", "Damage"], activation="manual", damaging=True, spell=True)
+        other = {"index": 2, "enabled": True, "main": False, "metaGroup": False,
+                 "gems": [gem("Spark", "SparkPlayer", types=["Spell", "Damage"], activation="manual", damaging=True, spell=True)]}
+        doc = synthetic(snap, [], extra_groups=[other])
+        doc["skills"] = [{"group": 1, "name": "Snap", "id": "SnapPlayer", "offence": {"shockChance": 100.0}},
+                         {"group": 2, "name": "Spark", "id": "SparkPlayer", "offence": {"shockChance": 40.0}}]
+        self.assertAlmostEqual(self.score(doc)["dps_honest"], 400_000)     # Snap's own chance never counts
+        other["gems"].append(gem("Frostbolt", "FrostboltPlayer", types=["Spell"], activation="manual", damaging=True, spell=True))
+        self.assertAlmostEqual(self.score(doc)["dps_honest"], 1_000_000)   # can be cast on a Frostbolt
+
+    def test_zero_dps_is_a_violation(self):
+        r = self.score(synthetic(ICE_SHOT, [], {"CombinedDPS": 0.0}))
+        self.assertTrue(any(v["rule"] == "floor" and v["entry"] == "dps" for v in r["violations"]))
 
     def test_atziri_life_loss_check(self):
         doc = synthetic(ICE_SHOT, [("Atziri's Impatience", "SupportAtzirisImpatiencePlayer")],
@@ -247,6 +285,15 @@ class TestEnergy(unittest.TestCase):
         self.assertGreaterEqual(n, 30)
 
     def _final_corr(self, power):
+        # the POC predates the Cast on Critical "20% less damage" rule: compare with it switched off
+        saved = dict(E.DEFAULT_SOCKETED_DAMAGE)
+        E.DEFAULT_SOCKETED_DAMAGE.update({k: 1.0 for k in saved})
+        try:
+            return self._final_corr_inner(power)
+        finally:
+            E.DEFAULT_SOCKETED_DAMAGE.update(saved)
+
+    def _final_corr_inner(self, power):
         out = {}
         s = Scorer(profile="pinnacle_v1", floors=[], registry=Registry({}, None),
                    profiles=Profiles({"pinnacle_v1": {"enemy_power": power}}))
@@ -293,7 +340,9 @@ class TestEnergy(unittest.TestCase):
         self.assertIn("energy:freeze_ignored:1", res.flags)
         g["feeder"]["freeze_events_per_sec"] = 0.5
         res = E.correct(BuildView({"energy": [g]}).energy_groups(), 20)
-        self.assertAlmostEqual(res.spells[0].energy_rate, 0.5 * 10 * 20 / 100)
+        # 2 triggers/s of energy, but a meta triggers at most once per hit: 0.5 freezes/s
+        self.assertAlmostEqual(res.spells[0].energy_rate, 0.5)
+        self.assertIn("energy:one_trigger_per_hit:1", res.flags)
 
 
     def _coc(self, feeder):
@@ -307,10 +356,41 @@ class TestEnergy(unittest.TestCase):
         self.assertAlmostEqual(res.spells[0].energy_rate, 4 * 0.5 * 20 * 0.25 / 100)   # 0.1 triggers/s
         self.assertFalse(any("threshold_unknown" in f for f in res.flags))
 
-    def test_crit_energy_threshold_share_is_capped(self):
-        g = self._coc({"hits_per_sec": 1, "crit": 1.0, "critHit": 500000, "enemyAilmentThreshold": 100000})
+    def test_crit_energy_threshold_share_is_uncapped(self):
+        # wiki: 10x threshold hit = 10x energy; no cap
+        g = self._coc({"hits_per_sec": 0.5, "crit": 0.1, "critHit": 500000, "enemyAilmentThreshold": 100000})
         res = E.correct(BuildView({"energy": [g]}).energy_groups(), 20)
-        self.assertAlmostEqual(res.spells[0].energy_rate, 1 * 20 * E.THRESHOLD_CAP / 100)
+        self.assertAlmostEqual(res.spells[0].energy_rate, 0.05 * 20 * 5 / 100)       # 0.05 triggers/s
+
+    def test_one_trigger_per_hit(self):
+        g = self._coc({"hits_per_sec": 1, "crit": 1.0, "critHit": 5000000, "enemyAilmentThreshold": 100000})
+        res = E.correct(BuildView({"energy": [g]}).energy_groups(), 20)
+        self.assertAlmostEqual(res.spells[0].energy_rate, 1.0)                       # 1 crit/s
+        self.assertIn("energy:one_trigger_per_hit:2", res.flags)
+
+    def test_cast_on_crit_socketed_damage_less(self):
+        g = self._coc({"hits_per_sec": 10, "crit": 1.0, "critHit": 100000, "enemyAilmentThreshold": 100000})
+        res = E.correct(BuildView({"energy": [g]}).energy_groups(), 20)
+        self.assertAlmostEqual(res.spells[0].corrected, 1000 * 0.8)                  # rate 2/s >= PoB 1/s
+        g["socketedDamageMore"] = 1.0
+        res = E.correct(BuildView({"energy": [g]}).energy_groups(), 20)
+        self.assertAlmostEqual(res.spells[0].corrected, 1000)
+
+    def test_energy_rounds_down_and_global_mods(self):
+        # 0.004 x 20 = 0.08 per crit -> no rounding loss; 0.0004 x 20 = 0.008 -> 0
+        g = self._coc({"hits_per_sec": 1, "crit": 1.0, "critHit": 40, "enemyAilmentThreshold": 100000})
+        self.assertEqual(E.correct(BuildView({"energy": [g]}).energy_groups(), 20).spells[0].energy_rate, 0.0)
+        g = self._coc({"hits_per_sec": 1, "crit": 1.0, "critHit": 50000, "enemyAilmentThreshold": 100000})
+        g["globalEnergy"] = {"inc": 50, "more": 35, "refund": 25}
+        r = E.correct(BuildView({"energy": [g]}).energy_groups(), 20).spells[0].energy_rate
+        self.assertAlmostEqual(r, 10 * 1.5 * 1.35 / (1 - 0.125) / 100)
+
+    def test_support_granted_skills_not_meta_triggered(self):
+        g = self._coc({"hits_per_sec": 4, "crit": 0.5})
+        g["triggered"] = [{"name": "Ember Fusillade", "pobRate": 1.0, "dps": 1000, "castTime": 1.0},
+                          {"name": "Fiery Death", "pobRate": 1.6, "dps": 50000, "types": ["Spell", "SkillGrantedBySupport"]}]
+        res = E.correct(BuildView({"energy": [g]}).energy_groups(), 20)
+        self.assertEqual([s.name for s in res.spells], ["Ember Fusillade"])
 
     def test_crit_energy_without_threshold_facts_is_flagged(self):
         g = self._coc({"hits_per_sec": 1, "crit": 1.0})

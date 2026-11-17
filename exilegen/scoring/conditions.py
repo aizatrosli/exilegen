@@ -20,6 +20,9 @@ HERE = os.path.dirname(__file__)
 CURATED = os.path.join(HERE, "conditions.yaml")
 AUTO = os.path.join(HERE, "conditions_auto.yaml")
 AUTO_MIN_CREDIT = 0.5
+# conditions that make a gem do nothing at all when they never hold on a profile (no kills or deaths on a
+# single Pinnacle boss). Auto-scan entries are otherwise informational; these gates apply even to them.
+HARD_GATES = ("kills_recently", "on_death")
 
 
 @dataclass
@@ -251,6 +254,11 @@ class Registry:
     def entry_credit(self, e: dict, profile: str, signals: Signals) -> tuple[str, float, str, list[str]]:
         """-> (action, credit, reason, flags) before custom checks / part application."""
         flags: list[str] = []
+        if not e["curated"]:
+            for c in e.get("conditions") or []:
+                if c in HARD_GATES and self._avail(self.conditions, c, profile, signals, flags) <= 1e-9:
+                    return "discount", 0.0, f"auto-scan {c}=0 on {profile} (never happens)", \
+                        flags + [f"unverified:auto_gate:{e['id']}:{c}"]
         if not e["curated"] and e.get("risk") != "high":
             # medium/low auto-scan entries are informational: they never change a number
             return "flag", 1.0, "auto-scan " + ",".join((e.get("conditions") or []) + (e.get("drawbacks") or [])), flags
@@ -310,12 +318,17 @@ class Registry:
                 if not gem.enabled:
                     continue
                 for e in self.lookup(gem.id, gem.name):
-                    if not include_low and not e["curated"] and e.get("risk") == "low":
+                    if not include_low and not e["curated"] and e.get("risk") == "low" \
+                            and not set(e.get("conditions") or []) & set(HARD_GATES):
                         continue
                     key = (e["id"], g.index)
                     if key in seen:
                         continue
                     seen.add(key)
+                    if e.get("role") == "global" and e["curated"]:
+                        # buffs from their own group (Demon Form) change every damaging part
+                        hits.append(self._apply(e, bv, profile, signals, g, gem, parts, bool(parts)))
+                        continue
                     on_dps = id(g) in dps_groups
                     if not on_dps and not e["curated"]:
                         continue
@@ -336,7 +349,8 @@ class Registry:
         action, credit, reason, flags = self.entry_credit(e, profile, signals)
         check = e.get("check")
         dps_mult = None
-        whole_skill = e.get("role") == "skill"
+        part_mults = None
+        whole_skill = e.get("whole_skill", e.get("role") == "skill")
         if check and not (action == "block" and e.get("requires")):
             r = CHECKS[check](e, bv, profile, signals, group, parts)
             if r:
@@ -345,6 +359,7 @@ class Registry:
                 reason = r.get("reason", reason)
                 flags += r.get("flags", [])
                 dps_mult = r.get("dps_multiplier")
+                part_mults = r.get("part_multipliers")
                 whole_skill = r.get("whole_skill", whole_skill)
         explicit = (e.get("treatment") or {}).get(profile)
         if explicit and explicit.get("action") in ("allow", "flag") and not e.get("requires"):
@@ -361,7 +376,9 @@ class Registry:
         if not e.get("verified"):
             hit.flags.append(f"unverified:registry_entry:{e['id']}")
         for p in parts:
-            if action == "adjust" and dps_mult is not None:
+            if action == "adjust" and part_mults is not None:
+                f = part_mults.get(p.label, 1.0)
+            elif action == "adjust" and dps_mult is not None:
                 f = dps_mult
             elif action == "block":
                 f = 0.0 if (whole_skill and (gem is None or p.matches_skill(e) or e.get("kind") in ("support", "rule"))) else None
@@ -387,6 +404,19 @@ class Registry:
 # ---------------------------------------------------------------------------- custom checks
 def _uses_per_sec(bv: BuildView):
     return bv.num("speed", None, False)
+
+
+def _skill_rows(bv: BuildView) -> list[dict]:
+    """Per-skill engine rows (perSkill: group, name, id, offence{...}, lifeUsePerSec), or [] when absent."""
+    rows = bv.raw("skills")
+    return [r for r in rows if isinstance(r, dict) and isinstance(r.get("offence"), dict)] if isinstance(rows, list) else []
+
+
+def _group_row(bv: BuildView, group) -> dict | None:
+    if group is None:
+        return None
+    rows = [r for r in _skill_rows(bv) if r.get("group") == group.index]
+    return max(rows, key=lambda r: r.get("dps") or 0.0) if rows else None
 
 
 def check_atziri_life_loss(e, bv, profile, signals, group, parts):
@@ -429,12 +459,21 @@ def check_zerphi_glory(e, bv, profile, signals, group, parts):
     need, pct = float(p.get("glory_required", 50)), float(p.get("glory_per_life_pct", 5))
     cost = bv.num("life_cost_per_sec", None, False)
     uses = _uses_per_sec(bv)
+    rows = _skill_rows(bv)
+    if rows and group is not None:
+        # gem text: Glory from "5% of Life spent on other Skills" -> the supported group's own cost never counts
+        cost = sum(r.get("lifeUsePerSec") or 0.0 for r in rows if r.get("group") != group.index)
+        own = _group_row(bv, group)
+        if own is not None and (own.get("offence") or {}).get("speed"):
+            uses = own["offence"]["speed"]
     if cost is None or uses is None:
         sp = signals.get("spends_life")
         if sp is False:
             return {"action": "discount", "credit": 0.0, "whole_skill": True, "reason": "no life spending: no Glory"}
         return {"action": "discount", "credit": 0.3, "whole_skill": True, "flags": ["unverified:glory_inputs_missing"],
                 "reason": "Glory rate unknown"}
+    if cost <= 0:
+        return {"action": "discount", "credit": 0.0, "whole_skill": True, "reason": "no life spent on other skills: no Glory"}
     glory = cost * pct / 100.0
     frac = min(1.0, glory / (need * uses)) if uses > 0 else 1.0
     return {"action": "discount" if frac < 1 else "allow", "credit": frac, "whole_skill": True,
@@ -456,14 +495,40 @@ def check_spell_cascade_group(e, bv, profile, signals, group, parts):
         return {"action": "allow", "credit": 1.0}
     p = e.get("params") or {}
     m = 1.0 + float(p.get("pinnacle_overlap_hits", 0.43))
-    return {"action": "adjust", "credit": 1.0, "dps_multiplier": m,
-            "reason": f"PoB ignores the extra cascades; x{m:.2f} on every spell in the group (net neutral vs no cascade)"}
+    # Spell Cascade only supports Cascadable spells (PoB sup_int.lua); PoB applies neither its -30% nor the
+    # cascades to the others, so they get no correction
+    per_part, flags = {}, []
+    for pt in parts:
+        gem = None
+        if pt.group is not None:
+            gem = next((x for x in pt.group.gems if not x.support and (x.id == pt.skill_id or x.name == pt.skill_name)), None)
+        if gem is None or not gem.types:
+            per_part[pt.label] = m
+            flags.append(f"unverified:cascade_types_unknown:{pt.skill_name}")
+        else:
+            per_part[pt.label] = m if "Cascadable" in gem.types else 1.0
+    return {"action": "adjust", "credit": 1.0, "dps_multiplier": m, "part_multipliers": per_part, "flags": flags,
+            "reason": f"PoB ignores the extra cascades; x{m:.2f} on Cascadable spells in the group (net neutral vs no cascade)"}
 
 
 def check_ailment_payoff(e, bv, profile, signals, group, parts):
     if profile == "as_exported":
         return {"action": "allow", "credit": 1.0}
-    vals = [signals.get("applies_" + a) for a in (e.get("params") or {}).get("ailments", [])]
+    p = e.get("params") or {}
+    ails = p.get("ailments", [])
+    alt = set(p.get("alternative_targets") or [])          # Snap: "can also be cast on a Frostbolt"
+    if alt and any(gem.name in alt for _, gem in signals._gems() or []):
+        return {"action": "allow", "credit": 1.0, "reason": "has " + "/".join(sorted(alt))}
+    me = set((e.get("match") or {}).get("ids") or []) | {n.lower() for n in (e.get("match") or {}).get("names") or []}
+    rows = [r for r in _skill_rows(bv) if r.get("id") not in me and str(r.get("name", "")).lower() not in me]
+    if rows:
+        # the payoff consumes an ailment ANOTHER skill applied: never read its own chance
+        c = max(min(1.0, ((r.get("offence") or {}).get(a + "Chance") or 0.0) / 100.0) for r in rows for a in ails)
+        if c >= 0.999:
+            return {"action": "allow", "credit": 1.0}
+        return {"action": "discount" if c > 0 else "block", "credit": c, "whole_skill": True,
+                "reason": f"best ailment chance of the other skills {c:.0%}"}
+    vals = [signals.get("applies_" + a) for a in ails]
     known = [v for v in vals if v is not None]
     if not known:
         return {"action": "discount", "credit": 0.3, "whole_skill": True, "flags": ["unverified:ailment_chance_missing"],
@@ -475,7 +540,71 @@ def check_ailment_payoff(e, bv, profile, signals, group, parts):
             "reason": f"best ailment chance {c:.0%}"}
 
 
+def check_inexorable_critical(e, bv, profile, signals, group, parts):
+    """The bonus builds up with time since the supported skill last crit and resets on every crit (gem text);
+    PoB evaluates it at the full value (config 'seconds since Inevitable Crit' = 10). With crits as a Poisson
+    process of rate l, the time-average of min(age, T) is (1 - e^(-lT)) / l, so credit = that / T."""
+    if profile == "as_exported":
+        return {"action": "allow", "credit": 1.0}
+    T = float((e.get("params") or {}).get("full_after_seconds", 10.0))
+    row = _group_row(bv, group)
+    o = (row or {}).get("offence") or {}
+    hps, cc = o.get("hitsPerSec"), o.get("critChance")
+    if hps is None or cc is None:
+        hps, cc = bv.hits_per_sec(), bv.num("crit_chance", None, False)
+    if not hps or cc is None:
+        return {"action": "discount", "credit": 0.5, "flags": ["unverified:inexorable_inputs_missing"],
+                "reason": "crit rate unknown"}
+    lam = hps * min(100.0, cc) / 100.0
+    if lam <= 0:
+        return {"action": "allow", "credit": 1.0, "reason": "never crits: bonus stays at full"}
+    credit = (1.0 - math.exp(-lam * T)) / (lam * T)
+    return {"action": "discount", "credit": credit,
+            "reason": f"{lam:.2f} crits/s: average bonus {credit:.0%} of PoB's full value (resets on every crit)"}
+
+
+def check_demon_form_sustain(e, bv, profile, signals, group, parts):
+    """Demon Form gains 1 Demonflame a second up to 10 and loses life faster per stack; at 1 life it reverts
+    (gem text). PoB applies 10 stacks for free and only shows the degen in NetLifeRegen. When the build cannot
+    hold 10 stacks, credit the bonus at the stack count its recovery sustains (about linear per stack)."""
+    if profile == "as_exported":
+        return {"action": "flag", "credit": 1.0}
+    stacks = float((e.get("params") or {}).get("max_stacks", 10))
+    net = bv.num("net_life_regen", None, False)
+    rec = (bv.num("life_regen", 0, False) or 0) + (bv.num("life_leech", 0, False) or 0)
+    if net is None:
+        return {"action": "discount", "credit": 0.5, "flags": ["unverified:demon_form_net_regen_missing"],
+                "reason": "net life regen unknown"}
+    if net >= 0:
+        return {"action": "flag", "credit": 1.0, "reason": f"holds {stacks:g} Demonflame (net life {net:+.0f}/s)"}
+    degen = rec - net
+    held = stacks * rec / degen if degen > 0 else 0.0
+    return {"action": "discount", "credit": max(0.0, min(1.0, held / stacks)),
+            "reason": f"loses {-net:.0f} life/s at {stacks:g} stacks: recovery holds about {held:.1f}"}
+
+
+def check_own_corpse_life(e, bv, profile, signals, group, parts):
+    """Where the only corpses are the build's own minions (Sacrifice on a Pinnacle), the explosion scales with
+    that minion's life, not with PoB's default corpse (monster life at the enemy level)."""
+    if profile not in ((e.get("params") or {}).get("own_corpse_profiles") or []):
+        return None
+    if not signals.get("creates_corpses"):
+        return {"action": "block", "credit": 0.0, "whole_skill": True, "reason": "no corpse source on this fight"}
+    rows = _skill_rows(bv)
+    corpse = max((r.get("corpseLife") or 0.0 for r in rows), default=0.0)
+    minion = max((r.get("minionLife") or 0.0 for r in rows), default=0.0)
+    if corpse <= 0 or minion <= 0:
+        return {"action": "flag", "credit": 1.0, "flags": ["unverified:corpse_life_missing"],
+                "reason": "own minion corpse; life unknown"}
+    c = min(1.0, minion / corpse)
+    return {"action": "discount" if c < 1 else "allow", "credit": c, "whole_skill": True,
+            "reason": f"own minion corpse {minion:.0f} life vs PoB's {corpse:.0f}"}
+
+
 CHECKS = {
+    "own_corpse_life": check_own_corpse_life,
+    "demon_form_sustain": check_demon_form_sustain,
+    "inexorable_critical": check_inexorable_critical,
     "atziri_life_loss": check_atziri_life_loss,
     "life_cost_sustain": check_life_cost_sustain,
     "zerphi_glory": check_zerphi_glory,
