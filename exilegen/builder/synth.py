@@ -358,6 +358,13 @@ class _Synth:
             got = self.gp.equip_unique(u["name"], u.get("slot"), u.get("variant"))
             if got is None:
                 raise SynthError(f"unique {u['name']!r} could not be equipped")
+        # a unique's own skill ("Grants Skill: Level (1-20) X") comes at a middle roll: take the top of the range
+        try:
+            for it in (self.e.raw("get_items", {}) or {}).get("items") or []:
+                if "Grants Skill: Level (" in str(it.get("raw") or "") and it.get("id") is not None:
+                    self._top_granted_level(f"Item:{int(it['id'])}:")
+        except Exception as ex:          # noqa: BLE001
+            self.note(f"granted skill levels kept: {str(ex)[:100]}")
 
     def make_gear(self):
         sk = self.sk
