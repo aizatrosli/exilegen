@@ -417,6 +417,17 @@ local function dpsOf(o)
 end
 
 -- hit-rate and ailment facts of the calculated main skill of an output
+-- supports limited to one copy across all skills: lineage supports, and supports that reserve Spirit
+local function oneCopyOnly(gd)
+	local ge = gd and gd.grantedEffect
+	if not (ge and ge.support) then return false end
+	if gd.tags and gd.tags.lineage then return true end
+	for _, lv in pairs(ge.levels or {}) do
+		if type(lv) == "table" and (lv.spiritReservationFlat or 0) > 0 then return true end
+	end
+	return false
+end
+
 local function offenceFacts(o)
 	local avgHit = n0(o.AverageHit)
 	local hitChance = num(o.HitChance) or 100
@@ -430,6 +441,11 @@ local function offenceFacts(o)
 		chillChance = pct("ChillChance"), electrocuteChance = pct("ElectrocuteChance"),
 		bleedChance = pct("BleedChance"), poisonChance = pct("PoisonChance"),
 		skillTriggerRate = num(o.SkillTriggerRate), effectiveSourceRate = num(o.EffectiveSourceRate), triggerRateCap = num(o.TriggerRateCap),
+		-- energy scaling facts: Cast on Critical gains energy scaled by the share of the enemy's Ailment Threshold
+		-- the crit deals; AverageHit = nonCrit x CritEffect, a crit = nonCrit x CritMultiplier
+		critHit = (avgHit > 0 and num(o.CritEffect) and o.CritEffect > 0 and num(o.CritMultiplier)) and avgHit / o.CritEffect * o.CritMultiplier or NULL,
+		fireHit = num(o.FireHitAverage) or NULL,
+		enemyAilmentThreshold = num(o.EnemyAilmentThreshold) or NULL,
 	}
 end
 
@@ -645,6 +661,7 @@ local function energyFacts(skills, mainSel)
 				shocksPerSec = feeder.offence.hitsPerSec * feeder.offence.shockChance / 100,
 				ignitesPerSec = feeder.offence.hitsPerSec * feeder.offence.igniteChance / 100,
 				freezesPerSec = feeder.offence.hitsPerSec * feeder.offence.freezeChance / 100,
+				critHit = feeder.offence.critHit, fireHit = feeder.offence.fireHit, enemyAilmentThreshold = feeder.offence.enemyAilmentThreshold,
 			} or NULL
 			e.triggered = arr({})
 			for _, s in ipairs(skills) do
@@ -1269,7 +1286,9 @@ local function validSupports(p)
 	for j, g2 in ipairs(list) do
 		if j ~= gi and g2.enabled ~= false then
 			for _, gem in ipairs(g2.gemList or {}) do
-				if gem.gemData and gem.enabled ~= false then usedElsewhere[gem.gemData.id] = j end
+				-- PoE2 0.3.0+: any support can be used on many skills; only lineage supports and supports that
+				-- reserve Spirit are limited to one copy (per rank) across all skills (wiki: Gem#Support gems)
+				if gem.gemData and gem.enabled ~= false and oneCopyOnly(gem.gemData) then usedElsewhere[gem.gemData.id] = j end
 			end
 		end
 	end

@@ -32,7 +32,8 @@ r["feasible"], r["objective"], r["dps_honest"], r["flags"], print(r["explain"])
 ## How a score is computed (per profile)
 
 1. **Energy.** For each Meta+Triggers group the engine reports:
-   - `energy/s` = feeder events/s × energy per event × enemy Power (from the profile) × (1+gen%) / (1 − ½·refund%)
+   - `energy/s` = feeder events/s × energy per event × enemy Power (from the profile) × threshold share × (1+gen%) / (1 − ½·refund%)
+   - threshold share: crits count `min(1, crit hit ÷ enemy ailment threshold)` and ignites `min(1, 0.8 × fire hit ÷ threshold)`, as the gem text says; shock and freeze are not scaled. Without the facts the share is 1 and the build is flagged `unverified:energy_threshold_unknown`. Whether a hit above the threshold gives more than 1 is untested in game.
    - `triggers/s` = energy/s ÷ max energy, where max energy = Σ socketed spells' base cast time × 100
 
    Each spell's DPS is multiplied by `min(1, triggers/s ÷ PoB's assumed rate)`. A half-energy factor is reported as a sensitivity check.

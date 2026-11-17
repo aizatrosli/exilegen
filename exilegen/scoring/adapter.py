@@ -210,6 +210,12 @@ def _norm_feeder(f: dict | None) -> dict:
                                                                     "block": "blocksPerSec"}[k])
         if _num(v) is not None:
             out[f"{k}_events_per_sec"] = _num(v)
+    # energy scaling facts: average crit hit, average fire hit, enemy ailment threshold (PoB EnemyAilmentThreshold)
+    for k, names in {"crit_hit": ("crit_hit", "critHit"), "fire_hit": ("fire_hit", "fireHit"),
+                     "ailment_threshold": ("ailment_threshold", "enemyAilmentThreshold", "EnemyAilmentThreshold")}.items():
+        v = _first(f, *names)
+        if _num(v) is not None:
+            out[k] = _num(v)
     v = _first(f, "minion_deaths_per_sec", "minionDeathsPerSec")
     if _num(v) is not None:
         out["minion_deaths_per_sec"] = _num(v)

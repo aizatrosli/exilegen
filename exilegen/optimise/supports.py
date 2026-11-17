@@ -6,8 +6,9 @@
 For each target socket group the step replaces support gems with legal alternatives:
 
 1. Candidates come from the engine (`valid_supports`): PoB's can-support test, gem tier against the
-   character level, not socketed in another enabled group (PoE2 one-copy rule, which also covers lineage
-   supports), not already in the group. A candidate is legal for slot k when its only conflicts (same gem,
+   character level, not already in the group, and for lineage supports and supports that reserve Spirit,
+   not socketed in another enabled group (since PoE2 0.3.0 only those are limited to one copy; any other
+   support can be used on several skills). A candidate is legal for slot k when its only conflicts (same gem,
    gem family, plus-version lineage) sit in slot k. Supports that do not support the group's active skill
    (a meta gem's energy supports, say) are protected and never touched. Candidates whose registry entry
    blocks under any scorer profile (e.g. Hexblast without a curse) are dropped before evaluation.
