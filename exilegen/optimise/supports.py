@@ -314,6 +314,10 @@ class SupportStep:
             return []
         left = self.ctx.budget_left()
         per = len(self.profs) * (1 + (8 if exact else 0))
+        if not exact:
+            # keep enough for _pick's exact confirm: a screen that spends the whole budget finds the better
+            # support and then cannot commit it
+            left -= self.confirm_n * len(self.profs) * 9
         if left < per * len(moves):
             moves = moves[:max(0, left // per)]
             if not moves:

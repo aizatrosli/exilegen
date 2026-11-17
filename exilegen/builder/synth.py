@@ -342,6 +342,10 @@ class _Synth:
     def _resocket_granted(self, meta_id: str, before: list[dict]) -> None:
         """PoB keys an item-granted group by the item, so replacing the item (gear optimise re-rolls the wand)
         makes a fresh group with only the meta gem: put the spells and supports back into it."""
+        view = self.e.raw("get_skills", {}) or {}
+        for g in view.get("socketGroups") or view.get("groups") or []:
+            if g.get("source") and any(str(x.get("skillId")) == meta_id for x in g.get("gems") or []):
+                self._top_granted_level(str(g["source"]))     # the new item rolled its granted level again
         gi, now = self._granted_sockets(meta_id)
         if gi is None:
             self.note("granted meta group lost with its item")
