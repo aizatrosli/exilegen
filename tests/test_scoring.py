@@ -448,3 +448,30 @@ class TestScorer(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class SupportCreditTest(unittest.TestCase):
+    """Clear-speed and conditional credit of the main skill's supports (scoring/support_credit.json)."""
+
+    def _doc(self, sups):
+        gems = [{"id": "SparkPlayer", "name": "Spark", "support": False}] + [{"id": n, "name": n, "support": True} for n in sups]
+        return {"stats": {"CombinedDPS": 1000, "TotalEHP": 20000}, "main_group": 1,
+                "groups": [{"index": 1, "enabled": True, "main": True, "gems": gems}]}
+
+    def test_clear_supports_raise_the_objective_and_leave_dps(self):
+        from exilegen.scoring import objective as O
+        s = Scorer(profile="pinnacle_v1", floors=[], registry=REG, profiles=PINNACLE20)
+        plain, fork = s.score(self._doc(["Lightning Attunement"])), s.score(self._doc(["Fork", "Pierce III"]))
+        self.assertEqual(plain["dps_honest"], fork["dps_honest"])
+        self.assertAlmostEqual(fork["objective"] - plain["objective"], 0.3 * math.log(1.5 * 1.4))
+        self.assertAlmostEqual(fork["utility"]["clear_mult"], 2.1)
+        capped = s.score(self._doc(["Fork", "Chain", "Pierce", "Nova Projectiles"]))
+        self.assertEqual(capped["utility"]["clear_mult"], 3.0)
+        self.assertLess(s.score(self._doc(["Concentrated Area"]))["objective"], plain["objective"])
+        old = O._CREDIT
+        try:
+            O._CREDIT = dict(O.support_credit(), conditional={"execute": {"more": {"I": 0.2, "III": 0.4}, "share": {"default": 0.35}}})
+            ex = s.score(self._doc(["Execute III"]))
+            self.assertAlmostEqual(ex["objective"] - plain["objective"], math.log(1 + 0.4 * 0.35))
+        finally:
+            O._CREDIT = old

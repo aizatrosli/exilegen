@@ -11,7 +11,10 @@ With several profiles the top-level numbers are those of the profile with the lo
 """
 from __future__ import annotations
 
+import json
 import math
+import os
+import re
 from dataclasses import dataclass, field
 
 from . import constraints as C
@@ -29,6 +32,42 @@ DEFAULT_WEIGHTS = {
     "ailment": 0.05,     # log(ailment threshold / (life+ES))
     "aoe": {"mapping_v1": 0.3},   # log(area multiplier from registry utility adjustments)
 }
+_CREDIT = None
+_TIER = re.compile(r"\s+(?:I|II|III|IV|V)$", re.I)
+
+
+def support_credit() -> dict:
+    """support_credit.json: clear-speed and conditional credit of support gems (see its notes)."""
+    global _CREDIT
+    if _CREDIT is None:
+        with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "support_credit.json"), encoding="utf-8") as f:
+            _CREDIT = json.load(f)
+    return _CREDIT
+
+
+def main_support_credit(bv, profile: str) -> tuple[float, float, list[str]]:
+    """(clear multiplier, conditional damage multiplier, the supports that earned either) for the main group."""
+    data = support_credit()
+    g = bv.main_group()
+    clear, cond, names = 1.0, 1.0, []
+    for gem in (g.gems if g else []):
+        if not gem.support or not gem.enabled:
+            continue
+        fam = _TIER.sub("", gem.name or "").strip().lower()
+        if fam in data["clear"]:
+            clear *= float(data["clear"][fam])
+            names.append(gem.name)
+        c = data["conditional"].get(fam)
+        if c:
+            m = _TIER.search(gem.name or "")
+            tier = m.group(0).strip().upper() if m else "I"
+            more = c["more"].get(tier, c["more"].get("default", 0.0)) if isinstance(c["more"], dict) else c["more"]
+            share = c["share"].get(profile, c["share"].get("default", 0.0)) if isinstance(c["share"], dict) else c["share"]
+            cond *= 1.0 + float(more) * float(share)
+            names.append(gem.name)
+    return min(clear, float(data.get("clear_cap", 3.0))), cond, names
+
+
 KNOWN_PROFILES = {"pinnacle_v1", "mapping_v1", "as_exported", "pinnacle_locked"}
 
 
@@ -192,6 +231,13 @@ class Scorer:
             terms["ailment"] = _w(self.weights, "ailment", profile) * math.log(max(0.1, min(10.0, thr / pool)))
         if utility.get("aoe_mult", 1.0) != 1.0:
             terms["aoe"] = _w(self.weights, "aoe", profile) * _safe_log(utility["aoe_mult"], 0.1)
+        clear, cond, credited = main_support_credit(bv, profile)
+        if clear != 1.0:
+            terms["clear"] = float(support_credit().get("clear_weight", 0.3)) * _safe_log(clear, 0.1)
+            utility["clear_mult"] = clear
+        if cond != 1.0 and dps_honest > 0:
+            terms["conditional"] = math.log(cond)
+            utility["conditional_mult"] = cond
         objective = sum(terms.values())
 
         # 8. flags + verdict

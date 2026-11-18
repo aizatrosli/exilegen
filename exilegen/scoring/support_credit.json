@@ -1,0 +1,26 @@
+{
+ "notes": "What PoB's locked configs do not count for a support gem on the main skill. 'clear' is a judged multiplier on how fast a pack dies (more targets hit per use); the objective adds clear_weight x log(product, capped at clear_cap) in every profile, because the score is the minimum over profiles. 'conditional' is damage PoB only shows with a config switch on: more = the gem's more-damage while the state holds, share = the fraction of the time it holds per profile. It adds log(1 + more x share) to the objective and leaves the reported DPS as measured. Families: lower case, no tier.",
+ "clear_weight": 0.3,
+ "clear_cap": 3.0,
+ "clear": {
+  "fork": 1.5,
+  "chain": 1.6,
+  "pierce": 1.4,
+  "ricochet": 1.4,
+  "salvo": 1.3,
+  "nova projectiles": 1.6,
+  "multishot": 1.4,
+  "scattershot": 1.4,
+  "sione's temper": 1.3,
+  "projectile acceleration": 1.15,
+  "vilenta's propulsion": 1.15,
+  "magnified area": 1.4,
+  "concentrated area": 0.75,
+  "branching fissures": 1.4,
+  "ancestral call": 1.4,
+  "minion splash": 1.5,
+  "prolonged duration": 1.1,
+  "overabundance": 1.2
+ },
+ "conditional": {}
+}
