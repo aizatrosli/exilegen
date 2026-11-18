@@ -362,6 +362,10 @@ class SupportStep:
         blocked = self._blocked_names(sups)
         self.registry_blocked.setdefault(group, []).extend(blocked)
         cands = [s for s in sups if not s.get("socketed") and s["name"] not in blocked]
+        # supports the objective credits beyond PoB's DPS (clear speed, conditional damage) are screened first:
+        # the budget cuts the candidate list, and in catalogue order they sit near its end
+        from exilegen.scoring.objective import credited_family
+        cands.sort(key=lambda c: not credited_family(c.get("name") or ""))
         return slots, cands, gems, vs
 
     def _blocked_names(self, sups: list[dict]) -> set:

@@ -45,6 +45,13 @@ def support_credit() -> dict:
     return _CREDIT
 
 
+def credited_family(name: str) -> bool:
+    """Does the support earn clear or conditional credit? (the support search screens these first)"""
+    data = support_credit()
+    fam = _TIER.sub("", name or "").strip().lower()
+    return fam in data["clear"] or fam in data["conditional"]
+
+
 def main_support_credit(bv, profile: str) -> tuple[float, float, list[str]]:
     """(clear multiplier, conditional damage multiplier, the supports that earned either) for the main group."""
     data = support_credit()
@@ -54,13 +61,14 @@ def main_support_credit(bv, profile: str) -> tuple[float, float, list[str]]:
         if not gem.support or not gem.enabled:
             continue
         fam = _TIER.sub("", gem.name or "").strip().lower()
+        m = _TIER.search(gem.name or "")
+        tier = m.group(0).strip().upper() if m else "I"
         if fam in data["clear"]:
-            clear *= float(data["clear"][fam])
+            v = data["clear"][fam]
+            clear *= float(v.get(tier, v.get("default", 1.0)) if isinstance(v, dict) else v)
             names.append(gem.name)
         c = data["conditional"].get(fam)
         if c:
-            m = _TIER.search(gem.name or "")
-            tier = m.group(0).strip().upper() if m else "I"
             more = c["more"].get(tier, c["more"].get("default", 0.0)) if isinstance(c["more"], dict) else c["more"]
             share = c["share"].get(profile, c["share"].get("default", 0.0)) if isinstance(c["share"], dict) else c["share"]
             cond *= 1.0 + float(more) * float(share)
