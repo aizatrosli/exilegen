@@ -1,6 +1,6 @@
 {
  "notes": "What PoB's locked configs do not count for a support gem on the main skill. 'clear' is a judged multiplier on how fast a pack dies (more targets hit per use); the objective adds clear_weight x log(product, capped at clear_cap) in every profile, because the score is the minimum over profiles. 'conditional' is damage PoB only shows with a config switch on: more = the gem's more-damage while the state holds, share = the fraction of the time it holds per profile. It adds log(1 + more x share) to the objective and leaves the reported DPS as measured. Families: lower case, no tier. A clear value may be a number or {tier: value, default: value}. Supports whose effect PoB does not model at all (Salvo, Sione's Temper, Nova Projectiles I, Branching Fissures, Ancestral Call) cost no damage in PoB, so they get a small credit: otherwise the search would socket them everywhere for free. Conditional numbers are PoB's own (Data/Skills), the shares are judged.",
- "clear_weight": 0.3,
+ "clear_weight": 0.5,
  "clear_cap": 3.0,
  "clear": {
   "fork": 1.5,

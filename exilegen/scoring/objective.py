@@ -52,6 +52,24 @@ def credited_family(name: str) -> bool:
     return fam in data["clear"] or fam in data["conditional"]
 
 
+def gem_credit(name: str, profile: str) -> tuple[float, float]:
+    """(clear multiplier, conditional damage multiplier) one support gem earns in the main group."""
+    data = support_credit()
+    fam = _TIER.sub("", name or "").strip().lower()
+    m = _TIER.search(name or "")
+    tier = m.group(0).strip().upper() if m else "I"
+    clear, cond = 1.0, 1.0
+    if fam in data["clear"]:
+        v = data["clear"][fam]
+        clear = float(v.get(tier, v.get("default", 1.0)) if isinstance(v, dict) else v)
+    c = data["conditional"].get(fam)
+    if c:
+        more = c["more"].get(tier, c["more"].get("default", 0.0)) if isinstance(c["more"], dict) else c["more"]
+        share = c["share"].get(profile, c["share"].get("default", 0.0)) if isinstance(c["share"], dict) else c["share"]
+        cond = 1.0 + float(more) * float(share)
+    return clear, cond
+
+
 def main_support_credit(bv, profile: str) -> tuple[float, float, list[str]]:
     """(clear multiplier, conditional damage multiplier, the supports that earned either) for the main group."""
     data = support_credit()
@@ -60,18 +78,9 @@ def main_support_credit(bv, profile: str) -> tuple[float, float, list[str]]:
     for gem in (g.gems if g else []):
         if not gem.support or not gem.enabled:
             continue
-        fam = _TIER.sub("", gem.name or "").strip().lower()
-        m = _TIER.search(gem.name or "")
-        tier = m.group(0).strip().upper() if m else "I"
-        if fam in data["clear"]:
-            v = data["clear"][fam]
-            clear *= float(v.get(tier, v.get("default", 1.0)) if isinstance(v, dict) else v)
-            names.append(gem.name)
-        c = data["conditional"].get(fam)
-        if c:
-            more = c["more"].get(tier, c["more"].get("default", 0.0)) if isinstance(c["more"], dict) else c["more"]
-            share = c["share"].get(profile, c["share"].get("default", 0.0)) if isinstance(c["share"], dict) else c["share"]
-            cond *= 1.0 + float(more) * float(share)
+        if credited_family(gem.name or ""):
+            a, b = gem_credit(gem.name, profile)
+            clear, cond = clear * a, cond * b
             names.append(gem.name)
     return min(clear, float(data.get("clear_cap", 3.0))), cond, names
 

@@ -471,7 +471,7 @@ class SupportStep:
             slots, cands, gems, _vs = self._candidates(group)
             if not slots or not cands:
                 return changes
-            loss = self._slot_loss(group)
+            loss = self._slot_value(group, gems)
             order = sorted(slots, key=lambda s: loss.get(s, 0.0))
             committed = False
             for s in order:
@@ -519,6 +519,26 @@ class SupportStep:
                 break
             changes.append(self._commit(group, pick[0], pick[1], gems, f"local.r{rnd}"))
         return changes
+
+    def _slot_value(self, group: int, gems: dict) -> dict[int, float]:
+        """slot -> what the support in it is worth to the objective, in log units: its DPS (drop-one) plus,
+        in the main group, the clear and conditional credit the objective gives it. Ordering by DPS alone
+        never offered the slot of a damage support the objective marks down (Concentrated Area) to a
+        credited one (Execute), so the better single swap was not screened."""
+        import math
+        from exilegen.scoring.objective import gem_credit, support_credit
+        loss = self._slot_loss(group)
+        out = {s: -math.log(max(1e-6, 1.0 - min(v, 0.999999))) for s, v in loss.items()}
+        doc = self.cur.stats.get(self.profs[0]) or {}
+        if group != (doc.get("main") or {}).get("group"):
+            return out
+        w = float(support_credit().get("clear_weight", 0.0))
+        for s, x in gems.items():
+            if not x.get("support") or x.get("enabled") is False:
+                continue
+            cr = [gem_credit(x.get("name") or "", p) for p in self.profs]
+            out[s] = out.get(s, 0.0) + min(w * math.log(max(1e-6, a)) + math.log(max(1e-6, b)) for a, b in cr)
+        return out
 
     def _slot_loss(self, group: int) -> dict[int, float]:
         """slot -> relative DPS loss when the support is dropped (committed build, first profile)."""

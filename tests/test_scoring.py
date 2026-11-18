@@ -463,7 +463,7 @@ class SupportCreditTest(unittest.TestCase):
         s = Scorer(profile="pinnacle_v1", floors=[], registry=REG, profiles=PINNACLE20)
         plain, fork = s.score(self._doc(["Lightning Attunement"])), s.score(self._doc(["Fork", "Pierce III"]))
         self.assertEqual(plain["dps_honest"], fork["dps_honest"])
-        self.assertAlmostEqual(fork["objective"] - plain["objective"], 0.3 * math.log(1.5 * 1.4))
+        self.assertAlmostEqual(fork["objective"] - plain["objective"], 0.5 * math.log(1.5 * 1.4))
         self.assertAlmostEqual(fork["utility"]["clear_mult"], 2.1)
         capped = s.score(self._doc(["Fork", "Chain", "Pierce", "Nova Projectiles"]))
         self.assertEqual(capped["utility"]["clear_mult"], 3.0)
@@ -475,3 +475,20 @@ class SupportCreditTest(unittest.TestCase):
             self.assertAlmostEqual(ex["objective"] - plain["objective"], math.log(1 + 0.4 * 0.35))
         finally:
             O._CREDIT = old
+
+    def test_support_search_offers_a_marked_down_damage_support_first(self):
+        """Concentrated Area out-damages the other slot, yet the objective marks it down: it is the slot to try."""
+        from types import SimpleNamespace
+        from exilegen.optimise.supports import SupportStep
+        st = SupportStep()
+        st.profs = ["pinnacle_v1", "mapping_v1"]
+        ms = [{"group": 1, "slot": 2, "dps_base": 100.0, "dps_without": 80.0},      # Concentrated Area: 20% of DPS
+              {"group": 1, "slot": 3, "dps_base": 100.0, "dps_without": 90.0}]      # plain support: 10%
+        st.cur = SimpleNamespace(stats={"pinnacle_v1": {"main": {"group": 1}, "marginals": ms}})
+        gems = {2: {"name": "Concentrated Area", "support": True}, 3: {"name": "Lightning Attunement", "support": True},
+                4: {"name": "Execute II", "support": True}}
+        v = st._slot_value(1, gems)
+        self.assertLess(v[2], v[3])
+        self.assertGreater(v[4], 0.0)                       # Execute's credit counts though PoB shows no DPS for it
+        self.assertEqual(sorted(st._slot_loss(1), key=st._slot_loss(1).get), [3, 2])
+        self.assertAlmostEqual(st._slot_value(9, gems).get(2, 0.0), 0.0)   # not the main group: DPS only
