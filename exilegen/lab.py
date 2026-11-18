@@ -119,6 +119,11 @@ def cmd_synth(a) -> dict:
             "notes": res.notes, "evals": res.evals, "seconds": res.seconds}
 
 
+def _measures_main(rec) -> bool:
+    from .builder.archive import measures_main
+    return measures_main(rec)
+
+
 def _entry_view(e, codes: bool) -> dict:
     rec = e.rec
     sk = rec.get("skeleton") or {}
@@ -130,7 +135,7 @@ def _entry_view(e, codes: bool) -> dict:
            "main_skill_name": (sk.get("tags") or {}).get("main_skill_name"),
            "uniques": [u.get("name") for u in sk.get("uniques") or []], "trigger": sk.get("trigger"),
            "keystones": sk.get("keystones"), "defence": sk.get("defence"), "source": sk.get("source"),
-           "thesis": sk.get("thesis"), "descriptor": rec.get("descriptor"),
+           "thesis": sk.get("thesis"), "thesis_stale": not _measures_main(rec), "descriptor": rec.get("descriptor"),
            "flags": [f for f in s.get("flags") or [] if "unverified" in str(f)][:8]}
     if codes:
         out["code"] = rec.get("code")

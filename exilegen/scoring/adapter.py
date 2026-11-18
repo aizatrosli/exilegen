@@ -72,6 +72,7 @@ FIELDS: dict[str, list[str]] = {
     "mana_regen": ["sustain.manaRegen", "stats.ManaRegenRecovery", "stats.ManaRegen"],
     "life_regen": ["sustain.lifeRegen", "stats.LifeRegenRecovery", "stats.LifeRegen"],
     "mana_leech": ["sustain.manaLeech", "stats.ManaLeechGainRate", "stats.ManaLeechRate"],
+    "net_life_regen": ["stats.NetLifeRegen"],
     "life_leech": ["sustain.lifeLeech", "stats.LifeLeechGainRate", "stats.LifeLeechRate"],
     # attributes
     "str": ["stats.Str"], "dex": ["stats.Dex"], "int": ["stats.Int"],
@@ -174,6 +175,8 @@ class EnergyGroup:
     spells: list[EnergySpell]
     pob_assumed_rate: float | None = None
     raw: dict = field(default_factory=dict)
+    gen_more_pct: float = 0.0               # "Meta Skills gain X% more Energy" (Invoker)
+    socketed_damage_more: float | None = None   # "Socketed Skills deal X% less Damage" multiplier
 
 
 def _first(d: dict, *names, default=None):
@@ -246,6 +249,8 @@ def normalise_energy_group(e: dict, default_feeder: dict | None = None) -> Energ
     for x in src:
         if x.get("spell") is False:
             continue
+        if "SkillGrantedBySupport" in (x.get("types") or []):
+            continue                         # support-granted skills (Fiery Death) are not meta-triggered
         spells.append(EnergySpell(
             name=str(_first(x, "name", default="?")), id=_first(x, "id", "skillId"),
             cast_time=_num(_first(x, "cast_time", "castTime", "baseCastTime")) or ct_by.get(x.get("id")) or ct_by.get(x.get("name")),
@@ -253,13 +258,16 @@ def normalise_energy_group(e: dict, default_feeder: dict | None = None) -> Energ
             pob_dps=_num(_first(x, "pob_dps", "pobDps", "dps", "CombinedDPS"))))
     feeder_raw = _first(e, "feeder", "feederRates", "events", default=None)
     feeder = _norm_feeder(feeder_raw if isinstance(feeder_raw, dict) else default_feeder)
+    glob = _first(e, "globalEnergy", "global_energy", default=None) or {}
     return EnergyGroup(
         group=_first(e, "group", "gi", "groupIndex"),
         meta_id=_first(e, "meta_id", "metaSkillId", "metaId"),
         meta_name=_first(e, "meta_name", "metaName", "meta"),
         max_energy=_num(_first(e, "max_energy", "maxEnergy")),
-        gen_pct=_num(_first(e, "gen_pct", "genBonus", "gen", "energyGeneratedPct")) or 0.0,
-        refund_pct=_num(_first(e, "refund_pct", "refund", "refundChance")) or 0.0,
+        gen_pct=(_num(_first(e, "gen_pct", "genBonus", "gen", "energyGeneratedPct")) or 0.0) + (_num(glob.get("inc")) or 0.0),
+        refund_pct=(_num(_first(e, "refund_pct", "refund", "refundChance")) or 0.0) + (_num(glob.get("refund")) or 0.0),
+        gen_more_pct=_num(glob.get("more")) or 0.0,
+        socketed_damage_more=_num(_first(e, "socketed_damage_more", "socketedDamageMore")),
         per_event=per_event, feeder=feeder, spells=spells,
         pob_assumed_rate=_num(_first(e, "pob_assumed_rate", "pobAssumedRate")),
         raw=e)

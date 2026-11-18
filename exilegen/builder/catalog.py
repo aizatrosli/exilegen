@@ -31,10 +31,15 @@ SLOT_OF_TYPE = {
     "Helmet": "Helmet", "Ring": "Ring", "Jewel": "Jewel", "Flask": "Flask", "Charm": "Charm",
     "Shield": "Weapon 2", "Focus": "Weapon 2", "Quiver": "Weapon 2",
 }
-TWO_HANDED = {"Bow", "Crossbow", "Staff", "Quarterstaff", "Two Hand Axe", "Two Hand Mace", "Two Hand Sword", "Spear2H"}
+TWO_HANDED = {"Bow", "Crossbow", "Staff", "Quarterstaff", "Two Hand Axe", "Two Hand Mace", "Two Hand Sword", "Spear2H",
+              "Talisman"}
 # weapon classes that occupy only the main hand (an off-hand: shield / focus / quiver / second 1h weapon is allowed)
 ONE_HANDED = {"Claw", "Dagger", "Flail", "One Hand Axe", "One Hand Mace", "One Hand Sword", "Spear", "Wand",
-              "Sceptre", "Talisman"}
+              "Sceptre"}
+# weapon classes with bases in the released game (PoB's skill data also lists the unreleased ones: claws, daggers,
+# flails, axes, swords). "Unarmed" means no weapon at all (Concoctions, Crackling Palm).
+RELEASED_WEAPONS = {"Bow", "Crossbow", "Quarterstaff", "Staff", "Spear", "Spear2H", "Talisman", "One Hand Mace",
+                    "Two Hand Mace", "Wand", "Sceptre"}
 # PoB skill weaponTypes key -> our weapon class (quarterstaff attacks are "Staff" in PoB skill data)
 SKILL_WEAPON_ALIAS = {"Staff": "Quarterstaff"}
 # activation-relevant skill types
@@ -490,11 +495,31 @@ class Catalog:
 _LOADED: dict[str, Catalog] = {}
 
 
+_REMOVED: dict | None = None
+
+
+def removed() -> dict:
+    """{"gems": {name: version}, "uniques": {name: version}}: removed from the game (wiki removal_version)
+    though PoB-PoE2 may still carry them."""
+    global _REMOVED
+    if _REMOVED is None:
+        p = os.path.join(DATA_DIR, "removed.json")
+        _REMOVED = json.load(open(p)) if os.path.exists(p) else {"gems": {}, "uniques": {}}
+    return _REMOVED
+
+
+def is_removed_gem(name: str | None) -> bool:
+    return bool(name) and name in removed().get("gems", {})
+
+
 def load(data_dir: str = DATA_DIR) -> Catalog:
     if data_dir in _LOADED:
         return _LOADED[data_dir]
-    sk = json.load(open(os.path.join(data_dir, "skills.json")))["skills"]
-    un = json.load(open(os.path.join(data_dir, "uniques.json")))["uniques"]
+    gone = removed()
+    sk = [s for s in json.load(open(os.path.join(data_dir, "skills.json")))["skills"]
+          if s.get("name") not in gone.get("gems", {})]
+    un = [u for u in json.load(open(os.path.join(data_dir, "uniques.json")))["uniques"]
+          if u.get("name") not in gone.get("uniques", {})]
     tr = json.load(open(os.path.join(data_dir, "tree.json")))
     pp = os.path.join(data_dir, "parsed_mods.json")
     cp = os.path.join(data_dir, "corpus.json")

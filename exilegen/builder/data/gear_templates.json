@@ -44,7 +44,8 @@
     "One Hand Sword": {"type": "One Hand Sword", "hands": 1, "offhand": "Shield"},
     "Two Hand Sword": {"type": "Two Hand Sword", "hands": 2},
     "One Hand Axe": {"type": "One Hand Axe", "hands": 1, "offhand": "Shield"},
-    "Two Hand Axe": {"type": "Two Hand Axe", "hands": 2}
+    "Two Hand Axe": {"type": "Two Hand Axe", "hands": 2},
+    "Unarmed": {"type": null, "hands": 0}
   },
   "requirement_aliases": {
     "Any Martial Weapon": "Two Hand Mace",
@@ -53,7 +54,6 @@
     "Any Melee Martial Weapon or Unarmed": "Two Hand Mace",
     "Any non-Talisman Martial Weapon": "Two Hand Mace",
     "Any non-Talisman Melee Martial Weapon": "Two Hand Mace",
-    "Unarmed": "Quarterstaff",
     "Any Shield": "One Hand Mace",
     "Armoured Shield": "One Hand Mace"
   },

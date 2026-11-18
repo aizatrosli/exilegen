@@ -43,6 +43,7 @@ from exilegen.optimise.base import Context, StepResult, fields_for, has_meta_gro
 from exilegen.scoring import Scorer
 from exilegen.scoring import floors as F
 
+from . import catalog as catmod
 from .contracts import BuildResult, Skeleton, main_skill_matches
 from .gear import GearPlanner, weapon_spec
 
@@ -322,15 +323,30 @@ class _Synth:
         if sk.weapon and spec is None:
             self.note(f"weapon hint {sk.weapon!r} unknown; using the skill's requirement")
         off = self.sk.offhand or (self.sk.trigger or {}).get("offhand")
+        need = self._shield_need()
+        if need and spec is not None and spec.get("hands") == 1 and off in (None, "Shield", "Focus", need):
+            off = need
         if spec is not None and off:
             spec = dict(spec, offhand=off)
             if spec.get("hands") == 2:
                 self.note(f"off-hand {off} wanted but {spec['type']} is two-handed")
         self.weapon = spec
+        self.gp.skill_types = set(self.main_info.types or [])
         self.gp.equip_weapons(spec)
         self.gp.fill_templates()
         taken = ", ".join(f"{s}={v.split(':', 1)[-1]}" for s, v in sorted(self.gp.taken.items()))
         self.note(f"gear ({sk.budget_tier}, {self.gp.dtype}): {taken}")
+
+    def _shield_need(self) -> str | None:
+        """Off-hand the main skill demands: a Buckler (RequiresBuckler: Parry), an Armoured Shield (Shield
+        Charge, Resonating Shield; from the gem's weapon requirement) or any shield."""
+        t = set(self.main_info.types or [])
+        if "RequiresBuckler" in t:
+            return "Buckler"
+        if "RequiresShield" not in t:
+            return None
+        req = self._weapon_requirement() or ""
+        return "Armoured Shield" if "Armoured" in req else "Shield"
 
     def _weapon_requirement(self) -> str | None:
         try:
@@ -499,6 +515,9 @@ class _Synth:
         if g is None or g.get("noSupports"):
             return
         have = sum(1 for x in g.get("gems") or [] if x.get("support"))
+        if g.get("metaGroup"):
+            # a meta gem's skill gems sit in the same sockets as its supports: 5 in all, not 5 supports + spells
+            have += max(0, sum(1 for x in g.get("gems") or [] if not x.get("support")) - 1)
         want = max(0, n_supports - have)
         if want <= 0:
             return
@@ -511,7 +530,8 @@ class _Synth:
         except Exception as ex:
             self.note(f"{label}: valid_supports failed: {ex}")
             return
-        cands = [x for x in vs.get("supports") or [] if not x.get("socketed") and not x.get("conflicts")]
+        cands = [x for x in vs.get("supports") or [] if not x.get("socketed") and not x.get("conflicts")
+                 and not catmod.is_removed_gem(x.get("name"))]
         if not cands:
             return
         names = {x["id"]: x["name"] for x in cands}

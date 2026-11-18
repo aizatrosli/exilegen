@@ -17,7 +17,7 @@ import math
 import os
 import time
 
-from .archive import AXES, Archive, Entry, primary_doc
+from .archive import AXES, Archive, Entry, measures_main, primary_doc
 
 REPORT_CONSTRAINTS = ["one_button", "one_button:strict", "no_cast", "no_cast:strict", "no_minions"]
 SURPRISE_BUCKETS = ("unseen", "rare", "niche")
@@ -85,7 +85,9 @@ def build_block(e: Entry, n: int | None = None, code: bool = True) -> list[str]:
          f"   - source `{sk.get('source') or '?'}`" + (f", parent `{sk.get('parent')}`" if sk.get("parent") else "")
          + f", skeleton `{sk.get('id')}`"]
     if sk.get("thesis"):
-        L.append(f"   - thesis: {sk['thesis']}")
+        stale = "" if measures_main(e.rec) else \
+            f" (stale: written for {sk.get('main_skill')}; the search moved the damage to another skill)"
+        L.append(f"   - thesis: {sk['thesis']}{stale}")
     bits = []
     if sk.get("supports"):
         bits.append("supports " + ", ".join(sk["supports"]))
