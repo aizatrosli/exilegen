@@ -473,12 +473,16 @@ class SupportStep:
             if not slots or not cands:
                 return changes
             loss = self._slot_value(group, gems)
-            order = sorted(slots, key=lambda s: loss.get(s, 0.0))
+            # a support that adds no damage to a feasible build is most likely what keeps it feasible (Mana
+            # Leech): every swap there fails, so that slot is tried last and teaches nothing about candidates
+            ok = bool(self.cur.res.get("feasible"))
+            held = {s for s in slots if ok and abs(loss.get(s, 0.0)) < 1e-6}
+            order = sorted(slots, key=lambda s: (s in held, loss.get(s, 0.0)))
             committed = False
             for s in order:
                 moves = [[(s, c)] for c in self._short(group, cands) if self._legal([(s, c)])]
                 screened = self._evaluate(group, moves, exact=False)
-                self._learn(group, moves, screened, loss.get(s, 0.0))
+                self._learn(group, moves, screened, loss.get(s, 0.0), s in held)
                 pick = self._pick(group, moves[:len(screened)], screened)
                 if pick:
                     changes.append(self._commit(group, pick[0], pick[1], gems, f"greedy.r{rnd}"))
@@ -543,13 +547,20 @@ class SupportStep:
             return cands
         return [c for c in cands if c["id"] not in prior] + known[:max(1, self.shortlist)]
 
-    def _learn(self, group: int, moves: list, screened: list, slot_value: float) -> None:
+    def _learn(self, group: int, moves: list, screened: list, slot_value: float, held: bool = False) -> None:
         """Rank each screened candidate by what it adds: its objective over the committed build's, plus the
-        worth of the support it replaced."""
+        worth of the support it replaced. A swap that breaks feasibility counts against the candidate only
+        when the build was feasible and the slot was not the one holding it so."""
         prior, cur = self._prior(group), self.cur.res.get("objective") or 0.0
+        ok = bool(self.cur.res.get("feasible"))
         for mv, r in zip(moves, screened):
-            if r and len(mv) == 1 and r.get("objective") is not None:
-                prior[mv[0][1]["id"]] = (bool(r.get("feasible")), r["objective"] - cur + slot_value)
+            if not r or len(mv) != 1 or r.get("objective") is None:
+                continue
+            cid, worth = mv[0][1]["id"], r["objective"] - cur + slot_value
+            if r.get("feasible"):
+                prior[cid] = (True, worth)
+            elif ok and not held:
+                prior.setdefault(cid, (False, worth))
 
     def _slot_value(self, group: int, gems: dict) -> dict[int, float]:
         """slot -> what the support in it is worth to the objective, in log units: its DPS (drop-one) plus,

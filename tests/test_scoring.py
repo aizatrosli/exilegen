@@ -497,7 +497,7 @@ class SupportCreditTest(unittest.TestCase):
         from types import SimpleNamespace
         from exilegen.optimise.supports import SupportStep
         st = SupportStep(shortlist=2)
-        st.eng, st.cur = SimpleNamespace(), SimpleNamespace(res={"objective": 10.0})
+        st.eng, st.cur = SimpleNamespace(), SimpleNamespace(res={"objective": 10.0, "feasible": True})
         cands = [{"id": n} for n in "abcde"]
         self.assertEqual(st._short(1, cands), cands)                    # nothing ranked yet: the full list
         moves = [[(2, c)] for c in cands[:4]]
@@ -509,3 +509,8 @@ class SupportCreditTest(unittest.TestCase):
         self.assertEqual(SupportStep(shortlist=2, **{}).__class__, SupportStep)
         st2 = SupportStep(shortlist=1); st2.eng = st.eng                 # a later pass sees the same ranking
         self.assertEqual([c["id"] for c in st2._short(1, cands)], ["c", "e", "b"])
+        st._learn(1, [[(3, cands[4])]], [{"objective": 2.0, "feasible": False}], 0.0, held=True)
+        self.assertNotIn("e", st.eng._support_prior[1])                  # the slot's fault, not the candidate's
+        st.cur.res["feasible"] = False
+        st._learn(1, [[(3, cands[4])]], [{"objective": 2.0, "feasible": False}], 0.3)
+        self.assertNotIn("e", st.eng._support_prior[1])                  # nothing is learnt from an infeasible start
