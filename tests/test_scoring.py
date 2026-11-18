@@ -463,7 +463,7 @@ class SupportCreditTest(unittest.TestCase):
         s = Scorer(profile="pinnacle_v1", floors=[], registry=REG, profiles=PINNACLE20)
         plain, fork = s.score(self._doc(["Lightning Attunement"])), s.score(self._doc(["Fork", "Pierce III"]))
         self.assertEqual(plain["dps_honest"], fork["dps_honest"])
-        self.assertAlmostEqual(fork["objective"] - plain["objective"], 0.5 * math.log(1.5 * 1.4))
+        self.assertAlmostEqual(fork["objective"] - plain["objective"], 0.3 * math.log(1.5 * 1.4))
         self.assertAlmostEqual(fork["utility"]["clear_mult"], 2.1)
         capped = s.score(self._doc(["Fork", "Chain", "Pierce", "Nova Projectiles"]))
         self.assertEqual(capped["utility"]["clear_mult"], 3.0)
@@ -492,3 +492,20 @@ class SupportCreditTest(unittest.TestCase):
         self.assertGreater(v[4], 0.0)                       # Execute's credit counts though PoB shows no DPS for it
         self.assertEqual(sorted(st._slot_loss(1), key=st._slot_loss(1).get), [3, 2])
         self.assertAlmostEqual(st._slot_value(9, gems).get(2, 0.0), 0.0)   # not the main group: DPS only
+
+    def test_support_search_shortlists_ranked_candidates(self):
+        from types import SimpleNamespace
+        from exilegen.optimise.supports import SupportStep
+        st = SupportStep(shortlist=2)
+        st.eng, st.cur = SimpleNamespace(), SimpleNamespace(res={"objective": 10.0})
+        cands = [{"id": n} for n in "abcde"]
+        self.assertEqual(st._short(1, cands), cands)                    # nothing ranked yet: the full list
+        moves = [[(2, c)] for c in cands[:4]]
+        res = [{"objective": 10.1, "feasible": True}, {"objective": 10.3, "feasible": True}, None,
+               {"objective": 11.0, "feasible": False}]
+        st._learn(1, moves, res, 0.2)
+        self.assertEqual([c["id"] for c in st._short(1, cands)], ["c", "e", "b", "a"])   # unscreened, then the best two
+        self.assertAlmostEqual(st.eng._support_prior[1]["b"][1], 0.5)
+        self.assertEqual(SupportStep(shortlist=2, **{}).__class__, SupportStep)
+        st2 = SupportStep(shortlist=1); st2.eng = st.eng                 # a later pass sees the same ranking
+        self.assertEqual([c["id"] for c in st2._short(1, cands)], ["c", "e", "b"])

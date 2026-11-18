@@ -75,6 +75,7 @@ class SupportStep:
     min_gain: float = 5e-4       # minimum objective gain (log units, ~0.05% DPS) to commit a move
     confirm_n: int = 3           # screened moves re-checked with real marginals before a commit
     max_moves_per_group: int = 30
+    shortlist: int = 20          # candidates screened per slot once the group's candidates have been ranked
     notes: list = field(default_factory=list)
 
     # ================================================================== entry point
@@ -475,8 +476,9 @@ class SupportStep:
             order = sorted(slots, key=lambda s: loss.get(s, 0.0))
             committed = False
             for s in order:
-                moves = [[(s, c)] for c in cands if self._legal([(s, c)])]
+                moves = [[(s, c)] for c in self._short(group, cands) if self._legal([(s, c)])]
                 screened = self._evaluate(group, moves, exact=False)
+                self._learn(group, moves, screened, loss.get(s, 0.0))
                 pick = self._pick(group, moves[:len(screened)], screened)
                 if pick:
                     changes.append(self._commit(group, pick[0], pick[1], gems, f"greedy.r{rnd}"))
@@ -495,7 +497,7 @@ class SupportStep:
             slots, cands, gems, _vs = self._candidates(group)
             if not slots or not cands:
                 return changes
-            singles = [[(s, c)] for s in slots for c in cands if self._legal([(s, c)])]
+            singles = [[(s, c)] for s in slots for c in self._short(group, cands) if self._legal([(s, c)])]
             sres = self._evaluate(group, singles, exact=False)
             best_per: dict[str, tuple] = {}
             for mv, r in zip(singles, sres):
@@ -519,6 +521,35 @@ class SupportStep:
                 break
             changes.append(self._commit(group, pick[0], pick[1], gems, f"local.r{rnd}"))
         return changes
+
+    # A full screen of one slot costs about two evaluations per candidate, some 500 for a main skill: a later
+    # pass with 250 left never reached a second slot. What a support is worth depends little on the slot it
+    # goes in, so the first screens rank the candidates and every later slot sees only the best of them.
+    def _prior(self, group: int) -> dict:
+        store = getattr(self.eng, "_support_prior", None)
+        if store is None:
+            store = {}
+            try:
+                self.eng._support_prior = store      # kept on the engine: each polish pass makes a new step
+            except Exception:                        # noqa: BLE001
+                self._store = store = getattr(self, "_store", {})
+        return store.setdefault(group, {})
+
+    def _short(self, group: int, cands: list) -> list:
+        """Never screened candidates first (in their own order), then the best `shortlist` of the ranked ones."""
+        prior = self._prior(group)
+        known = sorted((c for c in cands if c["id"] in prior), key=lambda c: prior[c["id"]], reverse=True)
+        if not known:
+            return cands
+        return [c for c in cands if c["id"] not in prior] + known[:max(1, self.shortlist)]
+
+    def _learn(self, group: int, moves: list, screened: list, slot_value: float) -> None:
+        """Rank each screened candidate by what it adds: its objective over the committed build's, plus the
+        worth of the support it replaced."""
+        prior, cur = self._prior(group), self.cur.res.get("objective") or 0.0
+        for mv, r in zip(moves, screened):
+            if r and len(mv) == 1 and r.get("objective") is not None:
+                prior[mv[0][1]["id"]] = (bool(r.get("feasible")), r["objective"] - cur + slot_value)
 
     def _slot_value(self, group: int, gems: dict) -> dict[int, float]:
         """slot -> what the support in it is worth to the objective, in log units: its DPS (drop-one) plus,
